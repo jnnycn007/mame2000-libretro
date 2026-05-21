@@ -8,6 +8,7 @@
 
 #include "driver.h"
 #include "png.h"
+#include "endian.h"
 
 /* These globals are only kept on a machine basis - LBO 042898 */
 unsigned int dispensed_tickets;
@@ -491,16 +492,17 @@ void printromlist(const struct RomModule *romp,const char *basename)
 ***************************************************************************/
 
 #ifdef MSB_FIRST
-#define intelLong(x) (((x << 24) | (((unsigned long) x) >> 24) | (( x & 0x0000ff00) << 8) | (( x & 0x00ff0000) >> 8)))
+/* WAV file integers are little-endian on disk; on a BE host, convert. */
+#define intelLong(x) ((uint32_t)le32toh((uint32_t)(x)))
 #else
-#define intelLong(x) (x)
+#define intelLong(x) ((uint32_t)(x))
 #endif
 
 static struct GameSample *read_wav_sample(void *f)
 {
 	unsigned long offset = 0;
-	UINT32 length, rate, filesize, temp32;
-	UINT16 bits, temp16;
+	uint32_t length, rate, filesize, temp32;
+	uint16_t bits, temp16;
 	char buf[32];
 	struct GameSample *result;
 

@@ -7,6 +7,7 @@
 
 ****************************************************************************/
 #include "driver.h"
+#include "endian.h"
 
 /* from mame.c */
 extern int bitmap_dirty;
@@ -16,10 +17,10 @@ struct wave_file {
 	int channel;			/* channel for playback */
 	void *file; 			/* osd file handle */
 	int mode;				/* write mode? */
-	int (*fill_wave)(INT16 *,int,UINT8*);
+	int (*fill_wave)(int16_t *,int,uint8_t*);
 	void *timer;			/* timer (TIME_NEVER) for reading sample values */
-	INT16 play_sample;		/* current sample value for playback */
-	INT16 record_sample;	/* current sample value for playback */
+	int16_t play_sample;		/* current sample value for playback */
+	int16_t record_sample;	/* current sample value for playback */
 	int display;			/* display tape status on screen */
 	int offset; 			/* offset set by device_seek function */
 	int playpos;			/* sample position for playback */
@@ -36,10 +37,10 @@ static struct Wave_interface *intf;
 static struct wave_file wave[MAX_WAVE] = {{-1,},{-1,}};
 
 #ifdef MSB_FIRST
-#define intelLong(x) (((x << 24) | (((unsigned long) x) >> 24) | \
-                       (( x & 0x0000ff00) << 8) | (( x & 0x00ff0000) >> 8)))
+/* WAV file integers are little-endian on disk; on a BE host, convert. */
+#define intelLong(x) ((uint32_t)le32toh((uint32_t)(x)))
 #else
-#define intelLong(x) (x)
+#define intelLong(x) ((uint32_t)(x))
 #endif
 
 #define WAVE_OK    0
@@ -52,9 +53,9 @@ static struct wave_file wave[MAX_WAVE] = {{-1,},{-1,}};
 static int wave_read(int id)
 {
 	struct wave_file *w = &wave[id];
-    UINT32 offset = 0;
-	UINT32 filesize, temp32;
-	UINT16 channels, bits, temp16;
+    uint32_t offset = 0;
+	uint32_t filesize, temp32;
+	uint16_t channels, bits, temp16;
 	char buf[32];
 
 	if( !w->file )
@@ -194,8 +195,8 @@ static int wave_read(int id)
 		}
 		if( channels == 2 )
 		{
-			UINT8 *src = w->data;
-			INT8 *dst = w->data;
+			uint8_t *src = w->data;
+			int8_t *dst = w->data;
 			logerror("WAVE mixing 8-bit unsigned stereo to 8-bit signed mono\n");
             /* convert stereo 8-bit data to mono signed samples */
 			for( temp32 = 0; temp32 < w->length/2; temp32++ )
@@ -214,8 +215,8 @@ static int wave_read(int id)
         }
 		else
 		{
-			UINT8 *src = w->data;
-			INT8 *dst = w->data;
+			uint8_t *src = w->data;
+			int8_t *dst = w->data;
             logerror("WAVE converting 8-bit unsigned to 8-bit signed\n");
             /* convert 8-bit data to signed samples */
 			for( temp32 = 0; temp32 < w->length; temp32++ )
@@ -233,13 +234,13 @@ static int wave_read(int id)
         }
         if( channels == 2 )
         {
-			INT16 *src = w->data;
-			INT16 *dst = w->data;
+			int16_t *src = w->data;
+			int16_t *dst = w->data;
             logerror("WAVE mixing 16-bit stereo to 16-bit mono\n");
             /* convert stereo 16-bit data to mono */
 			for( temp32 = 0; temp32 < w->length/2; temp32++ )
 			{
-				*dst = ((INT32)src[0] + (INT32)src[1]) / 2;
+				*dst = ((int32_t)src[0] + (int32_t)src[1]) / 2;
 				dst += 1;
 				src += 2;
 			}
@@ -265,15 +266,15 @@ static int wave_read(int id)
 static int wave_write(int id)
 {
 	struct wave_file *w = &wave[id];
-	UINT32 filesize, offset = 0, temp32;
-	UINT16 temp16;
+	uint32_t filesize, offset = 0, temp32;
+	uint16_t temp16;
 
 	if( !w->file )
         return WAVE_ERR;
 
     while( w->playpos < w->samples )
     {
-		*((INT16 *)w->data + w->playpos) = 0;
+		*((int16_t *)w->data + w->playpos) = 0;
 		w->playpos++;
 	}
 
@@ -422,7 +423,7 @@ static void wave_display(int id)
 }
 
 
-static void wave_sound_update(int id, INT16 *buffer, int length)
+static void wave_sound_update(int id, int16_t *buffer, int length)
 {
 	struct wave_file *w = &wave[id];
 	if( !w->timer )
@@ -442,7 +443,7 @@ static void wave_sound_update(int id, INT16 *buffer, int length)
 				while( w->counter <= 0 )
 				{
 					w->counter += Machine->sample_rate;
-					*((INT16 *)w->data + w->playpos) = w->record_sample;
+					*((int16_t *)w->data + w->playpos) = w->record_sample;
 					if( ++w->playpos >= w->samples )
 					{
 						w->samples += w->smpfreq;
@@ -468,7 +469,7 @@ static void wave_sound_update(int id, INT16 *buffer, int length)
 				while( w->counter <= 0 )
 				{
 					w->counter += Machine->sample_rate;
-					*((INT8 *)w->data + w->playpos) = w->record_sample / 256;
+					*((int8_t *)w->data + w->playpos) = w->record_sample / 256;
 					if( ++w->playpos >= w->samples )
 					{
 						w->samples += w->smpfreq;
@@ -499,7 +500,7 @@ static void wave_sound_update(int id, INT16 *buffer, int length)
 					w->counter += Machine->sample_rate;
 					if( ++w->playpos >= w->samples )
 						w->playpos = w->samples - 1;
-					w->play_sample = *((INT16 *)w->data + w->playpos);
+					w->play_sample = *((int16_t *)w->data + w->playpos);
 				}
 				*buffer++ = w->mute ? 0 : w->play_sample;
             }
@@ -514,7 +515,7 @@ static void wave_sound_update(int id, INT16 *buffer, int length)
 					w->counter += Machine->sample_rate;
 					if( ++w->playpos >= w->samples )
 						w->playpos = w->samples - 1;
-					w->play_sample = 256 * *((INT8 *)w->data + w->playpos);
+					w->play_sample = 256 * *((int8_t *)w->data + w->playpos);
 				}
 				*buffer++ = w->mute ? 0 : w->play_sample;
 			}
@@ -691,7 +692,7 @@ int wave_open(int id, int mode, void *args)
 
 		if( result == WAVE_FMT )
 		{
-			UINT8 *data;
+			uint8_t *data;
 			int bytes, pos, length;
 
 			/* User supplied fill_wave function? */
@@ -750,7 +751,7 @@ int wave_open(int id, int mode, void *args)
 			/* if there has to be a header */
 			if( wa->header_samples > 0 )
 			{
-				length = (*w->fill_wave)((INT16 *)w->data + pos, w->samples - pos, CODE_HEADER);
+				length = (*w->fill_wave)((int16_t *)w->data + pos, w->samples - pos, CODE_HEADER);
 				if( length < 0 )
 				{
 					logerror("WAVE conversion aborted at header\n");
@@ -772,7 +773,7 @@ int wave_open(int id, int mode, void *args)
 				if( length == 0 )
 					break;
 				bytes += length;
-				length = (*w->fill_wave)((INT16 *)w->data + pos, w->samples - pos, data);
+				length = (*w->fill_wave)((int16_t *)w->data + pos, w->samples - pos, data);
 				if( length < 0 )
 				{
 					logerror("WAVE conversion aborted at %d bytes (%d samples)\n", bytes, pos);
@@ -790,7 +791,7 @@ int wave_open(int id, int mode, void *args)
 			{
 				if( pos < w->samples )
 				{
-					length = (*w->fill_wave)((INT16 *)w->data + pos, w->samples - pos, CODE_TRAILER);
+					length = (*w->fill_wave)((int16_t *)w->data + pos, w->samples - pos, CODE_TRAILER);
 					if( length < 0 )
 					{
 						logerror("WAVE conversion aborted at trailer\n");
@@ -871,7 +872,7 @@ void wave_close(int id)
 int wave_seek(int id, int offset, int whence)
 {
 	struct wave_file *w = &wave[id];
-    UINT32 pos = 0;
+    uint32_t pos = 0;
 
 	if( !w->file )
 		return pos;
@@ -907,7 +908,7 @@ int wave_seek(int id, int offset, int whence)
 int wave_tell(int id)
 {
 	struct wave_file *w = &wave[id];
-    UINT32 pos = 0;
+    uint32_t pos = 0;
 	if( w->timer )
 		pos = w->offset + ((((float)timer_timeelapsed(w->timer))/(float)TIME_ONE_SEC) * w->smpfreq);
 	if( pos >= w->samples )
@@ -918,7 +919,7 @@ int wave_tell(int id)
 int wave_input(int id)
 {
 	struct wave_file *w = &wave[id];
-	UINT32 pos = 0;
+	uint32_t pos = 0;
     int level = 0;
 
 	if( !w->file )
@@ -934,9 +935,9 @@ int wave_input(int id)
 			pos = w->samples - 1;
         w->playpos = pos;
 		if( w->resolution == 16 )
-			level = *((INT16 *)w->data + pos);
+			level = *((int16_t *)w->data + pos);
 		else
-			level = 256 * *((INT8 *)w->data + pos);
+			level = 256 * *((int8_t *)w->data + pos);
     }
 	if( w->display )
 		wave_display(id);
@@ -946,7 +947,7 @@ int wave_input(int id)
 void wave_output(int id, int data)
 {
 	struct wave_file *w = &wave[id];
-	UINT32 pos = 0;
+	uint32_t pos = 0;
 
 	if( !w->file )
 		return;
@@ -978,7 +979,7 @@ void wave_output(int id, int data)
         }
         while( w->playpos < pos )
         {
-            *((INT16 *)w->data + w->playpos) = w->record_sample;
+            *((int16_t *)w->data + w->playpos) = w->record_sample;
             w->playpos++;
         }
     }
@@ -992,7 +993,7 @@ void wave_output(int id, int data)
 int wave_input_chunk(int id, void *dst, int count)
 {
 	struct wave_file *w = &wave[id];
-	UINT32 pos = 0;
+	uint32_t pos = 0;
 
 	if( !w->file )
 		return 0;
@@ -1010,9 +1011,9 @@ int wave_input_chunk(int id, void *dst, int count)
     if( count > 0 )
 	{
 		if( w->resolution == 16 )
-			memcpy(dst, (INT16 *)w->data + pos, count * sizeof(INT16));
+			memcpy(dst, (int16_t *)w->data + pos, count * sizeof(int16_t));
 		else
-			memcpy(dst, (INT8 *)w->data + pos, count * sizeof(INT8));
+			memcpy(dst, (int8_t *)w->data + pos, count * sizeof(int8_t));
 	}
 
     return count;
@@ -1021,7 +1022,7 @@ int wave_input_chunk(int id, void *dst, int count)
 int wave_output_chunk(int id, void *src, int count)
 {
 	struct wave_file *w = &wave[id];
-	UINT32 pos = 0;
+	uint32_t pos = 0;
 
 	if( !w->file )
 		return 0;
@@ -1050,9 +1051,9 @@ int wave_output_chunk(int id, void *src, int count)
     if( count > 0 )
 	{
 		if( w->resolution == 16 )
-			memcpy((INT16 *)w->data + pos, src, count * sizeof(INT16));
+			memcpy((int16_t *)w->data + pos, src, count * sizeof(int16_t));
 		else
-			memcpy((INT8 *)w->data + pos, src, count * sizeof(INT8));
+			memcpy((int8_t *)w->data + pos, src, count * sizeof(int8_t));
 	}
 
     return count;
