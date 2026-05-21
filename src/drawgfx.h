@@ -25,13 +25,13 @@
 
 struct GfxLayout
 {
-	UINT16 width,height; /* width and height (in pixels) of chars/sprites */
-	UINT32 total; /* total numer of chars/sprites in the rom */
-	UINT16 planes; /* number of bitplanes */
-	UINT32 planeoffset[MAX_GFX_PLANES]; /* start of every bitplane (in bits) */
-	UINT32 xoffset[MAX_GFX_SIZE]; /* position of the bit corresponding to the pixel */
-	UINT32 yoffset[MAX_GFX_SIZE]; /* of the given coordinates */
-	UINT16 charincrement; /* distance between two consecutive characters/sprites (in bits) */
+	uint16_t width,height; /* width and height (in pixels) of chars/sprites */
+	uint32_t total; /* total numer of chars/sprites in the rom */
+	uint16_t planes; /* number of bitplanes */
+	uint32_t planeoffset[MAX_GFX_PLANES]; /* start of every bitplane (in bits) */
+	uint32_t xoffset[MAX_GFX_SIZE]; /* position of the bit corresponding to the pixel */
+	uint32_t yoffset[MAX_GFX_SIZE]; /* of the given coordinates */
+	uint16_t charincrement; /* distance between two consecutive characters/sprites (in bits) */
 };
 
 #ifdef _MSC_VER
@@ -98,7 +98,7 @@ enum
 };
 
 /* drawing mode case TRANSPARENCY_PEN_TABLE */
-extern UINT8 gfx_drawmode_table[256];
+extern uint8_t gfx_drawmode_table[256];
 enum
 {
 	DRAWMODE_NONE,
@@ -128,7 +128,7 @@ void drawgfx(struct osd_bitmap *dest,const struct GfxElement *gfx,
 void pdrawgfx(struct osd_bitmap *dest,const struct GfxElement *gfx,
 		unsigned int code,unsigned int color,int flipx,int flipy,int sx,int sy,
 		const struct rectangle *clip,int transparency,int transparent_color,
-		UINT32 priority_mask);
+		uint32_t priority_mask);
 void copybitmap(struct osd_bitmap *dest,struct osd_bitmap *src,int flipx,int flipy,int sx,int sy,
 		const struct rectangle *clip,int transparency,int transparent_color);
 void copybitmap_remap(struct osd_bitmap *dest,struct osd_bitmap *src,int flipx,int flipy,int sx,int sy,
@@ -169,8 +169,8 @@ void copyscrollbitmap_remap(struct osd_bitmap *dest,struct osd_bitmap *src,
   copy. This is obtained by setting the wraparound parameter to true.
  */
 void copyrozbitmap(struct osd_bitmap *dest,struct osd_bitmap *src,
-		UINT32 startx,UINT32 starty,int incxx,int incxy,int incyx,int incyy,int wraparound,
-		const struct rectangle *clip,int transparency,int transparent_color,UINT32 priority);
+		uint32_t startx,uint32_t starty,int incxx,int incxy,int incyx,int incyy,int wraparound,
+		const struct rectangle *clip,int transparency,int transparent_color,uint32_t priority);
 
 void fillbitmap(struct osd_bitmap *dest,int pen,const struct rectangle *clip);
 void plot_pixel2(struct osd_bitmap *bitmap1,struct osd_bitmap *bitmap2,int x,int y,int pen);
@@ -180,6 +180,6 @@ void drawgfxzoom( struct osd_bitmap *dest_bmp,const struct GfxElement *gfx,
 void pdrawgfxzoom( struct osd_bitmap *dest_bmp,const struct GfxElement *gfx,
 		unsigned int code,unsigned int color,int flipx,int flipy,int sx,int sy,
 		const struct rectangle *clip,int transparency,int transparent_color,int scalex,int scaley,
-		UINT32 priority_mask);
+		uint32_t priority_mask);
 
 #endif

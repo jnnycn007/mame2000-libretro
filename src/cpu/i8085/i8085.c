@@ -61,16 +61,16 @@
 typedef struct {
 	int 	cputype;	/* 0 8080, 1 8085A */
 	PAIR	PC,SP,AF,BC,DE,HL,XX;
-	UINT8	HALT;
-	UINT8	IM; 		/* interrupt mask */
-	UINT8	IREQ;		/* requested interrupts */
-	UINT8	ISRV;		/* serviced interrupt */
-	UINT32	INTR;		/* vector for INTR */
-	UINT32	IRQ2;		/* scheduled interrupt address */
-	UINT32	IRQ1;		/* executed interrupt address */
-	INT8	nmi_state;
-	INT8	irq_state[4];
-	INT8	filler; /* align on dword boundary */
+	uint8_t	HALT;
+	uint8_t	IM; 		/* interrupt mask */
+	uint8_t	IREQ;		/* requested interrupts */
+	uint8_t	ISRV;		/* serviced interrupt */
+	uint32_t	INTR;		/* vector for INTR */
+	uint32_t	IRQ2;		/* scheduled interrupt address */
+	uint32_t	IRQ1;		/* executed interrupt address */
+	int8_t	nmi_state;
+	int8_t	irq_state[4];
+	int8_t	filler; /* align on dword boundary */
 	int 	(*irq_callback)(int);
 	void	(*sod_callback)(int state);
 }	i8085_Regs;
@@ -78,22 +78,22 @@ typedef struct {
 int i8085_ICount = 0;
 
 static i8085_Regs I;
-static UINT8 ZS[256];
-static UINT8 ZSP[256];
+static uint8_t ZS[256];
+static uint8_t ZSP[256];
 
-static UINT8 ROP(void)
+static uint8_t ROP(void)
 {
 	return cpu_readop(I.PC.w.l++);
 }
 
-static UINT8 ARG(void)
+static uint8_t ARG(void)
 {
 	return cpu_readop_arg(I.PC.w.l++);
 }
 
-static UINT16 ARG16(void)
+static uint16_t ARG16(void)
 {
-	UINT16 w;
+	uint16_t w;
 	w  = cpu_readop_arg(I.PC.d);
 	I.PC.w.l++;
 	w += cpu_readop_arg(I.PC.d) << 8;
@@ -101,12 +101,12 @@ static UINT16 ARG16(void)
 	return w;
 }
 
-static UINT8 RM(UINT32 a)
+static uint8_t RM(uint32_t a)
 {
 	return cpu_readmem16(a);
 }
 
-static void WM(UINT32 a, UINT8 v)
+static void WM(uint32_t a, uint8_t v)
 {
 	cpu_writemem16(a, v);
 }
@@ -114,7 +114,7 @@ static void WM(UINT32 a, UINT8 v)
 static	void illegal(void)
 {
 #if VERBOSE
-	UINT16 pc = I.PC.w.l - 1;
+	uint16_t pc = I.PC.w.l - 1;
 	LOG(("i8085 illegal instruction %04X $%02X\n", pc, cpu_readop(pc)));
 #endif
 }
@@ -1140,7 +1140,7 @@ int i8085_execute(int cycles)
  ****************************************************************************/
 static void init_tables (void)
 {
-	UINT8 zs;
+	uint8_t zs;
 	int i, p;
 	for (i = 0; i < 256; i++)
 	{

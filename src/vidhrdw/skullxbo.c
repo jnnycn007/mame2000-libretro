@@ -85,13 +85,13 @@ struct pf_overrender_data
 
 static struct atarigen_pf_state pf_state;
 
-static UINT16 *scroll_list;
+static uint16_t *scroll_list;
 
-static UINT8 latch_byte;
-static UINT16 mo_bank;
+static uint8_t latch_byte;
+static uint16_t mo_bank;
 
 #if DEBUG_VIDEO
-static UINT8 show_colors;
+static uint8_t show_colors;
 #endif
 
 
@@ -102,15 +102,15 @@ static UINT8 show_colors;
  *
  *************************************/
 
-static const UINT8 *update_palette(void);
+static const uint8_t *update_palette(void);
 
 static void pf_color_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 static void pf_render_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 static void pf_check_overrender_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 static void pf_overrender_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param);
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param);
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param);
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param);
 
 #if DEBUG_VIDEO
 static int debug(void);
@@ -148,7 +148,7 @@ int skullxbo_vh_start(void)
 	mo_bank = 0;
 
 	/* allocate the scroll list */
-	scroll_list = (UINT16*)malloc(sizeof(UINT16) * 2 * YDIM);
+	scroll_list = (uint16_t*)malloc(sizeof(uint16_t) * 2 * YDIM);
 	if (!scroll_list)
 		return 1;
 
@@ -276,11 +276,11 @@ WRITE_HANDLER( skullxbo_playfieldram_w )
 
 void skullxbo_scanline_update(int scanline)
 {
-	UINT16 *base = (UINT16 *)&atarigen_alpharam[((scanline / 8) * 64 + XCHARS) * 2];
+	uint16_t *base = (uint16_t *)&atarigen_alpharam[((scanline / 8) * 64 + XCHARS) * 2];
 	int x;
 
 	/* keep in range */
-	if ((UINT8 *)base >= &atarigen_alpharam[atarigen_alpharam_size])
+	if ((uint8_t *)base >= &atarigen_alpharam[atarigen_alpharam_size])
 		return;
 
 	/* update the MOs from the SLIP table */
@@ -289,8 +289,8 @@ void skullxbo_scanline_update(int scanline)
 	/* update the current parameters */
 	for (x = XCHARS; x < 64; x++)
 	{
-		UINT16 data = *base++;
-		UINT16 command = data & 0x000f;
+		uint16_t data = *base++;
+		uint16_t command = data & 0x000f;
 
 		if (command == 0x0d)
 		{
@@ -362,10 +362,10 @@ void skullxbo_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
  *
  *************************************/
 
-static const UINT8 *update_palette(void)
+static const uint8_t *update_palette(void)
 {
-	UINT16 pf_map[16], al_map[16];
-	UINT32 mo_map[16];
+	uint16_t pf_map[16], al_map[16];
+	uint32_t mo_map[16];
 	const unsigned int *usage;
 	int i, j, x, y, offs;
 
@@ -395,7 +395,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the playfield palette */
 	for (i = 0; i < 16; i++)
 	{
-		UINT16 used = pf_map[i];
+		uint16_t used = pf_map[i];
 		if (used)
 			for (j = 0; j < 16; j++)
 				if (used & (1 << j))
@@ -405,7 +405,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the motion object palette */
 	for (i = 0; i < 16; i++)
 	{
-		UINT32 used = mo_map[i];
+		uint32_t used = mo_map[i];
 		if (used)
 		{
 			palette_used_colors[0x000 + i * 32 + 0] = PALETTE_COLOR_TRANSPARENT;
@@ -418,7 +418,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the alphanumerics palette */
 	for (i = 0; i < 16; i++)
 	{
-		UINT16 used = al_map[i];
+		uint16_t used = al_map[i];
 		if (used)
 			for (j = 0; j < 4; j++)
 				if (used & (1 << j))
@@ -440,7 +440,7 @@ static const UINT8 *update_palette(void)
 static void pf_color_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *param)
 {
 	const unsigned int *usage = Machine->gfx[1]->pen_usage;
-	UINT16 *colormap = (UINT16 *)param;
+	uint16_t *colormap = (uint16_t *)param;
 	int x, y;
 
 	/* standard loop over tiles */
@@ -526,7 +526,7 @@ static void pf_render_callback(const struct rectangle *clip, const struct rectan
  *
  *************************************/
 
-static const UINT16 overrender_matrix[4] =
+static const uint16_t overrender_matrix[4] =
 {
 	0xf000,
 	0xff00,
@@ -617,16 +617,16 @@ static void pf_overrender_callback(const struct rectangle *clip, const struct re
  *
  *************************************/
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
 	const unsigned int *usage = Machine->gfx[0]->pen_usage;
-	UINT32 *colormap = (UINT32 *)param;
+	uint32_t *colormap = (uint32_t *)param;
 	int code = data[1] & 0x7fff;
 	int color = data[2] & 0x000f;
 	int hsize = ((data[3] >> 4) & 7) + 1;
 	int vsize = (data[3] & 15) + 1;
 	int tiles = hsize * vsize;
-	UINT32 temp = 0;
+	uint32_t temp = 0;
 	int i;
 
 	for (i = 0; i < tiles; i++)
@@ -642,7 +642,7 @@ static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, 
  *
  *************************************/
 
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
 	struct GfxElement *gfx = Machine->gfx[0];
 	struct pf_overrender_data overrender_data;
@@ -729,7 +729,7 @@ static void mo_render_callback(const UINT16 *data, const struct rectangle *clip,
 
 #if DEBUG_VIDEO
 
-static void mo_print(struct osd_bitmap *bitmap, struct rectangle *clip, UINT16 *data, void *param)
+static void mo_print(struct osd_bitmap *bitmap, struct rectangle *clip, uint16_t *data, void *param)
 {
 	int code = data[1] & 0x7fff;
 	int hsize = ((data[3] >> 4) & 7) + 1;

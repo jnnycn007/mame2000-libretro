@@ -48,7 +48,7 @@ each one of them can declare to have four different priority levels.
 00f unused
 */
 
-static UINT8 TC0360PRI_regs[16];
+static uint8_t TC0360PRI_regs[16];
 
 WRITE_HANDLER( TC0360PRI_w )
 {
@@ -70,7 +70,7 @@ extern int TC0480SCP_pri_reg;
 unsigned char *f2_sprite_extension;
 size_t f2_spriteext_size;
 int sprites_disabled,sprites_active_area,sprites_master_scrollx,sprites_master_scrolly;
-static UINT16 *spriteram_buffered,*spriteram_delayed;
+static uint16_t *spriteram_buffered,*spriteram_delayed;
 
 
 struct tempsprite
@@ -237,8 +237,8 @@ static int has_TC0430GRW(void)
 
 int taitof2_core_vh_start (void)
 {
-	spriteram_delayed = (UINT16*)malloc(spriteram_size);
-	spriteram_buffered = (UINT16*)malloc(spriteram_size);
+	spriteram_delayed = (uint16_t*)malloc(spriteram_size);
+	spriteram_buffered = (uint16_t*)malloc(spriteram_size);
 	spritelist = (struct tempsprite *)malloc(0x400 * sizeof(*spritelist));
 	if (!spriteram_delayed || !spriteram_buffered || !spritelist)
 		return 1;
@@ -1490,7 +1490,7 @@ Seems there are only 5 truly different layer orders used.
 And why does it use 5 reg values that all cause bg0123?
 */
 
-static UINT8 TC0480SCP_pri_lookup[32][4] =
+static uint8_t TC0480SCP_pri_lookup[32][4] =
 {
 	{ 0, 1, 2, 3, },	// 0x00  00000  yes (i.e. seen during game)
 	{ 0, 1, 2, 3, },	// 0x01  00001

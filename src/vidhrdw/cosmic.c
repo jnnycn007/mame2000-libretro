@@ -434,7 +434,7 @@ void nomnlnd_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
     {
 		// draw trees
 
-        static UINT8 water_animate=0;
+        static uint8_t water_animate=0;
 
         water_animate++;
 

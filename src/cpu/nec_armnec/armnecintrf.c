@@ -11,10 +11,10 @@
 typedef struct
 {
     struct ArmNec regs; /* ArmNec structure */
-	UINT32	int_vector; /* interrupt vector (not used) */
-	UINT32	pending_irq; /* pending irq */
-	UINT32	nmi_state; /* NMI state */
-	UINT32	irq_state; /* IRQ state */
+	uint32_t	int_vector; /* interrupt vector (not used) */
+	uint32_t	pending_irq; /* pending irq */
+	uint32_t	nmi_state; /* NMI state */
+	uint32_t	irq_state; /* IRQ state */
 	int     (*irq_callback)(int irqline); /* MAME IRQ callback */
 	unsigned char * ppMemRead[VEZ_PAGE_COUNT];
 	unsigned char * ppMemWrite[VEZ_PAGE_COUNT];

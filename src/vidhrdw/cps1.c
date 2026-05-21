@@ -410,7 +410,7 @@ static struct osd_bitmap *cps1_scroll2_bitmap;
 CPS1 VIDEO RENDERER
 
 */
-static UINT32 *cps1_gfx;		 /* Converted GFX memory */
+static uint32_t *cps1_gfx;		 /* Converted GFX memory */
 static int *cps1_char_pen_usage;	/* pen usage array */
 static int *cps1_tile16_pen_usage;      /* pen usage array */
 static int *cps1_tile32_pen_usage;      /* pen usage array */
@@ -420,7 +420,7 @@ static int cps1_max_tile32;	     /* Maximum number of 32x32 tiles */
 
 int cps1_gfx_start(void)
 {
-	UINT32 dwval;
+	uint32_t dwval;
 	int size=memory_region_length(REGION_GFX1);
 	unsigned char *data = memory_region(REGION_GFX1);
 	int i,j,nchar,penusage,gfxsize;
@@ -432,7 +432,7 @@ int cps1_gfx_start(void)
 	cps1_max_tile16=(gfxsize/4)/8;
 	cps1_max_tile32=(gfxsize/16)/8;
 
-	cps1_gfx=(UINT32*)malloc(gfxsize*sizeof(UINT32));
+	cps1_gfx=(uint32_t*)malloc(gfxsize*sizeof(uint32_t));
 	if (!cps1_gfx)
 	{
 		return -1;
@@ -1952,10 +1952,10 @@ void cps1_eof_callback(void)
 
 {
 	int i, j;
-	UINT32 dwval;
-	UINT32 *src;
+	uint32_t dwval;
+	uint32_t *src;
 	const unsigned short *paldata;
-	UINT32 n;
+	uint32_t n;
 	DATATYPE *bm;
 
 	if ( code > max || (tpens & pusage[code])==0)

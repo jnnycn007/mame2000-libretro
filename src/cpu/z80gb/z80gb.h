@@ -105,17 +105,17 @@ extern unsigned z80gb_dasm(char *buffer, unsigned pc);
 /* Memory functions                                                         */
 /****************************************************************************/
 
-#define mem_ReadByte(A)    ((UINT8)cpu_readmem16(A))
+#define mem_ReadByte(A)    ((uint8_t)cpu_readmem16(A))
 #define mem_WriteByte(A,V) (cpu_writemem16(A,V))
 
-static INLINE UINT16 mem_ReadWord (UINT32 address)
+static INLINE uint16_t mem_ReadWord (uint32_t address)
 {
-	UINT16 value = (UINT16) mem_ReadByte ((address + 1) & 0xffff) << 8;
+	uint16_t value = (uint16_t) mem_ReadByte ((address + 1) & 0xffff) << 8;
 	value |= mem_ReadByte (address);
 	return value;
 }
 
-static INLINE void mem_WriteWord (UINT32 address, UINT16 value)
+static INLINE void mem_WriteWord (uint32_t address, uint16_t value)
 {
   mem_WriteByte (address, value & 0xFF);
   mem_WriteByte ((address + 1) & 0xffff, value >> 8);

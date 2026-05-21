@@ -13,11 +13,11 @@
 ***************************************************************************/
 
 /* ----- typedefs for data and offset types ----- */
-typedef UINT8			data8_t;
-typedef UINT16			data16_t;
-typedef UINT32			data32_t;
-typedef UINT32 offs_t;
-typedef UINT32 data_t;
+typedef uint8_t			data8_t;
+typedef uint16_t			data16_t;
+typedef uint32_t			data32_t;
+typedef uint32_t offs_t;
+typedef uint32_t data_t;
 
 typedef data_t (*mem_read_handler)(offs_t offset);
 typedef void (*mem_write_handler)(offs_t offset,data_t data);
@@ -244,8 +244,8 @@ extern unsigned char *cpu_bankbase[];	/* array of bank bases */
 ***************************************************************************/
 
 /* ----- 16-bit memory accessing ----- */
-#define READ_WORD(a)		  (*(UINT16 *)(a))
-#define WRITE_WORD(a,d) 	  (*(UINT16 *)(a) = (d))
+#define READ_WORD(a)		  (*(uint16_t *)(a))
+#define WRITE_WORD(a,d) 	  (*(uint16_t *)(a) = (d))
 #define COMBINE_WORD(w,d)	  (((w) & ((d) >> 16)) | ((d) & 0xffff))
 #define COMBINE_WORD_MEM(a,d) (WRITE_WORD((a), (READ_WORD(a) & ((d) >> 16)) | (d)))
 
@@ -282,7 +282,7 @@ extern unsigned char *cpu_bankbase[];	/* array of bank bases */
 {														\
 	if (bank >= 1 && bank <= MAX_BANKS) 				\
 	{													\
-		cpu_bankbase[bank] = (UINT8 *)(base);			\
+		cpu_bankbase[bank] = (uint8_t *)(base);			\
 		if (ophw == bank)								\
 		{												\
 			ophw = 0xff;								\

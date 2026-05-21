@@ -95,10 +95,10 @@ WRITE_HANDLER( polepos_engine_sound_lsb_w );
 WRITE_HANDLER( polepos_engine_sound_msb_w );
 
 /* from vidhrdw */
-extern UINT8 *polepos_view_memory;
-extern UINT8 *polepos_road_memory;
-extern UINT8 *polepos_alpha_memory;
-extern UINT8 *polepos_sprite_memory;
+extern uint8_t *polepos_view_memory;
+extern uint8_t *polepos_road_memory;
+extern uint8_t *polepos_alpha_memory;
+extern uint8_t *polepos_sprite_memory;
 
 int polepos_vh_start(void);
 void polepos_vh_stop(void);

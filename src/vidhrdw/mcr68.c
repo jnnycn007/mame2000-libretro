@@ -16,8 +16,8 @@
 #define LOW_BYTE(x) (READ_WORD(x) & 0xff)
 
 
-UINT8 mcr68_sprite_clip;
-INT8 mcr68_sprite_xoffset;
+uint8_t mcr68_sprite_clip;
+int8_t mcr68_sprite_xoffset;
 
 
 #define DEBUG_VIDEO		0
@@ -344,7 +344,7 @@ WRITE_HANDLER( zwackery_spriteram_w )
 
 void zwackery_convert_color_prom(unsigned char *palette, unsigned short *colortable, const unsigned char *color_prom)
 {
-	const UINT8 *colordatabase = (const UINT8 *)memory_region(REGION_GFX3);
+	const uint8_t *colordatabase = (const uint8_t *)memory_region(REGION_GFX3);
 	struct GfxElement *gfx0 = Machine->gfx[0];
 	struct GfxElement *gfx2 = Machine->gfx[2];
 	int code, y, x, ix;
@@ -352,16 +352,16 @@ void zwackery_convert_color_prom(unsigned char *palette, unsigned short *colorta
 	/* "colorize" each code */
 	for (code = 0; code < gfx0->total_elements; code++)
 	{
-		const UINT8 *coldata = colordatabase + code * 32;
-		UINT8 *gfxdata0 = gfx0->gfxdata + code * gfx0->char_modulo;
-		UINT8 *gfxdata2 = gfx2->gfxdata + code * gfx2->char_modulo;
+		const uint8_t *coldata = colordatabase + code * 32;
+		uint8_t *gfxdata0 = gfx0->gfxdata + code * gfx0->char_modulo;
+		uint8_t *gfxdata2 = gfx2->gfxdata + code * gfx2->char_modulo;
 
 		/* assume 16 rows */
 		for (y = 0; y < 16; y++)
 		{
-			const UINT8 *cd = coldata;
-			UINT8 *gd0 = gfxdata0;
-			UINT8 *gd2 = gfxdata2;
+			const uint8_t *cd = coldata;
+			uint8_t *gd0 = gfxdata0;
+			uint8_t *gd2 = gfxdata2;
 
 			/* 16 colums, in batches of 4 pixels */
 			for (x = 0; x < 16; x += 4)
@@ -399,7 +399,7 @@ void zwackery_convert_color_prom(unsigned char *palette, unsigned short *colorta
 
 static void zwackery_mark_background(void)
 {
-	const UINT8 *colordatabase = (const UINT8 *)memory_region(REGION_GFX3);
+	const uint8_t *colordatabase = (const uint8_t *)memory_region(REGION_GFX3);
 	int offs;
 
 	/* for every character in the Video RAM, mark the colors */
@@ -411,8 +411,8 @@ static void zwackery_mark_background(void)
 		int i;
 
 		/* get color data pointers */
-		const UINT8 *coldata = colordatabase + code * 32;
-		UINT8 *used_colors = &palette_used_colors[color << 8];
+		const uint8_t *coldata = colordatabase + code * 32;
+		uint8_t *used_colors = &palette_used_colors[color << 8];
 
 		/* each character uses up to 32 unique colors */
 		for (i = 0; i < 32; i++)
@@ -477,7 +477,7 @@ if (show_bg_colors)
 
 static void zwackery_mark_sprites(void)
 {
-	UINT16 used[32];
+	uint16_t used[32];
 	int offs, i;
 
 	/* clear the usage array */
@@ -504,7 +504,7 @@ static void zwackery_mark_sprites(void)
 	/* use the usage array to mark the global palette_used_colors */
 	for (offs = 0; offs < 32; offs++)
 	{
-		UINT16 u = used[offs];
+		uint16_t u = used[offs];
 		if (u)
 		{
 			palette_used_colors[0x800 + offs * 16 + 0] = PALETTE_COLOR_TRANSPARENT;

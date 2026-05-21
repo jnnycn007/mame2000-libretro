@@ -5,7 +5,7 @@ void name(offs_t address,data_t data)													\
 	MHELE hw;																			\
 																						\
 	/* first-level lookup */															\
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_##abits + ABITS_MIN_##abits)];			\
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_##abits + ABITS_MIN_##abits)];			\
 																						\
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */		\
 	/* for banked memory reads/writes */												\
@@ -27,7 +27,7 @@ void name(offs_t address,data_t data)													\
 	if (hw >= MH_HARDMAX)																\
 	{																					\
 		hw -= MH_HARDMAX;																\
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))];	\
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))];	\
 																						\
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */	\
 		/* for banked memory reads/writes */											\
@@ -72,7 +72,7 @@ void name##_word(offs_t address,data_t data)											\
 	if (align == ALWAYS_ALIGNED || !(address & 1))										\
 	{																					\
 		/* first-level lookup */														\
-		hw = cur_mwhard[(UINT32)address >> (ABITS2_##abits + ABITS_MIN_##abits)];		\
+		hw = cur_mwhard[(uint32_t)address >> (ABITS2_##abits + ABITS_MIN_##abits)];		\
 		if (hw <= HT_BANKMAX)															\
 		{																				\
 			WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);		\
@@ -83,7 +83,7 @@ void name##_word(offs_t address,data_t data)											\
 		if (hw >= MH_HARDMAX)															\
 		{																				\
 			hw -= MH_HARDMAX;															\
-			hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))]; \
+			hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))]; \
 			if (hw <= HT_BANKMAX)														\
 			{																			\
 				WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);	\
@@ -112,7 +112,7 @@ void name##_word(offs_t address,data_t data)											\
 #define WRITELONG(name,type,abits,align)												\
 void name##_dword(offs_t address,data_t data)											\
 {																						\
-	UINT16 word1, word2;																\
+	uint16_t word1, word2;																\
 	MHELE hw1, hw2; 																	\
 																						\
 	/* only supports 16-bit memory systems */											\
@@ -125,19 +125,19 @@ void name##_dword(offs_t address,data_t data)											\
 		int address2 = (address + 2) & ADDRESS_MASK(abits); 							\
 																						\
 		/* first-level lookup */														\
-		hw1 = cur_mwhard[(UINT32)address >> (ABITS2_##abits + ABITS_MIN_##abits)];		\
-		hw2 = cur_mwhard[(UINT32)address2 >> (ABITS2_##abits + ABITS_MIN_##abits)]; 	\
+		hw1 = cur_mwhard[(uint32_t)address >> (ABITS2_##abits + ABITS_MIN_##abits)];		\
+		hw2 = cur_mwhard[(uint32_t)address2 >> (ABITS2_##abits + ABITS_MIN_##abits)]; 	\
 																						\
 		/* second-level lookup */														\
 		if (hw1 >= MH_HARDMAX)															\
 		{																				\
 			hw1 -= MH_HARDMAX;															\
-			hw1 = writehardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))]; \
+			hw1 = writehardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))]; \
 		}																				\
 		if (hw2 >= MH_HARDMAX)															\
 		{																				\
 			hw2 -= MH_HARDMAX;															\
-			hw2 = writehardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))];	\
+			hw2 = writehardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))];	\
 		}																				\
 																						\
 		/* extract words */ 															\
@@ -189,7 +189,7 @@ void cpu_writemem16(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_16 + ABITS_MIN_16)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_16 + ABITS_MIN_16)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -203,7 +203,7 @@ void cpu_writemem16(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_16) & MHMASK(ABITS2_16))];
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_16) & MHMASK(ABITS2_16))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -227,7 +227,7 @@ void cpu_writemem20(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_20 + ABITS_MIN_20)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_20 + ABITS_MIN_20)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -241,7 +241,7 @@ void cpu_writemem20(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_20) & MHMASK(ABITS2_20))];
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_20) & MHMASK(ABITS2_20))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -265,7 +265,7 @@ void cpu_writemem21(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_21 + ABITS_MIN_21)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_21 + ABITS_MIN_21)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -279,7 +279,7 @@ void cpu_writemem21(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_21) & MHMASK(ABITS2_21))];
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_21) & MHMASK(ABITS2_21))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -304,7 +304,7 @@ void cpu_writemem16bew(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_16BEW + ABITS_MIN_16BEW)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_16BEW + ABITS_MIN_16BEW)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -317,7 +317,7 @@ void cpu_writemem16bew(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_16BEW) & MHMASK(ABITS2_16BEW))];
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_16BEW) & MHMASK(ABITS2_16BEW))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -345,7 +345,7 @@ void cpu_writemem16bew_word(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_16BEW + ABITS_MIN_16BEW)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_16BEW + ABITS_MIN_16BEW)];
 	if (hw <= HT_BANKMAX)
 	{
 		WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -356,7 +356,7 @@ void cpu_writemem16bew_word(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_16BEW) & MHMASK(ABITS2_16BEW))]; 
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_16BEW) & MHMASK(ABITS2_16BEW))]; 
 		if (hw <= HT_BANKMAX)
 		{
 			WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -377,7 +377,7 @@ void cpu_writemem16lew(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_16LEW + ABITS_MIN_16LEW)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_16LEW + ABITS_MIN_16LEW)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -391,7 +391,7 @@ void cpu_writemem16lew(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_16LEW) & MHMASK(ABITS2_16LEW))];
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_16LEW) & MHMASK(ABITS2_16LEW))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -420,7 +420,7 @@ void cpu_writemem16lew_word(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_16LEW + ABITS_MIN_16LEW)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_16LEW + ABITS_MIN_16LEW)];
 	if (hw <= HT_BANKMAX)
 	{
 		WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -431,7 +431,7 @@ void cpu_writemem16lew_word(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_16LEW) & MHMASK(ABITS2_16LEW))]; 
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_16LEW) & MHMASK(ABITS2_16LEW))]; 
 		if (hw <= HT_BANKMAX)
 		{
 			WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -452,7 +452,7 @@ void cpu_writemem24(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_24 + ABITS_MIN_24)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_24 + ABITS_MIN_24)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -466,7 +466,7 @@ void cpu_writemem24(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_24) & MHMASK(ABITS2_24))];
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_24) & MHMASK(ABITS2_24))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -491,7 +491,7 @@ void cpu_writemem24bew(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -505,7 +505,7 @@ void cpu_writemem24bew(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))];
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -537,7 +537,7 @@ void cpu_writemem24bew_word(offs_t address,data_t data)
 	if (!(address & 1))
 	{
 		/* first-level lookup */
-		hw = cur_mwhard[(UINT32)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
+		hw = cur_mwhard[(uint32_t)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
 		if (hw <= HT_BANKMAX)
 		{
 			WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -548,7 +548,7 @@ void cpu_writemem24bew_word(offs_t address,data_t data)
 		if (hw >= MH_HARDMAX)
 		{
 			hw -= MH_HARDMAX;
-			hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))]; 
+			hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))]; 
 			if (hw <= HT_BANKMAX)
 			{
 				WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -574,7 +574,7 @@ INLINE
 #endif
 void cpu_writemem24bew_dword(offs_t address,data_t data)
 {
-	UINT16 word1, word2;
+	uint16_t word1, word2;
 	MHELE hw1, hw2; 
 
 	/* handle aligned case first */ 
@@ -583,19 +583,19 @@ void cpu_writemem24bew_dword(offs_t address,data_t data)
 		int address2 = (address + 2) & ADDRESS_MASK(24BEW); 
 
 		/* first-level lookup */
-		hw1 = cur_mwhard[(UINT32)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
-		hw2 = cur_mwhard[(UINT32)address2 >> (ABITS2_24BEW + ABITS_MIN_24BEW)]; 
+		hw1 = cur_mwhard[(uint32_t)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
+		hw2 = cur_mwhard[(uint32_t)address2 >> (ABITS2_24BEW + ABITS_MIN_24BEW)]; 
 
 		/* second-level lookup */
 		if (hw1 >= MH_HARDMAX)
 		{
 			hw1 -= MH_HARDMAX;
-			hw1 = writehardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))]; 
+			hw1 = writehardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))]; 
 		}
 		if (hw2 >= MH_HARDMAX)
 		{
 			hw2 -= MH_HARDMAX;
-			hw2 = writehardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))];
+			hw2 = writehardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))];
 		}
 
 		/* extract words */ 
@@ -632,7 +632,7 @@ void cpu_writemem26lew(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -646,7 +646,7 @@ void cpu_writemem26lew(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))];
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -675,7 +675,7 @@ void cpu_writemem26lew_word(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
 	if (hw <= HT_BANKMAX)
 	{
 		WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -686,7 +686,7 @@ void cpu_writemem26lew_word(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))]; 
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))]; 
 		if (hw <= HT_BANKMAX)
 		{
 			WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -704,25 +704,25 @@ INLINE
 #endif
 void cpu_writemem26lew_dword(offs_t address,data_t data)
 {
-	UINT16 word1, word2;
+	uint16_t word1, word2;
 	MHELE hw1, hw2; 
 
 	int address2 = (address + 2) & ADDRESS_MASK(26LEW); 
 
 	/* first-level lookup */
-	hw1 = cur_mwhard[(UINT32)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
-	hw2 = cur_mwhard[(UINT32)address2 >> (ABITS2_26LEW + ABITS_MIN_26LEW)]; 
+	hw1 = cur_mwhard[(uint32_t)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
+	hw2 = cur_mwhard[(uint32_t)address2 >> (ABITS2_26LEW + ABITS_MIN_26LEW)]; 
 
 	/* second-level lookup */
 	if (hw1 >= MH_HARDMAX)
 	{
 		hw1 -= MH_HARDMAX;
-		hw1 = writehardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))]; 
+		hw1 = writehardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))]; 
 	}
 	if (hw2 >= MH_HARDMAX)
 	{
 		hw2 -= MH_HARDMAX;
-		hw2 = writehardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))];
+		hw2 = writehardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))];
 	}
 
 	/* extract words */ 
@@ -749,7 +749,7 @@ void cpu_writemem29(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_29 + ABITS_MIN_29)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_29 + ABITS_MIN_29)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -763,7 +763,7 @@ void cpu_writemem29(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))];
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -795,7 +795,7 @@ void cpu_writemem29_word(offs_t address,data_t data)
 	if (!(address & 1))
 	{
 		/* first-level lookup */
-		hw = cur_mwhard[(UINT32)address >> (ABITS2_29 + ABITS_MIN_29)];
+		hw = cur_mwhard[(uint32_t)address >> (ABITS2_29 + ABITS_MIN_29)];
 		if (hw <= HT_BANKMAX)
 		{
 			WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -806,7 +806,7 @@ void cpu_writemem29_word(offs_t address,data_t data)
 		if (hw >= MH_HARDMAX)
 		{
 			hw -= MH_HARDMAX;
-			hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))]; 
+			hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))]; 
 			if (hw <= HT_BANKMAX)
 			{
 				WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -831,7 +831,7 @@ INLINE
 #endif
 void cpu_writemem29_dword(offs_t address,data_t data)
 {
-	UINT16 word1, word2;
+	uint16_t word1, word2;
 	MHELE hw1, hw2; 
 
 	/* handle aligned case first */ 
@@ -840,19 +840,19 @@ void cpu_writemem29_dword(offs_t address,data_t data)
 		int address2 = (address + 2) & ADDRESS_MASK(29); 
 
 		/* first-level lookup */
-		hw1 = cur_mwhard[(UINT32)address >> (ABITS2_29 + ABITS_MIN_29)];
-		hw2 = cur_mwhard[(UINT32)address2 >> (ABITS2_29 + ABITS_MIN_29)]; 
+		hw1 = cur_mwhard[(uint32_t)address >> (ABITS2_29 + ABITS_MIN_29)];
+		hw2 = cur_mwhard[(uint32_t)address2 >> (ABITS2_29 + ABITS_MIN_29)]; 
 
 		/* second-level lookup */
 		if (hw1 >= MH_HARDMAX)
 		{
 			hw1 -= MH_HARDMAX;
-			hw1 = writehardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))]; 
+			hw1 = writehardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))]; 
 		}
 		if (hw2 >= MH_HARDMAX)
 		{
 			hw2 -= MH_HARDMAX;
-			hw2 = writehardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_29) & MHMASK(ABITS2_29))];
+			hw2 = writehardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_29) & MHMASK(ABITS2_29))];
 		}
 
 		/* extract words */ 
@@ -888,7 +888,7 @@ void cpu_writemem32(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_32 + ABITS_MIN_32)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_32 + ABITS_MIN_32)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -902,7 +902,7 @@ void cpu_writemem32(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))];
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -934,7 +934,7 @@ void cpu_writemem32_word(offs_t address,data_t data)
 	if (!(address & 1))
 	{
 		/* first-level lookup */
-		hw = cur_mwhard[(UINT32)address >> (ABITS2_32 + ABITS_MIN_32)];
+		hw = cur_mwhard[(uint32_t)address >> (ABITS2_32 + ABITS_MIN_32)];
 		if (hw <= HT_BANKMAX)
 		{
 			WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -945,7 +945,7 @@ void cpu_writemem32_word(offs_t address,data_t data)
 		if (hw >= MH_HARDMAX)
 		{
 			hw -= MH_HARDMAX;
-			hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))]; 
+			hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))]; 
 			if (hw <= HT_BANKMAX)
 			{
 				WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -970,7 +970,7 @@ INLINE
 #endif
 void cpu_writemem32_dword(offs_t address,data_t data)
 {
-	UINT16 word1, word2;
+	uint16_t word1, word2;
 	MHELE hw1, hw2; 
 
 	/* handle aligned case first */ 
@@ -979,19 +979,19 @@ void cpu_writemem32_dword(offs_t address,data_t data)
 		int address2 = (address + 2) & ADDRESS_MASK(32); 
 
 		/* first-level lookup */
-		hw1 = cur_mwhard[(UINT32)address >> (ABITS2_32 + ABITS_MIN_32)];
-		hw2 = cur_mwhard[(UINT32)address2 >> (ABITS2_32 + ABITS_MIN_32)]; 
+		hw1 = cur_mwhard[(uint32_t)address >> (ABITS2_32 + ABITS_MIN_32)];
+		hw2 = cur_mwhard[(uint32_t)address2 >> (ABITS2_32 + ABITS_MIN_32)]; 
 
 		/* second-level lookup */
 		if (hw1 >= MH_HARDMAX)
 		{
 			hw1 -= MH_HARDMAX;
-			hw1 = writehardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))]; 
+			hw1 = writehardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))]; 
 		}
 		if (hw2 >= MH_HARDMAX)
 		{
 			hw2 -= MH_HARDMAX;
-			hw2 = writehardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_32) & MHMASK(ABITS2_32))];
+			hw2 = writehardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_32) & MHMASK(ABITS2_32))];
 		}
 
 		/* extract words */ 
@@ -1027,7 +1027,7 @@ void cpu_writemem32lew(offs_t address,data_t data)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mwhard[(UINT32)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
+	hw = cur_mwhard[(uint32_t)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -1041,7 +1041,7 @@ void cpu_writemem32lew(offs_t address,data_t data)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))];
+		hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -1073,7 +1073,7 @@ void cpu_writemem32lew_word(offs_t address,data_t data)
 	if (!(address & 1))
 	{
 		/* first-level lookup */
-		hw = cur_mwhard[(UINT32)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
+		hw = cur_mwhard[(uint32_t)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
 		if (hw <= HT_BANKMAX)
 		{
 			WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -1084,7 +1084,7 @@ void cpu_writemem32lew_word(offs_t address,data_t data)
 		if (hw >= MH_HARDMAX)
 		{
 			hw -= MH_HARDMAX;
-			hw = writehardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))]; 
+			hw = writehardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))]; 
 			if (hw <= HT_BANKMAX)
 			{
 				WRITE_WORD(&cpu_bankbase[hw][address - memorywriteoffset[hw]], data);
@@ -1110,7 +1110,7 @@ INLINE
 #endif
 void cpu_writemem32lew_dword(offs_t address,data_t data)
 {
-	UINT16 word1, word2;
+	uint16_t word1, word2;
 	MHELE hw1, hw2; 
 
 	/* handle aligned case first */ 
@@ -1119,19 +1119,19 @@ void cpu_writemem32lew_dword(offs_t address,data_t data)
 		int address2 = (address + 2) & ADDRESS_MASK(32LEW); 
 
 		/* first-level lookup */
-		hw1 = cur_mwhard[(UINT32)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
-		hw2 = cur_mwhard[(UINT32)address2 >> (ABITS2_32LEW + ABITS_MIN_32LEW)]; 
+		hw1 = cur_mwhard[(uint32_t)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
+		hw2 = cur_mwhard[(uint32_t)address2 >> (ABITS2_32LEW + ABITS_MIN_32LEW)]; 
 
 		/* second-level lookup */
 		if (hw1 >= MH_HARDMAX)
 		{
 			hw1 -= MH_HARDMAX;
-			hw1 = writehardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))]; 
+			hw1 = writehardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))]; 
 		}
 		if (hw2 >= MH_HARDMAX)
 		{
 			hw2 -= MH_HARDMAX;
-			hw2 = writehardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))];
+			hw2 = writehardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))];
 		}
 
 		/* extract words */ 

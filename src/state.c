@@ -169,7 +169,7 @@ void state_save_section( void *s, const char *module, int instance )
 }
 
 void state_save_UINT8( void *s, const char *module,int instance,
-	const char *name, const UINT8 *val, unsigned size )
+	const char *name, const uint8_t *val, unsigned size )
 {
 	state_handle *state = (state_handle *)s;
 
@@ -204,13 +204,13 @@ void state_save_UINT8( void *s, const char *module,int instance,
 }
 
 void state_save_INT8( void *s, const char *module,int instance,
-	const char *name, const INT8 *val, unsigned size )
+	const char *name, const int8_t *val, unsigned size )
 {
-	state_save_UINT8( s, module, instance, name, (UINT8*)val, size );
+	state_save_UINT8( s, module, instance, name, (uint8_t*)val, size );
 }
 
 void state_save_UINT16(void *s, const char *module,int instance,
-	const char *name, const UINT16 *val, unsigned size)
+	const char *name, const uint16_t *val, unsigned size)
 {
 	state_handle *state = (state_handle *)s;
 
@@ -245,13 +245,13 @@ void state_save_UINT16(void *s, const char *module,int instance,
 }
 
 void state_save_INT16( void *s, const char *module,int instance,
-	const char *name, const INT16 *val, unsigned size )
+	const char *name, const int16_t *val, unsigned size )
 {
-	state_save_UINT16( s, module, instance, name, (UINT16*)val, size );
+	state_save_UINT16( s, module, instance, name, (uint16_t*)val, size );
 }
 
 void state_save_UINT32( void *s, const char *module,int instance,
-	const char *name, const UINT32 *val, unsigned size )
+	const char *name, const uint32_t *val, unsigned size )
 {
 	state_handle *state = (state_handle *)s;
 
@@ -286,9 +286,9 @@ void state_save_UINT32( void *s, const char *module,int instance,
 }
 
 void state_save_INT32( void *s, const char *module,int instance,
-	const char *name, const INT32 *val, unsigned size )
+	const char *name, const int32_t *val, unsigned size )
 {
-	state_save_UINT32( s, module, instance, name, (UINT32*)val, size );
+	state_save_UINT32( s, module, instance, name, (uint32_t*)val, size );
 }
 
 /* load a linked list of state_vars (aka section) */
@@ -468,9 +468,9 @@ void state_load_section( void *s, const char *module, int instance )
 					/* store element */
 					switch( element_size )
 					{
-						case 1: *((UINT8*)v->data + v->size) = data;
-						case 2: *((UINT16*)v->data + v->size) = data;
-						case 4: *((UINT32*)v->data + v->size) = data;
+						case 1: *((uint8_t*)v->data + v->size) = data;
+						case 2: *((uint16_t*)v->data + v->size) = data;
+						case 4: *((uint32_t*)v->data + v->size) = data;
 					}
 					data = xtoul( &p, NULL );
 				} while( *p );
@@ -485,7 +485,7 @@ void state_load_section( void *s, const char *module, int instance )
 }
 
 void state_load_UINT8( void *s, const char *module, int instance,
-	const char *name, UINT8 *val, unsigned size )
+	const char *name, uint8_t *val, unsigned size )
 {
 	state_handle *state = (state_handle *)s;
     state_var *v;
@@ -499,7 +499,7 @@ void state_load_UINT8( void *s, const char *module, int instance,
 	{
 		unsigned offs;
 		for( offs = 0; offs < size && offs < v->size; offs++ )
-			*val++ = *((UINT8*)v->data + offs);
+			*val++ = *((uint8_t*)v->data + offs);
 	}
 	else
 	{
@@ -509,7 +509,7 @@ void state_load_UINT8( void *s, const char *module, int instance,
 }
 
 void state_load_INT8( void *s, const char *module, int instance,
-	const char *name, INT8 *val, unsigned size )
+	const char *name, int8_t *val, unsigned size )
 {
 	state_handle *state = (state_handle *)s;
     state_var *v;
@@ -523,7 +523,7 @@ void state_load_INT8( void *s, const char *module, int instance,
 	{
 		unsigned offs;
 		for( offs = 0; offs < size && offs < v->size; offs++ )
-			*val++ = *((INT8*)v->data + offs);
+			*val++ = *((int8_t*)v->data + offs);
 	}
 	else
 	{
@@ -533,7 +533,7 @@ void state_load_INT8( void *s, const char *module, int instance,
 }
 
 void state_load_UINT16( void *s, const char *module, int instance,
-	const char *name, UINT16 *val, unsigned size )
+	const char *name, uint16_t *val, unsigned size )
 {
 	state_handle *state = (state_handle *)s;
     state_var *v;
@@ -547,7 +547,7 @@ void state_load_UINT16( void *s, const char *module, int instance,
 	{
 		unsigned offs;
 		for( offs = 0; offs < size && offs < v->size; offs++ )
-			*val++ = *((UINT16*)v->data + offs);
+			*val++ = *((uint16_t*)v->data + offs);
 	}
 	else
 	{
@@ -557,7 +557,7 @@ void state_load_UINT16( void *s, const char *module, int instance,
 }
 
 void state_load_INT16( void *s, const char *module, int instance,
-	const char *name, INT16 *val, unsigned size )
+	const char *name, int16_t *val, unsigned size )
 {
 	state_handle *state = (state_handle *)s;
     state_var *v;
@@ -571,7 +571,7 @@ void state_load_INT16( void *s, const char *module, int instance,
 	{
 		unsigned offs;
 		for( offs = 0; offs < size && offs < v->size; offs++ )
-			*val++ = *((INT16*)v->data + offs);
+			*val++ = *((int16_t*)v->data + offs);
 	}
 	else
 	{
@@ -581,7 +581,7 @@ void state_load_INT16( void *s, const char *module, int instance,
 }
 
 void state_load_UINT32( void *s, const char *module, int instance,
-	const char *name, UINT32 *val, unsigned size )
+	const char *name, uint32_t *val, unsigned size )
 {
 	state_handle *state = (state_handle *)s;
     state_var *v;
@@ -595,7 +595,7 @@ void state_load_UINT32( void *s, const char *module, int instance,
 	{
 		unsigned offs;
 		for( offs = 0; offs < size && offs < v->size; offs++ )
-			*val++ = *((UINT32*)v->data + offs);
+			*val++ = *((uint32_t*)v->data + offs);
 	}
 	else
 	{
@@ -605,7 +605,7 @@ void state_load_UINT32( void *s, const char *module, int instance,
 }
 
 void state_load_INT32( void *s, const char *module, int instance,
-	const char *name, INT32 *val, unsigned size )
+	const char *name, int32_t *val, unsigned size )
 {
 	state_handle *state = (state_handle *)s;
     state_var *v;
@@ -619,7 +619,7 @@ void state_load_INT32( void *s, const char *module, int instance,
 	{
 		unsigned offs;
 		for( offs = 0; offs < size && offs < v->size; offs++ )
-			*val++ = *((INT32*)v->data + offs);
+			*val++ = *((int32_t*)v->data + offs);
 	}
 	else
 	{

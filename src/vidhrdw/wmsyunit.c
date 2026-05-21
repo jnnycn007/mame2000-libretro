@@ -34,47 +34,47 @@ enum
 
 
 /* CMOS-related variables */
-extern UINT8 *	wms_cmos_ram;
-extern UINT32	wms_cmos_page;
+extern uint8_t *	wms_cmos_ram;
+extern uint32_t	wms_cmos_page;
 
 /* graphics-related variables */
        struct rectangle wms_visible_area;
-       UINT8 *	wms_gfx_rom;
+       uint8_t *	wms_gfx_rom;
        size_t	wms_gfx_rom_size;
-static UINT8	autoerase_enable;
+static uint8_t	autoerase_enable;
 
 /* palette-related variables */
-static UINT8	pixel_mask;
-static UINT16	palette_mask;
-static UINT16 *	palette_lookup;
-static UINT8 *	palette_reverse_lookup;
+static uint8_t	pixel_mask;
+static uint16_t	palette_mask;
+static uint16_t *	palette_lookup;
+static uint8_t *	palette_reverse_lookup;
 
 /* videoram-related variables */
-static UINT16 *	local_videoram;
-static UINT16 *	local_videoram_copy;
-static UINT8	videobank_select;
+static uint16_t *	local_videoram;
+static uint16_t *	local_videoram_copy;
+static uint8_t	videobank_select;
 
 /* update-related variables */
-       UINT8	wms_partial_update_offset;
-static UINT8	page_flipping;
-static UINT8	skipping_this_frame;
-static UINT32	last_display_addr;
+       uint8_t	wms_partial_update_offset;
+static uint8_t	page_flipping;
+static uint8_t	skipping_this_frame;
+static uint32_t	last_display_addr;
 static int		last_update_scanline;
-static UINT32	autoerase_list[512];
-static UINT32	autoerase_count;
+static uint32_t	autoerase_list[512];
+static uint32_t	autoerase_count;
 
 /* DMA-related variables */
-static UINT16 dma_register[16];
+static uint16_t dma_register[16];
 static struct
 {
-	UINT32		offset;			/* source offset, in bits */
-	INT32 		rowbytes;		/* source bytes to skip each row */
-	INT32 		xpos;			/* x position, clipped */
-	INT32		ypos;			/* y position, clipped */
-	INT32		width;			/* horizontal pixel count */
-	INT32		height;			/* vertical pixel count */
-	UINT16		palette;		/* palette base */
-	UINT16		color;			/* current foreground color with palette */
+	uint32_t		offset;			/* source offset, in bits */
+	int32_t 		rowbytes;		/* source bytes to skip each row */
+	int32_t 		xpos;			/* x position, clipped */
+	int32_t		ypos;			/* y position, clipped */
+	int32_t		width;			/* horizontal pixel count */
+	int32_t		height;			/* vertical pixel count */
+	uint16_t		palette;		/* palette base */
+	uint16_t		color;			/* current foreground color with palette */
 } dma_state;
 
 
@@ -94,11 +94,11 @@ static void update_partial(int scanline);
 static int vh_start_common(void)
 {
 	/* allocate memory */
-	wms_cmos_ram = (UINT8*)malloc(0x2000 * 4);
-	local_videoram = (UINT16*)malloc(0x80000);
-	local_videoram_copy = (UINT16*)malloc(0x80000);
-	palette_lookup = (UINT16*)malloc(256 * sizeof(palette_lookup[0]));
-	palette_reverse_lookup = (UINT8*)malloc(65536 * sizeof(palette_reverse_lookup[0]));
+	wms_cmos_ram = (uint8_t*)malloc(0x2000 * 4);
+	local_videoram = (uint16_t*)malloc(0x80000);
+	local_videoram_copy = (uint16_t*)malloc(0x80000);
+	palette_lookup = (uint16_t*)malloc(256 * sizeof(palette_lookup[0]));
+	palette_reverse_lookup = (uint8_t*)malloc(65536 * sizeof(palette_reverse_lookup[0]));
 	
 	/* handle failure */
 	if (!wms_cmos_ram || !local_videoram || !local_videoram_copy || !palette_lookup || !palette_reverse_lookup)
@@ -279,15 +279,15 @@ READ_HANDLER( wms_yunit_vram_r )
  *
  *************************************/
 
-void wms_yunit_to_shiftreg(UINT32 address, UINT16 *shiftreg)
+void wms_yunit_to_shiftreg(uint32_t address, uint16_t *shiftreg)
 {
-	memcpy(shiftreg, &local_videoram[address >> 3], 2 * 512 * sizeof(UINT16));
+	memcpy(shiftreg, &local_videoram[address >> 3], 2 * 512 * sizeof(uint16_t));
 }
 
 
-void wms_yunit_from_shiftreg(UINT32 address, UINT16 *shiftreg)
+void wms_yunit_from_shiftreg(uint32_t address, uint16_t *shiftreg)
 {
-	memcpy(&local_videoram[address >> 3], shiftreg, 2 * 512 * sizeof(UINT16));
+	memcpy(&local_videoram[address >> 3], shiftreg, 2 * 512 * sizeof(uint16_t));
 }
 
 
@@ -387,10 +387,10 @@ typedef void (*dma_draw_func)(void);
 {																				\
 	int height = dma_state.height;												\
 	int width = dma_state.width;												\
-	UINT8 *base = wms_gfx_rom;													\
-	UINT32 offset = dma_state.offset >> 3;										\
-	UINT16 pal = dma_state.palette;												\
-	UINT16 color = pal | dma_state.color;										\
+	uint8_t *base = wms_gfx_rom;													\
+	uint32_t offset = dma_state.offset >> 3;										\
+	uint16_t pal = dma_state.palette;												\
+	uint16_t color = pal | dma_state.color;										\
 	int x, y;																	\
 																				\
 	/* loop over the height */													\
@@ -398,8 +398,8 @@ typedef void (*dma_draw_func)(void);
 	{																			\
 		int tx = dma_state.xpos;												\
 		int ty = dma_state.ypos;												\
-		UINT32 o = offset;														\
-		UINT16 *d;																\
+		uint32_t o = offset;														\
+		uint16_t *d;																\
 																				\
 		/* determine Y position */												\
 		ty = (ty + y) & 0x1ff;													\
@@ -608,7 +608,7 @@ READ_HANDLER( wms_yunit_dma_r )
 
 WRITE_HANDLER( wms_yunit_dma_w )
 {
-	UINT32 gfxoffset;
+	uint32_t gfxoffset;
 	int command;
 	
 	/* blend with the current register contents */
@@ -635,7 +635,7 @@ WRITE_HANDLER( wms_yunit_dma_w )
 				command, (command >> 4) & 1, (command >> 5) & 1);
 		logerror("  offset=%08X pos=(%d,%d) w=%d h=%d\n", 
 				dma_register[DMA_OFFSETLO] | (dma_register[DMA_OFFSETHI] << 16),
-				(INT16)dma_register[DMA_XSTART], (INT16)dma_register[DMA_YSTART],
+				(int16_t)dma_register[DMA_XSTART], (int16_t)dma_register[DMA_YSTART],
 				dma_register[DMA_WIDTH], dma_register[DMA_HEIGHT]);
 		logerror("  palette=%04X color=%04X\n",
 				dma_register[DMA_PALETTE], dma_register[DMA_COLOR]);
@@ -645,7 +645,7 @@ WRITE_HANDLER( wms_yunit_dma_w )
 	profiler_mark(PROFILER_USER1);
 
 	/* fill in the basic data */
-	dma_state.rowbytes = (INT16)dma_register[DMA_ROWBYTES];
+	dma_state.rowbytes = (int16_t)dma_register[DMA_ROWBYTES];
 	dma_state.xpos = dma_register[DMA_XSTART] & 0x1ff;
 	dma_state.ypos = dma_register[DMA_YSTART] & 0x1ff;
 	dma_state.width = dma_register[DMA_WIDTH];
@@ -702,7 +702,7 @@ WRITE_HANDLER( wms_yunit_dma_w )
 static void update_partial(int scanline)
 {
 	int v, width, xoffs, copying;
-	UINT32 offset;
+	uint32_t offset;
 	
 	/* determine if we need to copy these scanlines into another buffer */
 	copying = (!page_flipping && !skipping_this_frame);
@@ -738,13 +738,13 @@ static void update_partial(int scanline)
 	{
 		/* if we're not page flipping, and we're not skipping this frame, copy to the lookaside buffer */
 		if (!page_flipping && !skipping_this_frame)
-			memcpy(&local_videoram_copy[v * 512 + xoffs], &local_videoram[offset], width * sizeof(UINT16));
+			memcpy(&local_videoram_copy[v * 512 + xoffs], &local_videoram[offset], width * sizeof(uint16_t));
 
 		/* if we're not page flipping, do autoerase immediately behind us */
 		if (autoerase_enable)
 		{
 			if (!page_flipping)
-				memcpy(&local_videoram[offset], &local_videoram[510 * 512], width * sizeof(UINT16));
+				memcpy(&local_videoram[offset], &local_videoram[510 * 512], width * sizeof(uint16_t));
 			else
 				autoerase_list[autoerase_count++] = offset;
 		}
@@ -767,10 +767,10 @@ static void update_partial(int scanline)
 
 static void update_screen(struct osd_bitmap *bitmap)
 {
-	UINT16 *pens = Machine->pens;
-	UINT16 *buffer;
+	uint16_t *pens = Machine->pens;
+	uint16_t *buffer;
 	int v, h, width, xoffs;
-	UINT32 offset;
+	uint32_t offset;
 
 	/* determine the base of the videoram */
 	if (page_flipping)
@@ -796,9 +796,9 @@ static void update_screen(struct osd_bitmap *bitmap)
 		for (v = Machine->visible_area.min_y; v <= Machine->visible_area.max_y; v++)
 		{
 			/* handle the refresh */
-			UINT16 *src = &buffer[offset];
-			UINT16 *dst = &((UINT16 *)bitmap->line[v])[xoffs];
-			UINT32 diff = dst - src;
+			uint16_t *src = &buffer[offset];
+			uint16_t *dst = &((uint16_t *)bitmap->line[v])[xoffs];
+			uint32_t diff = dst - src;
 
 			/* copy one row */
 			for (h = 0; h < width; h++, src++)
@@ -816,8 +816,8 @@ static void update_screen(struct osd_bitmap *bitmap)
 		for (v = Machine->visible_area.min_y; v <= Machine->visible_area.max_y; v++)
 		{
 			/* handle the refresh */
-			UINT16 *src = &buffer[offset];
-			UINT8 *dst = &bitmap->line[v][xoffs];
+			uint16_t *src = &buffer[offset];
+			uint8_t *dst = &bitmap->line[v][xoffs];
 
 			for (h = 0; h < width; h++)
 				*dst++ = pens[*src++];
@@ -836,7 +836,7 @@ static void update_screen(struct osd_bitmap *bitmap)
  *
  *************************************/
 
-void wms_yunit_display_addr_changed(UINT32 offs, int rowbytes, int scanline)
+void wms_yunit_display_addr_changed(uint32_t offs, int rowbytes, int scanline)
 {
 	/* if nothing changed, nothing to do */
 	if (offs == last_display_addr)
@@ -885,7 +885,7 @@ void wms_yunit_vh_eof(void)
 	
 	/* handle any autoerase */
 	for (i = 0; i < autoerase_count; i++)
-		memcpy(&local_videoram[autoerase_list[i]], &local_videoram[510 * 512], width * sizeof(UINT16));
+		memcpy(&local_videoram[autoerase_list[i]], &local_videoram[510 * 512], width * sizeof(uint16_t));
 	autoerase_count = 0;
 	
 	/* determine if we're going to skip this upcoming frame */

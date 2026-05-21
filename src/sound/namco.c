@@ -50,8 +50,8 @@ static int namco_clock;
 static int sample_rate;
 
 /* mixer tables and internal buffers */
-static INT16 *mixer_table;
-static INT16 *mixer_lookup;
+static int16_t *mixer_table;
+static int16_t *mixer_lookup;
 static short *mixer_buffer;
 static short *mixer_buffer_2;
 
@@ -66,7 +66,7 @@ static int make_mixer_table(int voices)
 
 
 	/* allocate memory */
-	mixer_table = (INT16*)malloc(256 * voices * sizeof(INT16));
+	mixer_table = (int16_t*)malloc(256 * voices * sizeof(int16_t));
 	if (!mixer_table)
 		return 1;
 
@@ -87,7 +87,7 @@ static int make_mixer_table(int voices)
 
 
 /* generate sound to the mix buffer in mono */
-static void namco_update_mono(int ch, INT16 *buffer, int length)
+static void namco_update_mono(int ch, int16_t *buffer, int length)
 {
 	sound_channel *voice;
 	short *mix;
@@ -96,7 +96,7 @@ static void namco_update_mono(int ch, INT16 *buffer, int length)
 	/* if no sound, we're done */
 	if (sound_enable == 0)
 	{
-		memset(buffer, 0, length * sizeof(INT16));
+		memset(buffer, 0, length * sizeof(int16_t));
 		return;
 	}
 
@@ -185,7 +185,7 @@ static void namco_update_mono(int ch, INT16 *buffer, int length)
 
 
 /* generate sound to the mix buffer in stereo */
-static void namco_update_stereo(int ch, INT16 **buffer, int length)
+static void namco_update_stereo(int ch, int16_t **buffer, int length)
 {
 	sound_channel *voice;
 	short *lmix, *rmix;
@@ -194,14 +194,14 @@ static void namco_update_stereo(int ch, INT16 **buffer, int length)
 	/* if no sound, we're done */
 	if (sound_enable == 0)
 	{
-		memset(buffer[0], 0, length * sizeof(INT16));
-		memset(buffer[1], 0, length * sizeof(INT16));
+		memset(buffer[0], 0, length * sizeof(int16_t));
+		memset(buffer[1], 0, length * sizeof(int16_t));
 		return;
 	}
 
 	/* zap the contents of the mixer buffer */
-	memset(mixer_buffer, 0, length * sizeof(INT16));
-	memset(mixer_buffer_2, 0, length * sizeof(INT16));
+	memset(mixer_buffer, 0, length * sizeof(int16_t));
+	memset(mixer_buffer_2, 0, length * sizeof(int16_t));
 
 	/* loop over each voice and add its contribution */
 	for (voice = channel_list; voice < last_channel; voice++)
@@ -293,8 +293,8 @@ static void namco_update_stereo(int ch, INT16 **buffer, int length)
 	lmix = mixer_buffer;
 	rmix = mixer_buffer_2;
 	{
-		INT16 *dest1 = buffer[0];
-		INT16 *dest2 = buffer[1];
+		int16_t *dest1 = buffer[0];
+		int16_t *dest2 = buffer[1];
 		for (i = 0; i < length; i++)
 		{
 			*dest1++ = mixer_lookup[*lmix++];

@@ -6,7 +6,7 @@ data_t name(offs_t address) 															\
 	MHELE hw;																			\
 																						\
 	/* first-level lookup */															\
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_##abits + ABITS_MIN_##abits)];			\
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_##abits + ABITS_MIN_##abits)];			\
 																						\
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */		\
 	/* for banked memory reads/writes */												\
@@ -24,7 +24,7 @@ data_t name(offs_t address) 															\
 	if (hw >= MH_HARDMAX)																\
 	{																					\
 		hw -= MH_HARDMAX;																\
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))];	\
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))];	\
 																						\
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */	\
 		/* for banked memory reads/writes */											\
@@ -67,7 +67,7 @@ data_t name##_word(offs_t address)														\
 	if (align == ALWAYS_ALIGNED || !(address & 1))										\
 	{																					\
 		/* first-level lookup */														\
-		hw = cur_mrhard[(UINT32)address >> (ABITS2_##abits + ABITS_MIN_##abits)];		\
+		hw = cur_mrhard[(uint32_t)address >> (ABITS2_##abits + ABITS_MIN_##abits)];		\
 		if (hw <= HT_BANKMAX)															\
 			return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);		\
 																						\
@@ -75,7 +75,7 @@ data_t name##_word(offs_t address)														\
 		if (hw >= MH_HARDMAX)															\
 		{																				\
 			hw -= MH_HARDMAX;															\
-			hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))];	\
+			hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))];	\
 			if (hw <= HT_BANKMAX)														\
 				return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);	\
 		}																				\
@@ -101,7 +101,7 @@ data_t name##_word(offs_t address)														\
 #define READLONG(name,type,abits,align) 												\
 data_t name##_dword(offs_t address) 													\
 {																						\
-	UINT16 word1, word2;																\
+	uint16_t word1, word2;																\
 	MHELE hw1, hw2; 																	\
 																						\
 	/* only supports 16-bit memory systems */											\
@@ -114,19 +114,19 @@ data_t name##_dword(offs_t address) 													\
 		int address2 = (address + 2) & ADDRESS_MASK(abits); 							\
 																						\
 		/* first-level lookup */														\
-		hw1 = cur_mrhard[(UINT32)address >> (ABITS2_##abits + ABITS_MIN_##abits)];		\
-		hw2 = cur_mrhard[(UINT32)address2 >> (ABITS2_##abits + ABITS_MIN_##abits)]; 	\
+		hw1 = cur_mrhard[(uint32_t)address >> (ABITS2_##abits + ABITS_MIN_##abits)];		\
+		hw2 = cur_mrhard[(uint32_t)address2 >> (ABITS2_##abits + ABITS_MIN_##abits)]; 	\
 																						\
 		/* second-level lookup */														\
 		if (hw1 >= MH_HARDMAX)															\
 		{																				\
 			hw1 -= MH_HARDMAX;															\
-			hw1 = readhardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))];	\
+			hw1 = readhardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))];	\
 		}																				\
 		if (hw2 >= MH_HARDMAX)															\
 		{																				\
 			hw2 -= MH_HARDMAX;															\
-			hw2 = readhardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))]; \
+			hw2 = readhardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))]; \
 		}																				\
 																						\
 		/* process each word */ 														\
@@ -172,7 +172,7 @@ data_t cpu_readmem16 (offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_16 + ABITS_MIN_16)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_16 + ABITS_MIN_16)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -183,7 +183,7 @@ data_t cpu_readmem16 (offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_16) & MHMASK(ABITS2_16))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_16) & MHMASK(ABITS2_16))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -204,7 +204,7 @@ data_t cpu_readmem20 (offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_20 + ABITS_MIN_20)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_20 + ABITS_MIN_20)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -215,7 +215,7 @@ data_t cpu_readmem20 (offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_20) & MHMASK(ABITS2_20))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_20) & MHMASK(ABITS2_20))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -236,7 +236,7 @@ data_t cpu_readmem21 (offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_21 + ABITS_MIN_21)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_21 + ABITS_MIN_21)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -247,7 +247,7 @@ data_t cpu_readmem21 (offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_21) & MHMASK(ABITS2_21))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_21) & MHMASK(ABITS2_21))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -268,7 +268,7 @@ data_t cpu_readmem16bew(offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_16BEW + ABITS_MIN_16BEW)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_16BEW + ABITS_MIN_16BEW)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -281,7 +281,7 @@ data_t cpu_readmem16bew(offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_16BEW) & MHMASK(ABITS2_16BEW))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_16BEW) & MHMASK(ABITS2_16BEW))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -305,7 +305,7 @@ data_t cpu_readmem16bew_word(offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_16BEW + ABITS_MIN_16BEW)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_16BEW + ABITS_MIN_16BEW)];
 	if (hw <= HT_BANKMAX)
 		return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 
@@ -313,7 +313,7 @@ data_t cpu_readmem16bew_word(offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_16BEW) & MHMASK(ABITS2_16BEW))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_16BEW) & MHMASK(ABITS2_16BEW))];
 		if (hw <= HT_BANKMAX)
 			return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 	}
@@ -331,7 +331,7 @@ data_t cpu_readmem16lew (offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_16LEW + ABITS_MIN_16LEW)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_16LEW + ABITS_MIN_16LEW)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -344,7 +344,7 @@ data_t cpu_readmem16lew (offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_16LEW) & MHMASK(ABITS2_16LEW))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_16LEW) & MHMASK(ABITS2_16LEW))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -367,7 +367,7 @@ data_t cpu_readmem16lew_word(offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_16LEW + ABITS_MIN_16LEW)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_16LEW + ABITS_MIN_16LEW)];
 	if (hw <= HT_BANKMAX)
 		return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 
@@ -375,7 +375,7 @@ data_t cpu_readmem16lew_word(offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_16LEW) & MHMASK(ABITS2_16LEW))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_16LEW) & MHMASK(ABITS2_16LEW))];
 		if (hw <= HT_BANKMAX)
 			return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 	}
@@ -393,7 +393,7 @@ data_t cpu_readmem24 (offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_24 + ABITS_MIN_24)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_24 + ABITS_MIN_24)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -404,7 +404,7 @@ data_t cpu_readmem24 (offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_24) & MHMASK(ABITS2_24))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_24) & MHMASK(ABITS2_24))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -425,7 +425,7 @@ data_t cpu_readmem24bew (offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -438,7 +438,7 @@ data_t cpu_readmem24bew (offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -465,7 +465,7 @@ data_t cpu_readmem24bew_word(offs_t address)
 	if (!(address & 1))
 	{
 		/* first-level lookup */
-		hw = cur_mrhard[(UINT32)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
+		hw = cur_mrhard[(uint32_t)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
 		if (hw <= HT_BANKMAX)
 			return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 
@@ -473,7 +473,7 @@ data_t cpu_readmem24bew_word(offs_t address)
 		if (hw >= MH_HARDMAX)
 		{
 			hw -= MH_HARDMAX;
-			hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))];
+			hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))];
 			if (hw <= HT_BANKMAX)
 				return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 		}
@@ -491,7 +491,7 @@ INLINE
 #endif
 data_t cpu_readmem24bew_dword(offs_t address) 
 {
-	UINT16 word1, word2;
+	uint16_t word1, word2;
 	MHELE hw1, hw2; 
 
 	/* handle aligned case first */ 
@@ -500,19 +500,19 @@ data_t cpu_readmem24bew_dword(offs_t address)
 		int address2 = (address + 2) & ADDRESS_MASK(24BEW); 
 
 		/* first-level lookup */
-		hw1 = cur_mrhard[(UINT32)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
-		hw2 = cur_mrhard[(UINT32)address2 >> (ABITS2_24BEW + ABITS_MIN_24BEW)]; 
+		hw1 = cur_mrhard[(uint32_t)address >> (ABITS2_24BEW + ABITS_MIN_24BEW)];
+		hw2 = cur_mrhard[(uint32_t)address2 >> (ABITS2_24BEW + ABITS_MIN_24BEW)]; 
 
 		/* second-level lookup */
 		if (hw1 >= MH_HARDMAX)
 		{
 			hw1 -= MH_HARDMAX;
-			hw1 = readhardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))];
+			hw1 = readhardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))];
 		}
 		if (hw2 >= MH_HARDMAX)
 		{
 			hw2 -= MH_HARDMAX;
-			hw2 = readhardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))]; 
+			hw2 = readhardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_24BEW) & MHMASK(ABITS2_24BEW))]; 
 		}
 
 		/* process each word */ 
@@ -542,7 +542,7 @@ data_t cpu_readmem26lew (offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -555,7 +555,7 @@ data_t cpu_readmem26lew (offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -578,7 +578,7 @@ data_t cpu_readmem26lew_word(offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
 	if (hw <= HT_BANKMAX)
 		return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 
@@ -586,7 +586,7 @@ data_t cpu_readmem26lew_word(offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))];
 		if (hw <= HT_BANKMAX)
 			return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 	}
@@ -601,25 +601,25 @@ INLINE
 #endif
 data_t cpu_readmem26lew_dword(offs_t address) 
 {
-	UINT16 word1, word2;
+	uint16_t word1, word2;
 	MHELE hw1, hw2; 
 
 	int address2 = (address + 2) & ADDRESS_MASK(26LEW); 
 
 	/* first-level lookup */
-	hw1 = cur_mrhard[(UINT32)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
-	hw2 = cur_mrhard[(UINT32)address2 >> (ABITS2_26LEW + ABITS_MIN_26LEW)]; 
+	hw1 = cur_mrhard[(uint32_t)address >> (ABITS2_26LEW + ABITS_MIN_26LEW)];
+	hw2 = cur_mrhard[(uint32_t)address2 >> (ABITS2_26LEW + ABITS_MIN_26LEW)]; 
 
 	/* second-level lookup */
 	if (hw1 >= MH_HARDMAX)
 	{
 		hw1 -= MH_HARDMAX;
-		hw1 = readhardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))];
+		hw1 = readhardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))];
 	}
 	if (hw2 >= MH_HARDMAX)
 	{
 		hw2 -= MH_HARDMAX;
-		hw2 = readhardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))]; 
+		hw2 = readhardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_26LEW) & MHMASK(ABITS2_26LEW))]; 
 	}
 
 	/* process each word */ 
@@ -645,7 +645,7 @@ data_t cpu_readmem29 (offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_29 + ABITS_MIN_29)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_29 + ABITS_MIN_29)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -658,7 +658,7 @@ data_t cpu_readmem29 (offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -684,7 +684,7 @@ data_t cpu_readmem29_word(offs_t address)
 	if (!(address & 1))
 	{
 		/* first-level lookup */
-		hw = cur_mrhard[(UINT32)address >> (ABITS2_29 + ABITS_MIN_29)];
+		hw = cur_mrhard[(uint32_t)address >> (ABITS2_29 + ABITS_MIN_29)];
 		if (hw <= HT_BANKMAX)
 			return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 
@@ -692,7 +692,7 @@ data_t cpu_readmem29_word(offs_t address)
 		if (hw >= MH_HARDMAX)
 		{
 			hw -= MH_HARDMAX;
-			hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))];
+			hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))];
 			if (hw <= HT_BANKMAX)
 				return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 		}
@@ -711,7 +711,7 @@ INLINE
 #endif
 data_t cpu_readmem29_dword(offs_t address) 
 {
-	UINT16 word1, word2;
+	uint16_t word1, word2;
 	MHELE hw1, hw2; 
 
 	/* handle aligned case first */ 
@@ -720,19 +720,19 @@ data_t cpu_readmem29_dword(offs_t address)
 		int address2 = (address + 2) & ADDRESS_MASK(29); 
 
 		/* first-level lookup */
-		hw1 = cur_mrhard[(UINT32)address >> (ABITS2_29 + ABITS_MIN_29)];
-		hw2 = cur_mrhard[(UINT32)address2 >> (ABITS2_29 + ABITS_MIN_29)]; 
+		hw1 = cur_mrhard[(uint32_t)address >> (ABITS2_29 + ABITS_MIN_29)];
+		hw2 = cur_mrhard[(uint32_t)address2 >> (ABITS2_29 + ABITS_MIN_29)]; 
 
 		/* second-level lookup */
 		if (hw1 >= MH_HARDMAX)
 		{
 			hw1 -= MH_HARDMAX;
-			hw1 = readhardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))];
+			hw1 = readhardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_29) & MHMASK(ABITS2_29))];
 		}
 		if (hw2 >= MH_HARDMAX)
 		{
 			hw2 -= MH_HARDMAX;
-			hw2 = readhardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_29) & MHMASK(ABITS2_29))]; 
+			hw2 = readhardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_29) & MHMASK(ABITS2_29))]; 
 		}
 
 		/* process each word */ 
@@ -762,7 +762,7 @@ data_t cpu_readmem32 (offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_32 + ABITS_MIN_32)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_32 + ABITS_MIN_32)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -775,7 +775,7 @@ data_t cpu_readmem32 (offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -801,7 +801,7 @@ data_t cpu_readmem32_word(offs_t address)
 	if (!(address & 1))
 	{
 		/* first-level lookup */
-		hw = cur_mrhard[(UINT32)address >> (ABITS2_32 + ABITS_MIN_32)];
+		hw = cur_mrhard[(uint32_t)address >> (ABITS2_32 + ABITS_MIN_32)];
 		if (hw <= HT_BANKMAX)
 			return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 
@@ -809,7 +809,7 @@ data_t cpu_readmem32_word(offs_t address)
 		if (hw >= MH_HARDMAX)
 		{
 			hw -= MH_HARDMAX;
-			hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))];
+			hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))];
 			if (hw <= HT_BANKMAX)
 				return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 		}
@@ -829,7 +829,7 @@ INLINE
 #endif
 data_t cpu_readmem32_dword(offs_t address) 
 {
-	UINT16 word1, word2;
+	uint16_t word1, word2;
 	MHELE hw1, hw2; 
 
 	/* handle aligned case first */ 
@@ -838,19 +838,19 @@ data_t cpu_readmem32_dword(offs_t address)
 		int address2 = (address + 2) & ADDRESS_MASK(32); 
 
 		/* first-level lookup */
-		hw1 = cur_mrhard[(UINT32)address >> (ABITS2_32 + ABITS_MIN_32)];
-		hw2 = cur_mrhard[(UINT32)address2 >> (ABITS2_32 + ABITS_MIN_32)]; 
+		hw1 = cur_mrhard[(uint32_t)address >> (ABITS2_32 + ABITS_MIN_32)];
+		hw2 = cur_mrhard[(uint32_t)address2 >> (ABITS2_32 + ABITS_MIN_32)]; 
 
 		/* second-level lookup */
 		if (hw1 >= MH_HARDMAX)
 		{
 			hw1 -= MH_HARDMAX;
-			hw1 = readhardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))];
+			hw1 = readhardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32) & MHMASK(ABITS2_32))];
 		}
 		if (hw2 >= MH_HARDMAX)
 		{
 			hw2 -= MH_HARDMAX;
-			hw2 = readhardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_32) & MHMASK(ABITS2_32))]; 
+			hw2 = readhardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_32) & MHMASK(ABITS2_32))]; 
 		}
 
 		/* process each word */ 
@@ -880,7 +880,7 @@ data_t cpu_readmem32lew (offs_t address)
 	MHELE hw;
 
 	/* first-level lookup */
-	hw = cur_mrhard[(UINT32)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
+	hw = cur_mrhard[(uint32_t)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
 
 	/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 	/* for banked memory reads/writes */
@@ -893,7 +893,7 @@ data_t cpu_readmem32lew (offs_t address)
 	if (hw >= MH_HARDMAX)
 	{
 		hw -= MH_HARDMAX;
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))];
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))];
 
 		/* for compatibility with setbankhandler, 8-bit systems must call handlers */
 		/* for banked memory reads/writes */
@@ -919,7 +919,7 @@ data_t cpu_readmem32lew_word(offs_t address)
 	if (!(address & 1))
 	{
 		/* first-level lookup */
-		hw = cur_mrhard[(UINT32)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
+		hw = cur_mrhard[(uint32_t)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
 		if (hw <= HT_BANKMAX)
 			return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 
@@ -927,7 +927,7 @@ data_t cpu_readmem32lew_word(offs_t address)
 		if (hw >= MH_HARDMAX)
 		{
 			hw -= MH_HARDMAX;
-			hw = readhardware[(hw << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))];
+			hw = readhardware[(hw << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))];
 			if (hw <= HT_BANKMAX)
 				return READ_WORD(&cpu_bankbase[hw][address - memoryreadoffset[hw]]);
 		}
@@ -946,7 +946,7 @@ INLINE
 #endif
 data_t cpu_readmem32lew_dword(offs_t address) 
 {
-	UINT16 word1, word2;
+	uint16_t word1, word2;
 	MHELE hw1, hw2; 
 
 	/* handle aligned case first */ 
@@ -955,19 +955,19 @@ data_t cpu_readmem32lew_dword(offs_t address)
 		int address2 = (address + 2) & ADDRESS_MASK(32LEW); 
 
 		/* first-level lookup */
-		hw1 = cur_mrhard[(UINT32)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
-		hw2 = cur_mrhard[(UINT32)address2 >> (ABITS2_32LEW + ABITS_MIN_32LEW)]; 
+		hw1 = cur_mrhard[(uint32_t)address >> (ABITS2_32LEW + ABITS_MIN_32LEW)];
+		hw2 = cur_mrhard[(uint32_t)address2 >> (ABITS2_32LEW + ABITS_MIN_32LEW)]; 
 
 		/* second-level lookup */
 		if (hw1 >= MH_HARDMAX)
 		{
 			hw1 -= MH_HARDMAX;
-			hw1 = readhardware[(hw1 << MH_SBITS) + (((UINT32)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))];
+			hw1 = readhardware[(hw1 << MH_SBITS) + (((uint32_t)address >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))];
 		}
 		if (hw2 >= MH_HARDMAX)
 		{
 			hw2 -= MH_HARDMAX;
-			hw2 = readhardware[(hw2 << MH_SBITS) + (((UINT32)address2 >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))]; 
+			hw2 = readhardware[(hw2 << MH_SBITS) + (((uint32_t)address2 >> ABITS_MIN_32LEW) & MHMASK(ABITS2_32LEW))]; 
 		}
 
 		/* process each word */ 

@@ -27,17 +27,17 @@
 FILE	*sprite_log;
 #endif
 
-UINT8 exerion_cocktail_flip;
+uint8_t exerion_cocktail_flip;
 
-static UINT8 char_palette, sprite_palette;
-static UINT8 char_bank;
+static uint8_t char_palette, sprite_palette;
+static uint8_t char_bank;
 
-static UINT8 *background_latches;
-static UINT16 *background_gfx[4];
-static UINT8 current_latches[16];
+static uint8_t *background_latches;
+static uint16_t *background_gfx[4];
+static uint8_t current_latches[16];
 static int last_scanline_update;
 
-static UINT8 *background_mixer;
+static uint8_t *background_mixer;
 
 static void draw_background_8(struct osd_bitmap *bitmap);
 static void draw_background_16(struct osd_bitmap *bitmap);
@@ -117,8 +117,8 @@ void exerion_vh_convert_color_prom(unsigned char *palette, unsigned short *color
 
 int exerion_vh_start (void)
 {
-	UINT16 *dst;
-	UINT8 *src;
+	uint16_t *dst;
+	uint8_t *src;
 	int i, x, y;
 
 #ifdef DEBUG_SPRITES
@@ -129,12 +129,12 @@ int exerion_vh_start (void)
 	background_mixer = memory_region(REGION_PROMS) + 0x320;
 
 	/* allocate memory to track the background latches */
-	background_latches = (UINT8*)malloc(Machine->drv->screen_height * 16);
+	background_latches = (uint8_t*)malloc(Machine->drv->screen_height * 16);
 	if (!background_latches)
 		return 1;
 
 	/* allocate memory for the decoded background graphics */
-	background_gfx[0] = (UINT16*)malloc(2 * 256 * 256 * 4);
+	background_gfx[0] = (uint16_t*)malloc(2 * 256 * 256 * 4);
 	background_gfx[1] = background_gfx[0] + 256 * 256;
 	background_gfx[2] = background_gfx[1] + 256 * 256;
 	background_gfx[3] = background_gfx[2] + 256 * 256;
@@ -169,8 +169,8 @@ int exerion_vh_start (void)
 		{
 			for (x = 0; x < 128; x += 4)
 			{
-				UINT8 data = *src++;
-				UINT16 val;
+				uint8_t data = *src++;
+				uint16_t val;
 
 				val = ((data >> 3) & 2) | ((data >> 0) & 1);
 				if (val) val |= 0x100 >> i;
@@ -278,7 +278,7 @@ READ_HANDLER( exerion_video_timing_r )
 
 	int xbeam = cpu_gethorzbeampos();
 	int ybeam = cpu_getscanline();
-	UINT8 result = 0;
+	uint8_t result = 0;
 
 	if (ybeam >= VISIBLE_Y_MAX)
 		result |= 2;
@@ -416,13 +416,13 @@ void exerion_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 #define INCLUDE_DRAW_CORE
 
 #define DRAW_FUNC draw_background_8
-#define TYPE UINT8
+#define TYPE uint8_t
 #include "exerion.c"
 #undef TYPE
 #undef DRAW_FUNC
 
 #define DRAW_FUNC draw_background_16
-#define TYPE UINT16
+#define TYPE uint16_t
 #include "exerion.c"
 #undef TYPE
 #undef DRAW_FUNC
@@ -439,17 +439,17 @@ void exerion_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 
 void DRAW_FUNC(struct osd_bitmap *bitmap)
 {
-	UINT8 *latches = &background_latches[VISIBLE_Y_MIN * 16];
+	uint8_t *latches = &background_latches[VISIBLE_Y_MIN * 16];
 	int orientation = Machine->orientation;
 	int x, y;
 
 	/* loop over all visible scanlines */
 	for (y = VISIBLE_Y_MIN; y < VISIBLE_Y_MAX; y++, latches += 16)
 	{
-		UINT16 *src0 = &background_gfx[0][latches[1] * 256];
-		UINT16 *src1 = &background_gfx[1][latches[3] * 256];
-		UINT16 *src2 = &background_gfx[2][latches[5] * 256];
-		UINT16 *src3 = &background_gfx[3][latches[7] * 256];
+		uint16_t *src0 = &background_gfx[0][latches[1] * 256];
+		uint16_t *src1 = &background_gfx[1][latches[3] * 256];
+		uint16_t *src2 = &background_gfx[2][latches[5] * 256];
+		uint16_t *src3 = &background_gfx[3][latches[7] * 256];
 		int xoffs0 = latches[0];
 		int xoffs1 = latches[2];
 		int xoffs2 = latches[4];
@@ -462,8 +462,8 @@ void DRAW_FUNC(struct osd_bitmap *bitmap)
 		int stop1 = latches[9] >> 4;
 		int stop2 = latches[10] >> 4;
 		int stop3 = latches[11] >> 4;
-		UINT16 *pens = &Machine->remapped_colortable[0x200 + (latches[12] >> 4) * 16];
-		UINT8 *mixer = &background_mixer[(latches[12] << 4) & 0xf0];
+		uint16_t *pens = &Machine->remapped_colortable[0x200 + (latches[12] >> 4) * 16];
+		uint8_t *mixer = &background_mixer[(latches[12] << 4) & 0xf0];
 		TYPE *dst = &((TYPE *)bitmap->line[y])[VISIBLE_X_MIN];
 		int xadv = 1;
 
@@ -485,8 +485,8 @@ void DRAW_FUNC(struct osd_bitmap *bitmap)
 			/* draw the rest of the scanline fully */
 			for (x = VISIBLE_X_MIN; x < VISIBLE_X_MAX; x++, dst += xadv)
 			{
-				UINT16 combined = 0;
-				UINT8 lookupval, colorindex;
+				uint16_t combined = 0;
+				uint8_t lookupval, colorindex;
 
 				/* the output enable is controlled by the carries on the start/stop counters */
 				/* they are only active when the start has carried but the stop hasn't */
@@ -523,8 +523,8 @@ void DRAW_FUNC(struct osd_bitmap *bitmap)
 			/* draw the rest of the scanline fully */
 			for (x = VISIBLE_X_MIN; x < VISIBLE_X_MAX; x++, dst += xadv)
 			{
-				UINT16 combined = 0;
-				UINT8 lookupval, colorindex;
+				uint16_t combined = 0;
+				uint8_t lookupval, colorindex;
 
 				/* the output enable is controlled by the carries on the start/stop counters */
 				/* they are only active when the start has carried but the stop hasn't */

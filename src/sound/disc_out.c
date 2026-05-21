@@ -14,8 +14,8 @@
 
 struct dso_output_context
 {
-	INT16 left;
-	INT16 right;
+	int16_t left;
+	int16_t right;
 };
 
 /************************************************************************/
@@ -35,8 +35,8 @@ int dso_output_step(struct node_description *node)
 	/* We ALWAYS work in stereo here, let the stream update decide if its mono/stereo output */
 	struct dso_output_context *context;
 	context=(struct dso_output_context*)node->context;
-	context->left=(INT16)node->input0;
-	context->right=(INT16)node->input1;
+	context->left=(int16_t)node->input0;
+	context->right=(int16_t)node->input1;
 	return 0;
 }
 

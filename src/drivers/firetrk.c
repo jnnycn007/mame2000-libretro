@@ -3,10 +3,10 @@
 #include "driver.h"
 #include "vidhrdw/generic.h"
 
-static UINT8 firetruck_steer1, firetruck_steer2;
-static UINT8 firetruck_invert_display;
-static UINT8 firetruck_bit7_flags;
-static UINT8 firetruck_bit0_flags;
+static uint8_t firetruck_steer1, firetruck_steer2;
+static uint8_t firetruck_invert_display;
+static uint8_t firetruck_bit7_flags;
+static uint8_t firetruck_bit0_flags;
 
 static struct GfxLayout char_layout =
 {
@@ -473,8 +473,8 @@ static void draw_sprites( struct osd_bitmap *bitmap )
 		{
 			for( x=0; x<bitmap->width; x++ )
 			{
-				pen = ((UINT16 *)buf->line[y])[x];
-				if( pen != ((UINT16 *)bitmap->line[y])[x] )
+				pen = ((uint16_t *)buf->line[y])[x];
+				if( pen != ((uint16_t *)bitmap->line[y])[x] )
 				{
 					if( pen == track_color )
 					{
@@ -513,7 +513,7 @@ static void draw_text( struct osd_bitmap *bitmap )
 {
 	int color = firetruck_invert_display?3:7; /* invert display */
 	int x,y,tile_number;
-	const UINT8 *source = videoram;
+	const uint8_t *source = videoram;
 
 	for( x=0; x<=256-16; x+=256-16 )
 	{
@@ -540,7 +540,7 @@ static void draw_background( struct osd_bitmap *bitmap )
 	int phpload = videoram[0x1020];
 
 	int x,y,tile_number;
-	const UINT8 *source = videoram+0x800;
+	const uint8_t *source = videoram+0x800;
 
 	for( y=0; y<256; y+=16 )
 	{
@@ -593,14 +593,14 @@ static READ_HANDLER( firetruck_io_r )
 	bit7 = readinputport(3);
 	bit = 1<<offset;
 
-	steer_poll = ((INT8)(readinputport(4) - firetruck_steer1))/4;
+	steer_poll = ((int8_t)(readinputport(4) - firetruck_steer1))/4;
 	if( steer_poll )
 	{
 		if( steer_poll<0 ) bit0 |= 0x04;
 		firetruck_bit7_flags &= ~0x04;
 	}
 
-	steer_poll = ((INT8)(readinputport(5) - firetruck_steer2))/4;
+	steer_poll = ((int8_t)(readinputport(5) - firetruck_steer2))/4;
 	if( steer_poll )
 	{
 		if( steer_poll<0 ) bit0 |= 0x08;
@@ -777,7 +777,7 @@ static struct MachineDriver machine_driver_firetruck =
 void init_firetruck( void )
 {
 	/* combine the 4 bit program ROMs */
-	UINT8 *pMem = memory_region( REGION_CPU1 );
+	uint8_t *pMem = memory_region( REGION_CPU1 );
 	int i;
 	for( i=0; i<0x1000; i++ )
 	{

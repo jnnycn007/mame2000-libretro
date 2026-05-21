@@ -129,11 +129,11 @@ covering up the offending pixels.
 #include "machine/atari_vg.h"
 
 
-extern UINT8 *liberatr_base_ram;
-extern UINT8 *liberatr_planet_frame;
-extern UINT8 *liberatr_planet_select;
-extern UINT8 *liberatr_x;
-extern UINT8 *liberatr_y;
+extern uint8_t *liberatr_base_ram;
+extern uint8_t *liberatr_planet_frame;
+extern uint8_t *liberatr_planet_select;
+extern uint8_t *liberatr_x;
+extern uint8_t *liberatr_y;
 
 
 /* in vidhrdw */
@@ -149,7 +149,7 @@ WRITE_HANDLER( liberatr_bitmap_xy_w );
 
 
 
-static UINT8 *liberatr_ctrld;
+static uint8_t *liberatr_ctrld;
 
 
 static WRITE_HANDLER( liberatr_led_w )

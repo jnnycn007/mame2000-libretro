@@ -22,7 +22,7 @@ extern retro_video_refresh_t video_cb;
 
 #include "minimal.h"
 
-UINT32 *palette_16bit_lookup;
+uint32_t *palette_16bit_lookup;
 
 void blitscreen_dirty1_color8(struct osd_bitmap *bitmap)
 {

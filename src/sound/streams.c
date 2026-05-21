@@ -16,13 +16,13 @@
 	mixer_need_samples_this_frame((channel),stream_sample_rate[(channel)])
 
 static int stream_joined_channels[MIXER_MAX_CHANNELS];
-static INT16 *stream_buffer[MIXER_MAX_CHANNELS];
+static int16_t *stream_buffer[MIXER_MAX_CHANNELS];
 static int stream_sample_rate[MIXER_MAX_CHANNELS];
 static int stream_buffer_pos[MIXER_MAX_CHANNELS];
 static int stream_sample_length[MIXER_MAX_CHANNELS];	/* in usec */
 static int stream_param[MIXER_MAX_CHANNELS];
-static void (*stream_callback[MIXER_MAX_CHANNELS])(int param,INT16 *buffer,int length);
-static void (*stream_callback_multi[MIXER_MAX_CHANNELS])(int param,INT16 **buffer,int length);
+static void (*stream_callback[MIXER_MAX_CHANNELS])(int param,int16_t *buffer,int length);
+static void (*stream_callback_multi[MIXER_MAX_CHANNELS])(int param,int16_t **buffer,int length);
 
 static int memory[MIXER_MAX_CHANNELS];
 static int r1[MIXER_MAX_CHANNELS];
@@ -48,7 +48,7 @@ void set_RC_filter(int channel,int R1,int R2,int R3,int C)
 	c[channel] = C;
 }
 
-void apply_RC_filter(int channel,INT16 *buf,int len,int sample_rate)
+void apply_RC_filter(int channel,int16_t *buf,int len,int sample_rate)
 {
 	float R1,R2,R3,C;
 	float Req;
@@ -132,7 +132,7 @@ void streams_sh_update(void)
 
 			if (stream_joined_channels[channel] > 1)
 			{
-				INT16 *buf[MIXER_MAX_CHANNELS];
+				int16_t *buf[MIXER_MAX_CHANNELS];
 
 
 				if (buflen > 0)
@@ -153,7 +153,7 @@ void streams_sh_update(void)
 			{
 				if (buflen > 0)
 				{
-					INT16 *buf;
+					int16_t *buf;
 
 
 					buf = stream_buffer[channel] + stream_buffer_pos[channel];
@@ -174,7 +174,7 @@ void streams_sh_update(void)
 		{
 			for (i = 0;i < stream_joined_channels[channel];i++)
 				mixer_play_streamed_sample_16(channel+i,
-						stream_buffer[channel+i],sizeof(INT16)*SAMPLES_THIS_FRAME(channel+i),
+						stream_buffer[channel+i],sizeof(int16_t)*SAMPLES_THIS_FRAME(channel+i),
 						stream_sample_rate[channel]);
 		}
 	}
@@ -183,7 +183,7 @@ void streams_sh_update(void)
 
 int stream_init(const char *name,int default_mixing_level,
 		int sample_rate,
-		int param,void (*callback)(int param,INT16 *buffer,int length))
+		int param,void (*callback)(int param,int16_t *buffer,int length))
 {
 	int channel;
 
@@ -194,7 +194,7 @@ int stream_init(const char *name,int default_mixing_level,
 
 	mixer_set_name(channel,name);
 
-	if ((stream_buffer[channel] = (INT16*)malloc(sizeof(INT16)*BUFFER_LEN)) == 0)
+	if ((stream_buffer[channel] = (int16_t*)malloc(sizeof(int16_t)*BUFFER_LEN)) == 0)
 	{
 		return -1;
 	}
@@ -215,7 +215,7 @@ int stream_init(const char *name,int default_mixing_level,
 
 int stream_init_multi(int channels,const char **names,const int *default_mixing_levels,
 		int sample_rate,
-		int param,void (*callback)(int param,INT16 **buffer,int length))
+		int param,void (*callback)(int param,int16_t **buffer,int length))
 {
 	int channel,i;
 
@@ -228,7 +228,7 @@ int stream_init_multi(int channels,const char **names,const int *default_mixing_
 	{
 		mixer_set_name(channel+i,names[i]);
 
-		if ((stream_buffer[channel+i] = (INT16*)malloc(sizeof(INT16)*BUFFER_LEN)) == 0)
+		if ((stream_buffer[channel+i] = (int16_t*)malloc(sizeof(int16_t)*BUFFER_LEN)) == 0)
 		{
 			return -1;
 		}
@@ -268,7 +268,7 @@ void stream_update(int channel,int min_interval)
 	{
 		if (stream_joined_channels[channel] > 1)
 		{
-			INT16 *buf[MIXER_MAX_CHANNELS];
+			int16_t *buf[MIXER_MAX_CHANNELS];
 			int i;
 
 
@@ -284,7 +284,7 @@ void stream_update(int channel,int min_interval)
 		}
 		else
 		{
-			INT16 *buf;
+			int16_t *buf;
 
 
 			buf = stream_buffer[channel] + stream_buffer_pos[channel];

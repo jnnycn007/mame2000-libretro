@@ -40,41 +40,41 @@ enum
 
 
 /* graphics-related variables */
-extern UINT8 *	wms_gfx_rom;
+extern uint8_t *	wms_gfx_rom;
 extern size_t	wms_gfx_rom_size;
-       UINT8	wms_gfx_rom_large;
-static UINT16	wms_control;
+       uint8_t	wms_gfx_rom_large;
+static uint16_t	wms_control;
 
 /* videoram-related variables */
-static UINT32 	gfxbank_offset[2];
-static UINT16 *	local_videoram;
-static UINT8	videobank_select;
+static uint32_t 	gfxbank_offset[2];
+static uint16_t *	local_videoram;
+static uint8_t	videobank_select;
 
 /* DMA-related variables */
-static UINT16	dma_register[18];
+static uint16_t	dma_register[18];
 static struct
 {
-	UINT32		offset;			/* source offset, in bits */
-	INT32 		rowbits;		/* source bits to skip each row */
-	INT32 		xpos;			/* x position, clipped */
-	INT32		ypos;			/* y position, clipped */
-	INT32		width;			/* horizontal pixel count */
-	INT32		height;			/* vertical pixel count */
-	UINT16		palette;		/* palette base */
-	UINT16		color;			/* current foreground color with palette */
+	uint32_t		offset;			/* source offset, in bits */
+	int32_t 		rowbits;		/* source bits to skip each row */
+	int32_t 		xpos;			/* x position, clipped */
+	int32_t		ypos;			/* y position, clipped */
+	int32_t		width;			/* horizontal pixel count */
+	int32_t		height;			/* vertical pixel count */
+	uint16_t		palette;		/* palette base */
+	uint16_t		color;			/* current foreground color with palette */
 
-	UINT8		yflip;			/* yflip? */
-	UINT8		bpp;			/* bits per pixel */
-	UINT8		preskip;		/* preskip scale */
-	UINT8		postskip;		/* postskip scale */
-	INT32		topclip;		/* top clipping scanline */
-	INT32		botclip;		/* bottom clipping scanline */
-	INT32		leftclip;		/* left clipping column */
-	INT32		rightclip;		/* right clipping column */
-	INT32		startskip;		/* pixels to skip at start */
-	INT32		endskip;		/* pixels to skip at end */
-	UINT16		xstep;			/* 8.8 fixed number scale x factor */
-	UINT16		ystep;			/* 8.8 fixed number scale y factor */
+	uint8_t		yflip;			/* yflip? */
+	uint8_t		bpp;			/* bits per pixel */
+	uint8_t		preskip;		/* preskip scale */
+	uint8_t		postskip;		/* postskip scale */
+	int32_t		topclip;		/* top clipping scanline */
+	int32_t		botclip;		/* bottom clipping scanline */
+	int32_t		leftclip;		/* left clipping column */
+	int32_t		rightclip;		/* right clipping column */
+	int32_t		startskip;		/* pixels to skip at start */
+	int32_t		endskip;		/* pixels to skip at end */
+	uint16_t		xstep;			/* 8.8 fixed number scale x factor */
+	uint16_t		ystep;			/* 8.8 fixed number scale y factor */
 } dma_state;
 
 
@@ -93,7 +93,7 @@ void wms_tunit_vh_stop(void);
 int wms_tunit_vh_start(void)
 {
 	/* allocate memory */
-	local_videoram = (UINT16*)malloc(0x100000);
+	local_videoram = (uint16_t*)malloc(0x100000);
 	
 	/* handle failure */
 	if (!local_videoram)
@@ -145,7 +145,7 @@ void wms_tunit_vh_stop(void)
 
 READ_HANDLER( wms_tunit_gfxrom_r )
 {
-	UINT8 *base = &wms_gfx_rom[gfxbank_offset[(offset >> 22) & 1]];
+	uint8_t *base = &wms_gfx_rom[gfxbank_offset[(offset >> 22) & 1]];
 	offset &= 0x03fffff;
 	return base[offset] | (base[offset + 1] << 8);
 }
@@ -153,7 +153,7 @@ READ_HANDLER( wms_tunit_gfxrom_r )
 
 READ_HANDLER( wms_wolfu_gfxrom_r )
 {
-	UINT8 *base = &wms_gfx_rom[gfxbank_offset[0]];
+	uint8_t *base = &wms_gfx_rom[gfxbank_offset[0]];
 	return base[offset] | (base[offset + 1] << 8);
 }
 
@@ -200,15 +200,15 @@ READ_HANDLER( wms_tunit_vram_r )
  *
  *************************************/
 
-void wms_tunit_to_shiftreg(UINT32 address, UINT16 *shiftreg)
+void wms_tunit_to_shiftreg(uint32_t address, uint16_t *shiftreg)
 {
-	memcpy(shiftreg, &local_videoram[address >> 3], 2 * 512 * sizeof(UINT16));
+	memcpy(shiftreg, &local_videoram[address >> 3], 2 * 512 * sizeof(uint16_t));
 }
 
 
-void wms_tunit_from_shiftreg(UINT32 address, UINT16 *shiftreg)
+void wms_tunit_from_shiftreg(uint32_t address, uint16_t *shiftreg)
 {
-	memcpy(&local_videoram[address >> 3], shiftreg, 2 * 512 * sizeof(UINT16));
+	memcpy(&local_videoram[address >> 3], shiftreg, 2 * 512 * sizeof(uint16_t));
 }
 
 
@@ -316,7 +316,7 @@ typedef void (*dma_draw_func)(void);
 
 /*** fast pixel extractors ***/
 #if !defined(ALIGN_SHORTS) && !defined(MSB_FIRST)
-#define EXTRACTGEN(m)	((*(UINT16 *)&base[o >> 3] >> (o & 7)) & (m))
+#define EXTRACTGEN(m)	((*(uint16_t *)&base[o >> 3] >> (o & 7)) & (m))
 #elif defined(powerc)
 #define EXTRACTGEN(m)	((__lhbrx(base, o >> 3) >> (o & 7)) & (m))
 #else
@@ -327,10 +327,10 @@ typedef void (*dma_draw_func)(void);
 #define DMA_DRAW_FUNC_BODY(name, bitsperpixel, extractor, xflip, skip, scale, zero, nonzero) \
 {																				\
 	int height = dma_state.height << 8;											\
-	UINT8 *base = wms_gfx_rom;													\
-	UINT32 offset = dma_state.offset;											\
-	UINT16 pal = dma_state.palette;												\
-	UINT16 color = pal | dma_state.color;										\
+	uint8_t *base = wms_gfx_rom;													\
+	uint32_t offset = dma_state.offset;											\
+	uint16_t pal = dma_state.palette;												\
+	uint16_t color = pal | dma_state.color;										\
 	int sy = dma_state.ypos, iy = 0, ty;										\
 	int bpp = bitsperpixel;														\
 	int mask = (1 << bpp) - 1;													\
@@ -343,14 +343,14 @@ typedef void (*dma_draw_func)(void);
 		int endskip = dma_state.endskip << 8;									\
 		int width = dma_state.width << 8;										\
 		int sx = dma_state.xpos, ix = 0, tx;									\
-		UINT32 o = offset;														\
+		uint32_t o = offset;														\
 		int pre, post;															\
-		UINT16 *d;																\
+		uint16_t *d;																\
 																				\
 		/* handle skipping */													\
 		if (skip)																\
 		{																		\
-			UINT8 value = EXTRACTGEN(0xff);										\
+			uint8_t value = EXTRACTGEN(0xff);										\
 			o += 8;																\
 																				\
 			/* adjust for preskip */											\
@@ -487,7 +487,7 @@ typedef void (*dma_draw_func)(void);
 				if (width > 0) o += width * bpp;								\
 				while (ty--)													\
 				{																\
-					UINT8 value = EXTRACTGEN(0xff);								\
+					uint8_t value = EXTRACTGEN(0xff);								\
 					o += 8;														\
 					pre = (value & 0x0f) << dma_state.preskip;					\
 					post = ((value >> 4) & 0x0f) << dma_state.postskip;			\
@@ -644,14 +644,14 @@ READ_HANDLER( wms_tunit_dma_r )
 
 WRITE_HANDLER( wms_tunit_dma_w )
 {
-	static const UINT8 register_map[2][16] =
+	static const uint8_t register_map[2][16] =
 	{
 		{ 0,1,2,3,4,5,6,7,8,9,10,11,16,17,14,15 },
 		{ 0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15 }
 	};
 	int regbank = (dma_register[DMA_CONTROL] >> 5) & 1;
 	int command, bpp, regnum;
-	UINT32 gfxoffset;
+	uint32_t gfxoffset;
 
 	/* blend with the current register contents */
 	regnum = register_map[regbank][offset / 2];
@@ -681,7 +681,7 @@ WRITE_HANDLER( wms_tunit_dma_w )
 				command, (command >> 12) & 7, (command >> 7) & 1, (command >> 4) & 1, (command >> 5) & 1, (command >> 8) & 3, (command >> 10) & 3);
 		logerror("  offset=%08X pos=(%d,%d) w=%d h=%d clip=(%d,%d)\n", 
 				dma_register[DMA_OFFSETLO] | (dma_register[DMA_OFFSETHI] << 16),
-				(INT16)dma_register[DMA_XSTART], (INT16)dma_register[DMA_YSTART],
+				(int16_t)dma_register[DMA_XSTART], (int16_t)dma_register[DMA_YSTART],
 				dma_register[DMA_WIDTH], dma_register[DMA_HEIGHT],
 				dma_register[DMA_TOPCLIP], dma_register[DMA_BOTCLIP]);
 		logerror("  palette=%04X color=%04X lskip=%02X rskip=%02X xstep=%04X ystep=%04X unkE=%04X unkF=%04X\n",
@@ -699,8 +699,8 @@ WRITE_HANDLER( wms_tunit_dma_w )
 	bpp = (command >> 12) & 7;
 
 	/* fill in the basic data */
-	dma_state.xpos = (INT16)dma_register[DMA_XSTART];
-	dma_state.ypos = (INT16)dma_register[DMA_YSTART];
+	dma_state.xpos = (int16_t)dma_register[DMA_XSTART];
+	dma_state.ypos = (int16_t)dma_register[DMA_YSTART];
 	dma_state.width = dma_register[DMA_WIDTH];
 	dma_state.height = dma_register[DMA_HEIGHT];
 	dma_state.palette = dma_register[DMA_PALETTE] & 0x7f00;
@@ -711,10 +711,10 @@ WRITE_HANDLER( wms_tunit_dma_w )
 	dma_state.bpp = bpp ? bpp : 8;
 	dma_state.preskip = (command >> 8) & 3;
 	dma_state.postskip = (command >> 10) & 3;
-	dma_state.topclip = (INT16)dma_register[DMA_TOPCLIP];
-	dma_state.botclip = (INT16)dma_register[DMA_BOTCLIP];
-	dma_state.leftclip = (INT16)dma_register[DMA_LEFTCLIP];
-	dma_state.rightclip = (INT16)dma_register[DMA_RIGHTCLIP];
+	dma_state.topclip = (int16_t)dma_register[DMA_TOPCLIP];
+	dma_state.botclip = (int16_t)dma_register[DMA_BOTCLIP];
+	dma_state.leftclip = (int16_t)dma_register[DMA_LEFTCLIP];
+	dma_state.rightclip = (int16_t)dma_register[DMA_RIGHTCLIP];
 	dma_state.xstep = dma_register[DMA_SCALE_X] ? dma_register[DMA_SCALE_X] : 0x100;
 	dma_state.ystep = dma_register[DMA_SCALE_Y] ? dma_register[DMA_SCALE_Y] : 0x100;
 
@@ -810,9 +810,9 @@ skipdma:
 
 static void update_screen(struct osd_bitmap *bitmap)
 {
-	UINT16 *pens = Machine->pens;
+	uint16_t *pens = Machine->pens;
 	int v, h, width, xoffs;
-	UINT32 offset;
+	uint32_t offset;
 
 	/* determine the base of the videoram */
 	offset = ((~tms34010_get_DPYSTRT(0) & 0x1ff0) << 5) & 0x3ffff;
@@ -833,8 +833,8 @@ static void update_screen(struct osd_bitmap *bitmap)
 		for (v = Machine->visible_area.min_y; v <= Machine->visible_area.max_y; v++)
 		{
 			/* handle the refresh */
-			UINT16 *src = &local_videoram[offset];
-			UINT16 *dst = &((UINT16 *)bitmap->line[v])[xoffs];
+			uint16_t *src = &local_videoram[offset];
+			uint16_t *dst = &((uint16_t *)bitmap->line[v])[xoffs];
 
 			/* copy one row */
 			for (h = 0; h < width; h++)
@@ -852,8 +852,8 @@ static void update_screen(struct osd_bitmap *bitmap)
 		for (v = Machine->visible_area.min_y; v <= Machine->visible_area.max_y; v++)
 		{
 			/* handle the refresh */
-			UINT16 *src = &local_videoram[offset];
-			UINT8 *dst = &bitmap->line[v][xoffs];
+			uint16_t *src = &local_videoram[offset];
+			uint8_t *dst = &bitmap->line[v][xoffs];
 
 			for (h = 0; h < width; h++)
 				*dst++ = pens[*src++];
@@ -872,7 +872,7 @@ static void update_screen(struct osd_bitmap *bitmap)
  *
  *************************************/
 
-void wms_tunit_display_addr_changed(UINT32 offs, int rowbytes, int scanline)
+void wms_tunit_display_addr_changed(uint32_t offs, int rowbytes, int scanline)
 {
 	//logerror("Display address = %08X\n", offs);
 }

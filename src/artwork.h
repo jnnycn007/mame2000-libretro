@@ -28,22 +28,22 @@ struct artwork
 	struct osd_bitmap *alpha;
 	struct osd_bitmap *orig_artwork;   /* needed for palette recalcs */
 	struct osd_bitmap *vector_bitmap;  /* needed to buffer the vector image in vg with overlays */
-	UINT8 *orig_palette;               /* needed for restoring the colors after special effects? */
+	uint8_t *orig_palette;               /* needed for restoring the colors after special effects? */
 	int num_pens_used;
-	UINT8 *transparency;
+	uint8_t *transparency;
 	int num_pens_trans;
 	int start_pen;
-	UINT8 *brightness;                 /* brightness of each palette entry */
-	UINT64 *rgb;
-	UINT8 *pTable;                     /* Conversion table usually used for mixing colors */
+	uint8_t *brightness;                 /* brightness of each palette entry */
+	uint64_t *rgb;
+	uint8_t *pTable;                     /* Conversion table usually used for mixing colors */
 };
 
 
 struct artwork_element
 {
 	struct rectangle box;
-	UINT8 red,green,blue;
-	UINT16 alpha;   /* 0x00-0xff or OVERLAY_DEFAULT_OPACITY */
+	uint8_t red,green,blue;
+	uint16_t alpha;   /* 0x00-0xff or OVERLAY_DEFAULT_OPACITY */
 };
 
 #define OVERLAY_DEFAULT_OPACITY         0xffff

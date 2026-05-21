@@ -259,11 +259,11 @@ static void IRQHandler(int n,int irq)
 }
 
 /* update handler */
-static void YM3812UpdateHandler(int n, INT16 *buf, int length)
+static void YM3812UpdateHandler(int n, int16_t *buf, int length)
 {	YM3812UpdateOne(F3812[n],buf,length); }
 
 #if (HAS_Y8950)
-static void Y8950UpdateHandler(int n, INT16 *buf, int length)
+static void Y8950UpdateHandler(int n, int16_t *buf, int length)
 {	Y8950UpdateOne(F3812[n],buf,length); }
 
 static unsigned char Y8950PortHandler_r(int chip)

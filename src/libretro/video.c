@@ -55,7 +55,7 @@ static unsigned int *dirtycolor;
 static int dirtypalette;
 static int dirty_bright;
 static int bright_lookup[256];
-extern UINT32 *palette_16bit_lookup;
+extern uint32_t *palette_16bit_lookup;
 
 int frameskip,autoframeskip;
 #define FRAMESKIP_LEVELS 12
@@ -572,7 +572,7 @@ int osd_allocate_colors(unsigned int totalcolors,const unsigned char *palette,un
 
 	dirtycolor = (unsigned int*)malloc(screen_colors * sizeof(int));
 	current_palette = (unsigned char*)malloc(3 * screen_colors * sizeof(unsigned char));
-	palette_16bit_lookup = (UINT32*)malloc(screen_colors * sizeof(palette_16bit_lookup[0]));
+	palette_16bit_lookup = (uint32_t*)malloc(screen_colors * sizeof(palette_16bit_lookup[0]));
 	if (dirtycolor == 0 || current_palette == 0 || palette_16bit_lookup == 0)
 		return 1;
 

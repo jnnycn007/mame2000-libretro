@@ -13,48 +13,48 @@
 #include "vidhrdw/generic.h"
 
 /* globals from machine/williams.c */
-extern UINT8 williams2_bank;
-extern UINT16 sinistar_clip;
-extern UINT8 williams_cocktail;
+extern uint8_t williams2_bank;
+extern uint16_t sinistar_clip;
+extern uint8_t williams_cocktail;
 
 /* RAM globals */
-UINT8 *williams_videoram;
-UINT8 *williams2_paletteram;
+uint8_t *williams_videoram;
+uint8_t *williams2_paletteram;
 
 /* blitter variables */
-UINT8 *williams_blitterram;
-UINT8 williams_blitter_xor;
-UINT8 williams_blitter_remap;
-UINT8 williams_blitter_clip;
+uint8_t *williams_blitterram;
+uint8_t williams_blitter_xor;
+uint8_t williams_blitter_remap;
+uint8_t williams_blitter_clip;
 
 /* Blaster extra variables */
-UINT8 *blaster_video_bits;
-UINT8 *blaster_color_zero_table;
-UINT8 *blaster_color_zero_flags;
-static const UINT8 *blaster_remap;
-static UINT8 *blaster_remap_lookup;
-static UINT8 blaster_erase_screen;
-static UINT16 blaster_back_color;
+uint8_t *blaster_video_bits;
+uint8_t *blaster_color_zero_table;
+uint8_t *blaster_color_zero_flags;
+static const uint8_t *blaster_remap;
+static uint8_t *blaster_remap_lookup;
+static uint8_t blaster_erase_screen;
+static uint16_t blaster_back_color;
 
 /* tilemap variables */
-UINT8 williams2_tilemap_mask;
-const UINT8 *williams2_row_to_palette; /* take care of IC79 and J1/J2 */
-UINT8 williams2_M7_flip;
-INT8  williams2_videoshift;
-UINT8 williams2_special_bg_color;
-static UINT8 williams2_fg_color; /* IC90 */
-static UINT8 williams2_bg_color; /* IC89 */
+uint8_t williams2_tilemap_mask;
+const uint8_t *williams2_row_to_palette; /* take care of IC79 and J1/J2 */
+uint8_t williams2_M7_flip;
+int8_t  williams2_videoshift;
+uint8_t williams2_special_bg_color;
+static uint8_t williams2_fg_color; /* IC90 */
+static uint8_t williams2_bg_color; /* IC89 */
 
 /* later-Williams video control variables */
-UINT8 *williams2_blit_inhibit;
-UINT8 *williams2_xscroll_low;
-UINT8 *williams2_xscroll_high;
+uint8_t *williams2_blit_inhibit;
+uint8_t *williams2_xscroll_low;
+uint8_t *williams2_xscroll_high;
 
 /* control routines */
 void williams2_vh_stop(void);
 
 /* pixel copiers */
-static UINT8 *scanline_dirty;
+static uint8_t *scanline_dirty;
 static void copy_pixels_8(struct osd_bitmap *bitmap, const struct rectangle *clip);
 static void copy_pixels_remap_8(struct osd_bitmap *bitmap, const struct rectangle *clip);
 static void copy_pixels_transparent_8(struct osd_bitmap *bitmap, const struct rectangle *clip);
@@ -167,7 +167,7 @@ static void mark_dirty(int x1, int y1, int x2, int y2)
 int williams_vh_start(void)
 {
 	/* allocate space for video RAM and dirty scanlines */
-	williams_videoram = (UINT8*)malloc(videoram_size + 256);
+	williams_videoram = (uint8_t*)malloc(videoram_size + 256);
 	if (!williams_videoram)
 		return 1;
 	scanline_dirty = williams_videoram + videoram_size;
@@ -312,7 +312,7 @@ int williams2_vh_start(void)
 	blitter_table = williams2_blitters;
 
 	/* allocate a buffer for palette RAM */
-	williams2_paletteram = (UINT8*)malloc(4 * 1024 * 4 / 8);
+	williams2_paletteram = (uint8_t*)malloc(4 * 1024 * 4 / 8);
 	if (!williams2_paletteram)
 	{
 		williams2_vh_stop();
@@ -351,7 +351,7 @@ void williams2_vh_stop(void)
 
 static void williams2_update_tiles(int y, const struct rectangle *clip)
 {
-	UINT8 *tileram = &memory_region(REGION_CPU1)[0xc000];
+	uint8_t *tileram = &memory_region(REGION_CPU1)[0xc000];
 	int xpixeloffset, xtileoffset;
 	int color, col;
 
@@ -417,18 +417,18 @@ void williams2_vh_update(int counter)
 
 static void williams2_modify_color(int color, int offset)
 {
-	static const UINT8 ztable[16] =
+	static const uint8_t ztable[16] =
 	{
 		0x0, 0x3, 0x4,  0x5, 0x6, 0x7, 0x8,  0x9,
 		0xa, 0xb, 0xc,  0xd, 0xe, 0xf, 0x10, 0x11
 	};
 
-	UINT8 entry_lo = williams2_paletteram[offset * 2];
-	UINT8 entry_hi = williams2_paletteram[offset * 2 + 1];
-	UINT8 i = ztable[(entry_hi >> 4) & 15];
-	UINT8 b = ((entry_hi >> 0) & 15) * i;
-	UINT8 g = ((entry_lo >> 4) & 15) * i;
-	UINT8 r = ((entry_lo >> 0) & 15) * i;
+	uint8_t entry_lo = williams2_paletteram[offset * 2];
+	uint8_t entry_hi = williams2_paletteram[offset * 2 + 1];
+	uint8_t i = ztable[(entry_hi >> 4) & 15];
+	uint8_t b = ((entry_hi >> 0) & 15) * i;
+	uint8_t g = ((entry_lo >> 4) & 15) * i;
+	uint8_t r = ((entry_lo >> 0) & 15) * i;
 
 	palette_change_color(color, r, g, b);
 }
@@ -568,11 +568,11 @@ int blaster_vh_start(void)
 		return 1;
 
 	/* Expand the lookup table so that we do one lookup per byte */
-	blaster_remap_lookup = (UINT8*)malloc(256 * 256);
+	blaster_remap_lookup = (uint8_t*)malloc(256 * 256);
 	if (blaster_remap_lookup)
 		for (i = 0; i < 256; i++)
 		{
-			const UINT8 *table = memory_region(REGION_PROMS) + (i & 0x7f) * 16;
+			const uint8_t *table = memory_region(REGION_PROMS) + (i & 0x7f) * 16;
 			for (j = 0; j < 256; j++)
 				blaster_remap_lookup[i * 256 + j] = (table[j >> 4] << 4) | table[j & 0x0f];
 		}
@@ -991,7 +991,7 @@ WRITE_HANDLER( williams_blitter_w )
 #define COPY_NAME 						copy_pixels_8
 #define COPY_REMAP_NAME					copy_pixels_remap_8
 #define COPY_TRANSPARENT_NAME			copy_pixels_transparent_8
-#define TYPE							UINT8
+#define TYPE							uint8_t
 #include "williams.c"
 #undef TYPE
 #undef COPY_TRANSPARENT_NAME
@@ -1001,7 +1001,7 @@ WRITE_HANDLER( williams_blitter_w )
 #define COPY_NAME 						copy_pixels_16
 #define COPY_REMAP_NAME					copy_pixels_remap_16
 #define COPY_TRANSPARENT_NAME			copy_pixels_transparent_16
-#define TYPE							UINT16
+#define TYPE							uint16_t
 #include "williams.c"
 #undef TYPE
 #undef COPY_TRANSPARENT_NAME
@@ -1125,7 +1125,7 @@ static void BLITTER_NAME(int sstart, int dstart, int w, int h, int data)
 
 static void COPY_NAME(struct osd_bitmap *bitmap, const struct rectangle *clip)
 {
-	const UINT16 *pens = Machine->pens;
+	const uint16_t *pens = Machine->pens;
 	int pairs = (clip->max_x - clip->min_x + 1) / 2;
 	int xoffset = clip->min_x;
 	int x, y;
@@ -1136,7 +1136,7 @@ static void COPY_NAME(struct osd_bitmap *bitmap, const struct rectangle *clip)
 		/* loop over rows */
 		for (y = clip->min_y; y <= clip->max_y; y++)
 		{
-			const UINT8 *source = williams_videoram + y + 256 * (xoffset / 2);
+			const uint8_t *source = williams_videoram + y + 256 * (xoffset / 2);
 			TYPE *dest;
 
 			/* skip if not dirty */
@@ -1184,7 +1184,7 @@ static void COPY_NAME(struct osd_bitmap *bitmap, const struct rectangle *clip)
 		/* loop over rows */
 		for (y = clip->min_y; y <= clip->max_y; y++)
 		{
-			const UINT8 *source = williams_videoram + y + 256 * (xoffset / 2);
+			const uint8_t *source = williams_videoram + y + 256 * (xoffset / 2);
 			TYPE *dest;
 
 			/* skip if not dirty */
@@ -1239,7 +1239,7 @@ static void COPY_REMAP_NAME(struct osd_bitmap *bitmap, const struct rectangle *c
 {
 	int pairs = (clip->max_x - clip->min_x + 1) / 2;
 	int xoffset = clip->min_x;
-	UINT16 pens[16];
+	uint16_t pens[16];
 	int x, y;
 
 	/* copy the pens to start */
@@ -1251,7 +1251,7 @@ static void COPY_REMAP_NAME(struct osd_bitmap *bitmap, const struct rectangle *c
 		/* loop over rows */
 		for (y = clip->min_y; y <= clip->max_y; y++)
 		{
-			const UINT8 *source = williams_videoram + y + 256 * (xoffset / 2);
+			const uint8_t *source = williams_videoram + y + 256 * (xoffset / 2);
 			TYPE *dest;
 
 			/* pick the background pen */
@@ -1304,7 +1304,7 @@ static void COPY_REMAP_NAME(struct osd_bitmap *bitmap, const struct rectangle *c
 		/* loop over rows */
 		for (y = clip->min_y; y <= clip->max_y; y++)
 		{
-			const UINT8 *source = williams_videoram + y + 256 * (xoffset / 2);
+			const uint8_t *source = williams_videoram + y + 256 * (xoffset / 2);
 			TYPE *dest;
 
 			/* pick the background pen */
@@ -1362,7 +1362,7 @@ static void COPY_REMAP_NAME(struct osd_bitmap *bitmap, const struct rectangle *c
 
 static void COPY_TRANSPARENT_NAME(struct osd_bitmap *bitmap, const struct rectangle *clip)
 {
-	const UINT16 *pens = Machine->pens;
+	const uint16_t *pens = Machine->pens;
 	int pairs = (clip->max_x - clip->min_x + 1) / 2;
 	int xoffset = clip->min_x;
 	int x, y;
@@ -1373,7 +1373,7 @@ static void COPY_TRANSPARENT_NAME(struct osd_bitmap *bitmap, const struct rectan
 		/* loop over rows */
 		for (y = clip->min_y; y <= clip->max_y; y++)
 		{
-			const UINT8 *source = williams_videoram + y + 256 * (xoffset / 2);
+			const uint8_t *source = williams_videoram + y + 256 * (xoffset / 2);
 			TYPE *dest;
 
 			/* compute starting destination pixel based on flip */
@@ -1424,7 +1424,7 @@ static void COPY_TRANSPARENT_NAME(struct osd_bitmap *bitmap, const struct rectan
 		/* loop over rows */
 		for (y = clip->min_y; y <= clip->max_y; y++)
 		{
-			const UINT8 *source = williams_videoram + y + 256 * (xoffset / 2);
+			const uint8_t *source = williams_videoram + y + 256 * (xoffset / 2);
 			TYPE *dest;
 
 			/* compute starting destination pixel based on flip */

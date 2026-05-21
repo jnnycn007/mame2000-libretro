@@ -55,10 +55,10 @@
 #include "vidhrdw/generic.h"
 
 
-extern UINT8 mcr68_sprite_clip;
-extern INT8 mcr68_sprite_xoffset;
+extern uint8_t mcr68_sprite_clip;
+extern int8_t mcr68_sprite_xoffset;
 
-static UINT8 *control_word;
+static uint8_t *control_word;
 
 
 WRITE_HANDLER( mcr68_videoram_w );
@@ -231,7 +231,7 @@ static WRITE_HANDLER( archrivl_control_w )
  *
  *************************************/
 
-static UINT8 protection_data[5];
+static uint8_t protection_data[5];
 static WRITE_HANDLER( pigskin_protection_w )
 {
 	/* ignore upper-byte only */
@@ -311,8 +311,8 @@ static READ_HANDLER( pigskin_port_2_r )
 
 static READ_HANDLER( trisport_port_1_r )
 {
-	int xaxis = (INT8)input_port_3_r(offset);
-	int yaxis = (INT8)input_port_4_r(offset);
+	int xaxis = (int8_t)input_port_3_r(offset);
+	int yaxis = (int8_t)input_port_4_r(offset);
 	int result = input_port_1_r(offset);
 
 	result |= (xaxis & 0x3c) << 6;

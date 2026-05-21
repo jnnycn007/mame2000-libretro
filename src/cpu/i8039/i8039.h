@@ -45,12 +45,12 @@ extern unsigned i8039_dasm(char *buffer, unsigned pc);
  */
 
 #if OLDPORTHANDLING
-		UINT8	 I8039_port_r(UINT8 port);
-		void	 I8039_port_w(UINT8 port, UINT8 data);
-		UINT8	 I8039_test_r(UINT8 port);
-		void	 I8039_test_w(UINT8 port, UINT8 data);
-		UINT8	 I8039_bus_r(void);
-		void	 I8039_bus_w(UINT8 data);
+		uint8_t	 I8039_port_r(uint8_t port);
+		void	 I8039_port_w(uint8_t port, uint8_t data);
+		uint8_t	 I8039_test_r(uint8_t port);
+		void	 I8039_test_w(uint8_t port, uint8_t data);
+		uint8_t	 I8039_bus_r(void);
+		void	 I8039_bus_w(uint8_t data);
 #else
         #define  I8039_p0	0x100   /* Not used */
         #define  I8039_p1	0x101
@@ -197,25 +197,25 @@ extern unsigned n7751_dasm(char *buffer, unsigned pc);
 #include "memory.h"
 
 /*
- *	 Input a UINT8 from given I/O port
+ *	 Input a uint8_t from given I/O port
  */
-#define I8039_In(Port) ((UINT8)cpu_readport(Port))
+#define I8039_In(Port) ((uint8_t)cpu_readport(Port))
 
 
 /*
- *	 Output a UINT8 to given I/O port
+ *	 Output a uint8_t to given I/O port
  */
 #define I8039_Out(Port,Value) (cpu_writeport(Port,Value))
 
 
 /*
- *	 Read a UINT8 from given memory location
+ *	 Read a uint8_t from given memory location
  */
 #define I8039_RDMEM(A) ((unsigned)cpu_readmem16(A))
 
 
 /*
- *	 Write a UINT8 to given memory location
+ *	 Write a uint8_t to given memory location
  */
 #define I8039_WRMEM(A,V) (cpu_writemem16(A,V))
 

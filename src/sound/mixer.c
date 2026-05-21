@@ -35,27 +35,27 @@ struct mixer_channel_data
 	char		name[40];
 
 	/* current volume, gain and pan */
-	INT32		volume;
-	INT32		gain;
-	INT32		pan;
+	int32_t		volume;
+	int32_t		gain;
+	int32_t		pan;
 
 	/* mixing levels */
-	UINT8		mixing_level;
-	UINT8		default_mixing_level;
-	UINT8		config_mixing_level;
-	UINT8		config_default_mixing_level;
+	uint8_t		mixing_level;
+	uint8_t		default_mixing_level;
+	uint8_t		config_mixing_level;
+	uint8_t		config_default_mixing_level;
 
 	/* current playback positions */
-	UINT32		input_frac;
-	UINT32		samples_available;
-	UINT32		frequency;
-	UINT32		step_size;
+	uint32_t		input_frac;
+	uint32_t		samples_available;
+	uint32_t		frequency;
+	uint32_t		step_size;
 
 	/* state of non-streamed playback */
-	UINT8		is_stream;
-	UINT8		is_playing;
-	UINT8		is_looping;
-	UINT8		is_16bit;
+	uint8_t		is_stream;
+	uint8_t		is_playing;
+	uint8_t		is_looping;
+	uint8_t		is_16bit;
 	void *		data_start;
 	void *		data_end;
 	void *		data_current;
@@ -65,22 +65,22 @@ struct mixer_channel_data
 
 /* channel data */
 static struct mixer_channel_data mixer_channel[MIXER_MAX_CHANNELS];
-static UINT8 config_mixing_level[MIXER_MAX_CHANNELS];
-static UINT8 config_default_mixing_level[MIXER_MAX_CHANNELS];
-static UINT8 first_free_channel = 0;
-static UINT8 config_invalid;
-static UINT16 is_stereo;
+static uint8_t config_mixing_level[MIXER_MAX_CHANNELS];
+static uint8_t config_default_mixing_level[MIXER_MAX_CHANNELS];
+static uint8_t first_free_channel = 0;
+static uint8_t config_invalid;
+static uint16_t is_stereo;
 
 /* 32-bit accumulators */
-static UINT32 accum_base;
-static INT32 left_accum[ACCUMULATOR_SAMPLES];
-static INT32 right_accum[ACCUMULATOR_SAMPLES];
+static uint32_t accum_base;
+static int32_t left_accum[ACCUMULATOR_SAMPLES];
+static int32_t right_accum[ACCUMULATOR_SAMPLES];
 
 /* 16-bit mix buffers */
-static INT16 mix_buffer[ACCUMULATOR_SAMPLES*2];	/* *2 for stereo */
+static int16_t mix_buffer[ACCUMULATOR_SAMPLES*2];	/* *2 for stereo */
 
 /* global sample tracking */
-static UINT32 samples_this_frame;
+static uint32_t samples_this_frame;
 
 
 
@@ -119,8 +119,8 @@ int mixer_sh_start(void)
 
 	/* clear the accumulators */
 	accum_base = 0;
-	memset(left_accum, 0, ACCUMULATOR_SAMPLES * sizeof(INT32));
-	memset(right_accum, 0, ACCUMULATOR_SAMPLES * sizeof(INT32));
+	memset(left_accum, 0, ACCUMULATOR_SAMPLES * sizeof(int32_t));
+	memset(right_accum, 0, ACCUMULATOR_SAMPLES * sizeof(int32_t));
 
 	samples_this_frame = osd_start_audio_stream(is_stereo);
 
@@ -177,9 +177,9 @@ void mixer_update_channel(struct mixer_channel_data *channel, int total_sample_c
 void mixer_sh_update(void)
 {
 	struct mixer_channel_data *	channel;
-	UINT32 accum_pos = accum_base;
-	INT16 *mix;
-	INT32 sample;
+	uint32_t accum_pos = accum_base;
+	int16_t *mix;
+	int32_t sample;
 	int	i;
 
 	profiler_mark(PROFILER_MIXER);
@@ -438,8 +438,8 @@ int mixer_get_default_mixing_level(int ch)
 
 void mixer_read_config(void *f)
 {
-	UINT8 default_levels[MIXER_MAX_CHANNELS];
-	UINT8 mixing_levels[MIXER_MAX_CHANNELS];
+	uint8_t default_levels[MIXER_MAX_CHANNELS];
+	uint8_t mixing_levels[MIXER_MAX_CHANNELS];
 	int i;
 
 	memset(default_levels, 0xff, sizeof(default_levels));
@@ -461,8 +461,8 @@ void mixer_read_config(void *f)
 
 void mixer_write_config(void *f)
 {
-	UINT8 default_levels[MIXER_MAX_CHANNELS];
-	UINT8 mixing_levels[MIXER_MAX_CHANNELS];
+	uint8_t default_levels[MIXER_MAX_CHANNELS];
+	uint8_t mixing_levels[MIXER_MAX_CHANNELS];
 	int i;
 
 	for (i = 0; i < MIXER_MAX_CHANNELS; i++)
@@ -479,11 +479,11 @@ void mixer_write_config(void *f)
 	mixer_play_streamed_sample_16
 ***************************************************************************/
 #ifdef MAME_FASTSOUND
-void mixer_play_streamed_sample_16(int ch, INT16 *data, int len, int freq)
+void mixer_play_streamed_sample_16(int ch, int16_t *data, int len, int freq)
 {
 	struct mixer_channel_data *channel = &mixer_channel[ch];
-	UINT32 step_size, input_pos, output_pos, samples_mixed;
-	INT32 mixing_volume;
+	uint32_t step_size, input_pos, output_pos, samples_mixed;
+	int32_t mixing_volume;
 
 	/* skip if sound is off */
 	if (Machine->sample_rate == 0)
@@ -505,7 +505,7 @@ void mixer_play_streamed_sample_16(int ch, INT16 *data, int len, int freq)
 	if (freq != channel->frequency)
 	{
 		channel->frequency = freq;
-		channel->step_size = (UINT32)((float)freq * (float)(1 << FRACTION_BITS) / (float)Machine->sample_rate);
+		channel->step_size = (uint32_t)((float)freq * (float)(1 << FRACTION_BITS) / (float)Machine->sample_rate);
 	}
 	step_size = channel->step_size;
 
@@ -546,7 +546,7 @@ void mixer_play_streamed_sample_16(int ch, INT16 *data, int len, int freq)
 	{
 		while (input_pos < len)
 		{
-			INT32 mixing_value = (data[input_pos >> FRACTION_BITS] >> mixing_volume);
+			int32_t mixing_value = (data[input_pos >> FRACTION_BITS] >> mixing_volume);
 			left_accum[output_pos] += mixing_value;
 			right_accum[output_pos] += mixing_value;
 			input_pos += step_size;
@@ -562,11 +562,11 @@ void mixer_play_streamed_sample_16(int ch, INT16 *data, int len, int freq)
 	profiler_mark(PROFILER_END);
 }
 #else
-void mixer_play_streamed_sample_16(int ch, INT16 *data, int len, int freq)
+void mixer_play_streamed_sample_16(int ch, int16_t *data, int len, int freq)
 {
 	struct mixer_channel_data *channel = &mixer_channel[ch];
-	UINT32 step_size, input_pos, output_pos, samples_mixed;
-	INT32 mixing_volume;
+	uint32_t step_size, input_pos, output_pos, samples_mixed;
+	int32_t mixing_volume;
 
 	/* skip if sound is off */
 	if (Machine->sample_rate == 0)
@@ -585,7 +585,7 @@ void mixer_play_streamed_sample_16(int ch, INT16 *data, int len, int freq)
 	if (freq != channel->frequency)
 	{
 		channel->frequency = freq;
-		channel->step_size = (UINT32)((float)freq * (float)(1 << FRACTION_BITS) / (float)Machine->sample_rate);
+		channel->step_size = (uint32_t)((float)freq * (float)(1 << FRACTION_BITS) / (float)Machine->sample_rate);
 	}
 	step_size = channel->step_size;
 
@@ -626,7 +626,7 @@ void mixer_play_streamed_sample_16(int ch, INT16 *data, int len, int freq)
 	{
 		while (input_pos < len)
 		{
-			INT32 mixing_value = (data[input_pos >> FRACTION_BITS] * mixing_volume) >> 8;
+			int32_t mixing_value = (data[input_pos >> FRACTION_BITS] * mixing_volume) >> 8;
 			left_accum[output_pos] += mixing_value;
 			right_accum[output_pos] += mixing_value;
 			input_pos += step_size;
@@ -668,7 +668,7 @@ int mixer_need_samples_this_frame(int channel,int freq)
 	mixer_play_sample
 ***************************************************************************/
 
-void mixer_play_sample(int ch, INT8 *data, int len, int freq, int loop)
+void mixer_play_sample(int ch, int8_t *data, int len, int freq, int loop)
 {
 	struct mixer_channel_data *channel = &mixer_channel[ch];
 
@@ -683,14 +683,14 @@ void mixer_play_sample(int ch, INT8 *data, int len, int freq, int loop)
 	if (freq != channel->frequency)
 	{
 		channel->frequency = freq;
-		channel->step_size = (UINT32)((float)freq * (float)(1 << FRACTION_BITS) / (float)Machine->sample_rate);
+		channel->step_size = (uint32_t)((float)freq * (float)(1 << FRACTION_BITS) / (float)Machine->sample_rate);
 	}
 
 	/* now determine where to mix it */
 	channel->input_frac = 0;
 	channel->data_start = data;
 	channel->data_current = data;
-	channel->data_end = (UINT8 *)data + len;
+	channel->data_end = (uint8_t *)data + len;
 	channel->is_playing = 1;
 	channel->is_looping = loop;
 	channel->is_16bit = 0;
@@ -701,7 +701,7 @@ void mixer_play_sample(int ch, INT8 *data, int len, int freq, int loop)
 	mixer_play_sample_16
 ***************************************************************************/
 
-void mixer_play_sample_16(int ch, INT16 *data, int len, int freq, int loop)
+void mixer_play_sample_16(int ch, int16_t *data, int len, int freq, int loop)
 {
 	struct mixer_channel_data *channel = &mixer_channel[ch];
 
@@ -716,14 +716,14 @@ void mixer_play_sample_16(int ch, INT16 *data, int len, int freq, int loop)
 	if (freq != channel->frequency)
 	{
 		channel->frequency = freq;
-		channel->step_size = (UINT32)((float)freq * (float)(1 << FRACTION_BITS) / (float)Machine->sample_rate);
+		channel->step_size = (uint32_t)((float)freq * (float)(1 << FRACTION_BITS) / (float)Machine->sample_rate);
 	}
 
 	/* now determine where to mix it */
 	channel->input_frac = 0;
 	channel->data_start = data;
 	channel->data_current = data;
-	channel->data_end = (UINT8 *)data + len;
+	channel->data_end = (uint8_t *)data + len;
 	channel->is_playing = 1;
 	channel->is_looping = loop;
 	channel->is_16bit = 1;
@@ -770,7 +770,7 @@ void mixer_set_sample_frequency(int ch, int freq)
 	if (freq != channel->frequency)
 	{
 		channel->frequency = freq;
-		channel->step_size = (UINT32)((float)freq * (float)(1 << FRACTION_BITS) / (float)Machine->sample_rate);
+		channel->step_size = (uint32_t)((float)freq * (float)(1 << FRACTION_BITS) / (float)Machine->sample_rate);
 	}
 }
 
@@ -800,9 +800,9 @@ void mixer_sound_enable_global_w(int enable)
 
 void mix_sample_8(struct mixer_channel_data *channel, int samples_to_generate)
 {
-	UINT32 step_size, input_frac, output_pos;
-	INT8 *source, *source_end;
-	INT32 mixing_volume;
+	uint32_t step_size, input_frac, output_pos;
+	int8_t *source, *source_end;
+	int32_t mixing_volume;
 
 	/* compute the overall mixing volume */
 	if (mixer_sound_enabled)
@@ -812,8 +812,8 @@ void mix_sample_8(struct mixer_channel_data *channel, int samples_to_generate)
 
 	/* get the initial state */
 	step_size = channel->step_size;
-	source = (INT8*)channel->data_current;
-	source_end = (INT8*)channel->data_end;
+	source = (int8_t*)channel->data_current;
+	source_end = (int8_t*)channel->data_end;
 	input_frac = channel->input_frac;
 	output_pos = (accum_base + channel->samples_available) & ACCUMULATOR_MASK;
 
@@ -853,7 +853,7 @@ void mix_sample_8(struct mixer_channel_data *channel, int samples_to_generate)
 		{
 			while (source < source_end && samples_to_generate > 0)
 			{
-				INT32 mixing_value = *source * mixing_volume;
+				int32_t mixing_value = *source * mixing_volume;
 				left_accum[output_pos] += mixing_value;
 				right_accum[output_pos] += mixing_value;
 				input_frac += step_size;
@@ -876,7 +876,7 @@ void mix_sample_8(struct mixer_channel_data *channel, int samples_to_generate)
 
 			/* if we're looping, wrap to the beginning */
 			else
-				source -= (INT8 *)source_end - (INT8 *)channel->data_start;
+				source -= (int8_t *)source_end - (int8_t *)channel->data_start;
 		}
 	}
 
@@ -892,9 +892,9 @@ void mix_sample_8(struct mixer_channel_data *channel, int samples_to_generate)
 #ifdef MAME_FASTSOUND
 void mix_sample_16(struct mixer_channel_data *channel, int samples_to_generate)
 {
-	UINT32 step_size, input_frac, output_pos;
-	INT16 *source, *source_end;
-	INT32 mixing_volume;
+	uint32_t step_size, input_frac, output_pos;
+	int16_t *source, *source_end;
+	int32_t mixing_volume;
 
 	/* compute the overall mixing volume */
 	if (mixer_sound_enabled)
@@ -907,8 +907,8 @@ void mix_sample_16(struct mixer_channel_data *channel, int samples_to_generate)
 
 	/* get the initial state */
 	step_size = channel->step_size;
-	source = (INT16*)channel->data_current;
-	source_end = (INT16*)channel->data_end;
+	source = (int16_t*)channel->data_current;
+	source_end = (int16_t*)channel->data_end;
 	input_frac = channel->input_frac;
 	output_pos = (accum_base + channel->samples_available) & ACCUMULATOR_MASK;
 
@@ -952,7 +952,7 @@ void mix_sample_16(struct mixer_channel_data *channel, int samples_to_generate)
 		{
 			while (source < source_end && samples_to_generate > 0)
 			{
-				INT32 mixing_value = (*source >> mixing_volume);
+				int32_t mixing_value = (*source >> mixing_volume);
 				left_accum[output_pos] += mixing_value;
 				right_accum[output_pos] += mixing_value;
 
@@ -977,7 +977,7 @@ void mix_sample_16(struct mixer_channel_data *channel, int samples_to_generate)
 
 			/* if we're looping, wrap to the beginning */
 			else
-				source -= (INT16 *)source_end - (INT16 *)channel->data_start;
+				source -= (int16_t *)source_end - (int16_t *)channel->data_start;
 		}
 	}
 
@@ -988,9 +988,9 @@ void mix_sample_16(struct mixer_channel_data *channel, int samples_to_generate)
 #else
 void mix_sample_16(struct mixer_channel_data *channel, int samples_to_generate)
 {
-	UINT32 step_size, input_frac, output_pos;
-	INT16 *source, *source_end;
-	INT32 mixing_volume;
+	uint32_t step_size, input_frac, output_pos;
+	int16_t *source, *source_end;
+	int32_t mixing_volume;
 
 	/* compute the overall mixing volume */
 	if (mixer_sound_enabled)
@@ -1000,8 +1000,8 @@ void mix_sample_16(struct mixer_channel_data *channel, int samples_to_generate)
 
 	/* get the initial state */
 	step_size = channel->step_size;
-	source = (INT16*)channel->data_current;
-	source_end = (INT16*)channel->data_end;
+	source = (int16_t*)channel->data_current;
+	source_end = (int16_t*)channel->data_end;
 	input_frac = channel->input_frac;
 	output_pos = (accum_base + channel->samples_available) & ACCUMULATOR_MASK;
 
@@ -1045,7 +1045,7 @@ void mix_sample_16(struct mixer_channel_data *channel, int samples_to_generate)
 		{
 			while (source < source_end && samples_to_generate > 0)
 			{
-				INT32 mixing_value = (*source * mixing_volume) >> 8;
+				int32_t mixing_value = (*source * mixing_volume) >> 8;
 				left_accum[output_pos] += mixing_value;
 				right_accum[output_pos] += mixing_value;
 
@@ -1070,7 +1070,7 @@ void mix_sample_16(struct mixer_channel_data *channel, int samples_to_generate)
 
 			/* if we're looping, wrap to the beginning */
 			else
-				source -= (INT16 *)source_end - (INT16 *)channel->data_start;
+				source -= (int16_t *)source_end - (int16_t *)channel->data_start;
 		}
 	}
 

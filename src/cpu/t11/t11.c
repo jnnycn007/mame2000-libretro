@@ -25,10 +25,10 @@ typedef struct
 	PAIR	ppc;	/* previous program counter */
     PAIR    reg[8];
     PAIR    psw;
-    UINT16  op;
-    UINT8	wait_state;
-    UINT8   *bank[8];
-    INT8    irq_state[4];
+    uint16_t  op;
+    uint8_t	wait_state;
+    uint8_t   *bank[8];
+    int8_t    irq_state[4];
     int		interrupt_cycles;
     int     (*irq_callback)(int irqline);
 } t11_Regs;

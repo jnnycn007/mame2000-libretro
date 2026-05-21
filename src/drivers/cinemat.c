@@ -44,12 +44,12 @@ extern struct artwork_element solarq_overlay[];
 READ_HANDLER( cinemat_output_port_r );
 WRITE_HANDLER( cinemat_output_port_w );
 void cinemat_set_sound_handler(cinemat_sound_handler_proc sound_handler);
-void starcas_sound_w(UINT8 sound_val, UINT8 bits_changed);
-void warrior_sound_w(UINT8 sound_val, UINT8 bits_changed);
-void solarq_sound_w(UINT8 sound_val, UINT8 bits_changed);
-void ripoff_sound_w(UINT8 sound_val, UINT8 bits_changed);
-void spacewar_sound_w(UINT8 sound_val, UINT8 bits_changed);
-void demon_sound_w(UINT8 sound_val, UINT8 bits_changed);
+void starcas_sound_w(uint8_t sound_val, uint8_t bits_changed);
+void warrior_sound_w(uint8_t sound_val, uint8_t bits_changed);
+void solarq_sound_w(uint8_t sound_val, uint8_t bits_changed);
+void ripoff_sound_w(uint8_t sound_val, uint8_t bits_changed);
+void spacewar_sound_w(uint8_t sound_val, uint8_t bits_changed);
+void demon_sound_w(uint8_t sound_val, uint8_t bits_changed);
 
 extern struct Samplesinterface starcas_samples_interface;
 extern struct Samplesinterface warrior_samples_interface;
@@ -610,7 +610,7 @@ CINEMA_MACHINE (ripoff, 0, 0, 1024, 768, SOUND_SAMPLES, &ripoff_samples_interfac
 
 ***************************************************************************/
 
-static UINT8 speedfrk_steer[] = {0xe, 0x6, 0x2, 0x0, 0x3, 0x7, 0xf};
+static uint8_t speedfrk_steer[] = {0xe, 0x6, 0x2, 0x0, 0x3, 0x7, 0xf};
 
 READ_HANDLER( speedfrk_input_port_1_r )
 {

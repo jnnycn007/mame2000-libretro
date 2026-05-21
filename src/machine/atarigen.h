@@ -81,8 +81,8 @@ WRITE_HANDLER( atarigen_video_int_ack_w );
 		atarigen_nvram_handler - load/save EEPROM data
 
 --------------------------------------------------------------------------*/
-extern const UINT16 *atarigen_eeprom_default;
-extern UINT8 *atarigen_eeprom;
+extern const uint16_t *atarigen_eeprom_default;
+extern uint8_t *atarigen_eeprom;
 extern size_t atarigen_eeprom_size;
 
 void atarigen_eeprom_reset(void);
@@ -207,14 +207,14 @@ void atarigen_set_oki6295_vol(int volume);
 
 
 /* general video globals */
-extern UINT8 *atarigen_playfieldram;
-extern UINT8 *atarigen_playfield2ram;
-extern UINT8 *atarigen_playfieldram_color;
-extern UINT8 *atarigen_playfield2ram_color;
-extern UINT8 *atarigen_spriteram;
-extern UINT8 *atarigen_alpharam;
-extern UINT8 *atarigen_vscroll;
-extern UINT8 *atarigen_hscroll;
+extern uint8_t *atarigen_playfieldram;
+extern uint8_t *atarigen_playfield2ram;
+extern uint8_t *atarigen_playfieldram_color;
+extern uint8_t *atarigen_playfield2ram_color;
+extern uint8_t *atarigen_spriteram;
+extern uint8_t *atarigen_alpharam;
+extern uint8_t *atarigen_vscroll;
+extern uint8_t *atarigen_hscroll;
 
 extern size_t atarigen_playfieldram_size;
 extern size_t atarigen_playfield2ram_size;
@@ -264,11 +264,11 @@ struct atarigen_video_control_state_desc
 	int sprite_yscroll;						/* sprite xscroll */
 };
 
-extern UINT8 *atarigen_video_control_data;
+extern uint8_t *atarigen_video_control_data;
 extern struct atarigen_video_control_state_desc atarigen_video_control_state;
 
 void atarigen_video_control_reset(void);
-void atarigen_video_control_update(const UINT8 *data);
+void atarigen_video_control_update(const uint8_t *data);
 
 WRITE_HANDLER( atarigen_video_control_w );
 READ_HANDLER( atarigen_video_control_r );
@@ -303,13 +303,13 @@ struct atarigen_mo_desc
 	int entrywords;							/* number of words/entry (0 defaults to 4) */
 };
 
-typedef void (*atarigen_mo_callback)(const UINT16 *data, const struct rectangle *clip, void *param);
+typedef void (*atarigen_mo_callback)(const uint16_t *data, const struct rectangle *clip, void *param);
 
 int atarigen_mo_init(const struct atarigen_mo_desc *source_desc);
 void atarigen_mo_free(void);
 void atarigen_mo_reset(void);
-void atarigen_mo_update(const UINT8 *base, int start, int scanline);
-void atarigen_mo_update_slip_512(const UINT8 *base, int scroll, int scanline, const UINT8 *slips);
+void atarigen_mo_update(const uint8_t *base, int start, int scanline);
+void atarigen_mo_update_slip_512(const uint8_t *base, int scroll, int scanline, const uint8_t *slips);
 void atarigen_mo_process(atarigen_mo_callback callback, void *param);
 
 
@@ -332,13 +332,13 @@ struct atarigen_rle_descriptor
 {
 	int width;
 	int height;
-	INT16 xoffs;
-	INT16 yoffs;
+	int16_t xoffs;
+	int16_t yoffs;
 	int bpp;
-	UINT32 pen_usage;
-	UINT32 pen_usage_hi;
-	const UINT16 *table;
-	const UINT16 *data;
+	uint32_t pen_usage;
+	uint32_t pen_usage_hi;
+	const uint16_t *table;
+	const uint16_t *data;
 };
 
 extern int atarigen_rle_count;
@@ -373,15 +373,15 @@ void atarigen_rle_render(struct osd_bitmap *bitmap, struct atarigen_rle_descript
 
 --------------------------------------------------------------------------*/
 extern struct osd_bitmap *atarigen_pf_bitmap;
-extern UINT8 *atarigen_pf_dirty;
-extern UINT8 *atarigen_pf_visit;
+extern uint8_t *atarigen_pf_dirty;
+extern uint8_t *atarigen_pf_visit;
 
 extern struct osd_bitmap *atarigen_pf2_bitmap;
-extern UINT8 *atarigen_pf2_dirty;
-extern UINT8 *atarigen_pf2_visit;
+extern uint8_t *atarigen_pf2_dirty;
+extern uint8_t *atarigen_pf2_visit;
 
 extern struct osd_bitmap *atarigen_pf_overrender_bitmap;
-extern UINT16 atarigen_overrender_colortable[32];
+extern uint16_t atarigen_overrender_colortable[32];
 
 struct atarigen_pf_desc
 {
@@ -544,7 +544,7 @@ void atarigen_update_messages(void);
 
 #define atarigen_mo_draw_transparent(bitmap, gfx, code, hflip, vflip, x, y, hsize, vsize, clip, trans, trans_pen, tile_width, tile_height) \
 {																										\
-	UINT16 *temp = gfx->colortable;																\
+	uint16_t *temp = gfx->colortable;																\
 	gfx->colortable = atarigen_overrender_colortable;													\
 	atarigen_mo_draw(bitmap, gfx, code, 0, hflip, vflip, x, y, hsize, vsize, clip, trans, trans_pen, tile_width, tile_height);\
 	gfx->colortable = temp;																				\
@@ -583,7 +583,7 @@ void atarigen_update_messages(void);
 
 #define atarigen_mo_draw_transparent_strip(bitmap, gfx, code, hflip, vflip, x, y, vsize, clip, trans, trans_pen, tile_width, tile_height) \
 {																										\
-	UINT16 *temp = gfx->colortable;																\
+	uint16_t *temp = gfx->colortable;																\
 	gfx->colortable = atarigen_overrender_colortable;													\
 	atarigen_mo_draw_strip(bitmap, gfx, code, 0, hflip, vflip, x, y, vsize, clip, trans, trans_pen, tile_width, tile_height);\
 	gfx->colortable = temp;																				\

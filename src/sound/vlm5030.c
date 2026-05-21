@@ -269,7 +269,7 @@ static int parse_frame (void)
 }
 
 /* decode and buffering data */
-static void vlm5030_update_callback(int num,INT16 *buffer, int length)
+static void vlm5030_update_callback(int num,int16_t *buffer, int length)
 {
 	int buf_count=0;
 	int interp_effect;

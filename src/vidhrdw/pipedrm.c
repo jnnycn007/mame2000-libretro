@@ -16,13 +16,13 @@
  *
  *************************************/
 
-extern UINT8 pipedrm_video_control;
+extern uint8_t pipedrm_video_control;
 
 static struct osd_bitmap *background[2];
-static UINT8 *background_dirty[2];
-static UINT8 *local_videoram[2];
+static uint8_t *background_dirty[2];
+static uint8_t *local_videoram[2];
 
-static UINT8 scroll_regs[4];
+static uint8_t scroll_regs[4];
 
 
 
@@ -45,16 +45,16 @@ void pipedrm_vh_stop(void);
 int pipedrm_vh_start(void)
 {
 	/* allocate videoram */
-	local_videoram[0] = (UINT8*)malloc(videoram_size);
-	local_videoram[1] = (UINT8*)malloc(videoram_size);
+	local_videoram[0] = (uint8_t*)malloc(videoram_size);
+	local_videoram[1] = (uint8_t*)malloc(videoram_size);
 
 	/* allocate background bitmaps */
 	background[0] = bitmap_alloc(64*8, 64*4);
 	background[1] = bitmap_alloc(64*8, 64*4);
 
 	/* allocate dirty buffers */
-	background_dirty[0] = (UINT8*)malloc(64*64);
-	background_dirty[1] = (UINT8*)malloc(64*64);
+	background_dirty[0] = (uint8_t*)malloc(64*64);
+	background_dirty[1] = (uint8_t*)malloc(64*64);
 
 	/* handle errors */
 	if (!local_videoram[0] || !local_videoram[1] || !background[0] || !background[1] || !background_dirty[0] || !background_dirty[1])
@@ -169,7 +169,7 @@ static void mark_background_colors(void)
 	int mask1 = Machine->gfx[0]->total_elements - 1;
 	int mask2 = Machine->gfx[1]->total_elements - 1;
 	int colormask = Machine->gfx[0]->total_colors - 1;
-	UINT16 used_colors[128];
+	uint16_t used_colors[128];
 	int code, color, offs;
 
 	/* reset all color codes */
@@ -192,7 +192,7 @@ static void mark_background_colors(void)
 	/* fill in the final table */
 	for (offs = 0; offs <= colormask; offs++)
 	{
-		UINT16 used = used_colors[offs];
+		uint16_t used = used_colors[offs];
 		if (used)
 		{
 			for (color = 0; color < 15; color++)
@@ -209,7 +209,7 @@ static void mark_background_colors(void)
 
 static void mark_sprite_palette(void)
 {
-	UINT16 used_colors[0x20];
+	uint16_t used_colors[0x20];
 	int offs, i;
 
 	/* clear the color array */
@@ -240,7 +240,7 @@ static void mark_sprite_palette(void)
 	/* now mark the pens */
 	for (offs = 0; offs < 0x20; offs++)
 	{
-		UINT16 used = used_colors[offs];
+		uint16_t used = used_colors[offs];
 		if (used)
 		{
 			for (i = 0; i < 15; i++)
@@ -261,7 +261,7 @@ static void mark_sprite_palette(void)
 
 static void draw_sprites(struct osd_bitmap *bitmap, int draw_priority)
 {
-	UINT8 zoomtable[16] = { 0,7,14,20,25,30,34,38,42,46,49,52,54,57,59,61 };
+	uint8_t zoomtable[16] = { 0,7,14,20,25,30,34,38,42,46,49,52,54,57,59,61 };
 	int offs;
 
 	/* draw the sprites */
@@ -365,7 +365,7 @@ static void draw_sprites(struct osd_bitmap *bitmap, int draw_priority)
 
 static void common_screenrefresh(int full_refresh)
 {
-	UINT16 saved_pens[64];
+	uint16_t saved_pens[64];
 	int offs;
 
 	/* update the palette usage */

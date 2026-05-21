@@ -16,32 +16,32 @@
 #define VIEW_HEIGHT					(28*8)
 
 /* external definitions */
-UINT8 *turbo_sprite_position;
-UINT8 turbo_collision;
+uint8_t *turbo_sprite_position;
+uint8_t turbo_collision;
 
 /* from machine */
-extern UINT8 turbo_opa, turbo_opb, turbo_opc;
-extern UINT8 turbo_ipa, turbo_ipb, turbo_ipc;
-extern UINT8 turbo_fbpla, turbo_fbcol;
-extern UINT8 turbo_segment_data[32];
-extern UINT8 turbo_speed;
+extern uint8_t turbo_opa, turbo_opb, turbo_opc;
+extern uint8_t turbo_ipa, turbo_ipb, turbo_ipc;
+extern uint8_t turbo_fbpla, turbo_fbcol;
+extern uint8_t turbo_segment_data[32];
+extern uint8_t turbo_speed;
 
 /* internal data */
-static UINT8 *sprite_gfxdata, *sprite_priority;
-static UINT8 *road_gfxdata, *road_palette, *road_enable_collide;
-static UINT8 *back_gfxdata, *back_palette;
-static UINT8 *overall_priority, *collision_map;
+static uint8_t *sprite_gfxdata, *sprite_priority;
+static uint8_t *road_gfxdata, *road_palette, *road_enable_collide;
+static uint8_t *back_gfxdata, *back_palette;
+static uint8_t *overall_priority, *collision_map;
 
 /* sprite tracking */
 struct sprite_params_data
 {
-	UINT32 *base;
+	uint32_t *base;
 	int offset, rowbytes;
 	int yscale, miny, maxy;
 	int xscale, xoffs;
 };
 static struct sprite_params_data sprite_params[16];
-static UINT32 *sprite_expanded_data;
+static uint32_t *sprite_expanded_data;
 
 /* orientation */
 static const struct rectangle game_clip = { 0, VIEW_WIDTH - 1, 64, 64 + VIEW_HEIGHT - 1 };
@@ -49,9 +49,9 @@ static struct rectangle adjusted_clip;
 static int startx, starty, deltax, deltay;
 
 /* misc other stuff */
-static UINT16 *back_expanded_data;
-static UINT16 *road_expanded_palette;
-static UINT8 drew_frame;
+static uint16_t *back_expanded_data;
+static uint16_t *road_expanded_palette;
+static uint8_t drew_frame;
 
 /* prototypes */
 static void draw_everything_core_8(struct osd_bitmap *bitmap);
@@ -129,21 +129,21 @@ void turbo_vh_convert_color_prom(unsigned char *palette, unsigned short *colorta
 int turbo_vh_start(void)
 {
 	int i, j, sprite_length, sprite_bank_size, back_length;
-	UINT32 sprite_expand[16];
-	UINT32 *dst;
-	UINT16 *bdst;
-	UINT8 *src;
+	uint32_t sprite_expand[16];
+	uint32_t *dst;
+	uint16_t *bdst;
+	uint8_t *src;
 
 	/* allocate the expanded sprite data */
 	sprite_length = memory_region_length(REGION_GFX1);
 	sprite_bank_size = sprite_length / 8;
-	sprite_expanded_data = (UINT32*)malloc(sprite_length * 2 * sizeof(UINT32));
+	sprite_expanded_data = (uint32_t*)malloc(sprite_length * 2 * sizeof(uint32_t));
 	if (!sprite_expanded_data)
 		return 1;
 
 	/* allocate the expanded background data */
 	back_length = memory_region_length(REGION_GFX3);
-	back_expanded_data = (UINT16*)malloc(back_length);
+	back_expanded_data = (uint16_t*)malloc(back_length);
 	if (!back_expanded_data)
 	{
 		free(sprite_expanded_data);
@@ -151,7 +151,7 @@ int turbo_vh_start(void)
 	}
 
 	/* allocate the expanded road palette */
-	road_expanded_palette = (UINT16*)malloc(0x40 * sizeof(UINT16));
+	road_expanded_palette = (uint16_t*)malloc(0x40 * sizeof(uint16_t));
 	if (!road_expanded_palette)
 	{
 		free(back_expanded_data);
@@ -176,7 +176,7 @@ int turbo_vh_start(void)
 	/* compute the sprite expansion array */
 	for (i = 0; i < 16; i++)
 	{
-		UINT32 value = 0;
+		uint32_t value = 0;
 		if (i & 1) value |= 0x00000001;
 		if (i & 2) value |= 0x00000100;
 		if (i & 4) value |= 0x00010000;
@@ -289,12 +289,12 @@ static void update_sprite_info(void)
 	/* first loop over all sprites and update those whose scanlines intersect ours */
 	for (i = 0; i < 16; i++, data++)
 	{
-		UINT8 *sprite_base = spriteram + 16 * i;
+		uint8_t *sprite_base = spriteram + 16 * i;
 
 		/* snarf all the data */
 		data->base = sprite_expanded_data + (i & 7) * 0x8000;
 		data->offset = (sprite_base[6] + 256 * sprite_base[7]) & 0x7fff;
-		data->rowbytes = (INT16)(sprite_base[4] + 256 * sprite_base[5]);
+		data->rowbytes = (int16_t)(sprite_base[4] + 256 * sprite_base[5]);
 		data->miny = sprite_base[0];
 		data->maxy = sprite_base[1];
 		data->xscale = ((5 * 256 - 4 * sprite_base[2]) << 16) / (5 * 256);
@@ -324,12 +324,12 @@ static void update_sprite_info(void)
 
 ***************************************************************************/
 
-static void draw_one_sprite(const struct sprite_params_data *data, UINT32 *dest, int xclip, int scanline)
+static void draw_one_sprite(const struct sprite_params_data *data, uint32_t *dest, int xclip, int scanline)
 {
 	int xstep = data->xscale;
 	int xoffs = data->xoffs;
 	int xcurr, offset;
-	UINT32 *src;
+	uint32_t *src;
 
 	/* xoffs of -1 means don't draw */
 	if (xoffs == -1) return;
@@ -353,7 +353,7 @@ static void draw_one_sprite(const struct sprite_params_data *data, UINT32 *dest,
 	/* loop over columns */
 	while (xoffs < VIEW_WIDTH)
 	{
-		UINT32 srcval = src[xcurr >> 16];
+		uint32_t srcval = src[xcurr >> 16];
 
 		/* stop on the end-of-row signal */
 		if (srcval == 0x12345678) break;
@@ -363,7 +363,7 @@ static void draw_one_sprite(const struct sprite_params_data *data, UINT32 *dest,
 }
 
 
-static void draw_road_sprites(UINT32 *dest, int scanline)
+static void draw_road_sprites(uint32_t *dest, int scanline)
 {
 	static const struct sprite_params_data *param_list[6] =
 	{
@@ -385,7 +385,7 @@ static void draw_road_sprites(UINT32 *dest, int scanline)
 }
 
 
-static void draw_offroad_sprites(UINT32 *dest, int road_column, int scanline)
+static void draw_offroad_sprites(uint32_t *dest, int road_column, int scanline)
 {
 	static const struct sprite_params_data *param_list[10] =
 	{
@@ -443,7 +443,7 @@ static void draw_scores(struct osd_bitmap *bitmap)
 	clip.max_x = clip.min_x + 1;
 	for (y = 0; y < 22; y++)
 	{
-		static UINT8 led_color[] = { 2, 2, 2, 2, 1, 1, 0, 0, 0, 0, 0 };
+		static uint8_t led_color[] = { 2, 2, 2, 2, 1, 1, 0, 0, 0, 0, 0 };
 		int code = ((y / 2) <= turbo_speed) ? 0 : 1;
 
 		drawgfx(bitmap, Machine->gfx[1],
@@ -518,13 +518,13 @@ void turbo_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 #define FULL_DRAW	1
 
 #define DRAW_FUNC	draw_everything_core_8
-#define TYPE		UINT8
+#define TYPE		uint8_t
 #include "turbo.c"
 #undef TYPE
 #undef DRAW_FUNC
 
 #define DRAW_FUNC	draw_everything_core_16
-#define TYPE		UINT16
+#define TYPE		uint16_t
 #include "turbo.c"
 #undef TYPE
 #undef DRAW_FUNC
@@ -533,7 +533,7 @@ void turbo_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 #define FULL_DRAW	0
 
 #define DRAW_FUNC	draw_minimal
-#define TYPE		UINT8
+#define TYPE		uint8_t
 #include "turbo.c"
 #undef TYPE
 #undef DRAW_FUNC
@@ -551,15 +551,15 @@ void turbo_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 static void DRAW_FUNC(struct osd_bitmap *bitmap)
 {
 	TYPE *base = &((TYPE *)bitmap->line[starty])[startx];
-	UINT32 sprite_buffer[VIEW_WIDTH + 256];
+	uint32_t sprite_buffer[VIEW_WIDTH + 256];
 
-	UINT8 *overall_priority_base = &overall_priority[(turbo_fbpla & 8) << 6];
-	UINT8 *sprite_priority_base = &sprite_priority[(turbo_fbpla & 7) << 7];
-	UINT8 *road_gfxdata_base = &road_gfxdata[(turbo_opc << 5) & 0x7e0];
-	UINT16 *road_palette_base = &road_expanded_palette[(turbo_fbcol & 1) << 4];
+	uint8_t *overall_priority_base = &overall_priority[(turbo_fbpla & 8) << 6];
+	uint8_t *sprite_priority_base = &sprite_priority[(turbo_fbpla & 7) << 7];
+	uint8_t *road_gfxdata_base = &road_gfxdata[(turbo_opc << 5) & 0x7e0];
+	uint16_t *road_palette_base = &road_expanded_palette[(turbo_fbcol & 1) << 4];
 
 	int dx = deltax, dy = deltay, rowsize = (bitmap->line[1] - bitmap->line[0]) * 8 / bitmap->depth;
-	UINT16 *colortable;
+	uint16_t *colortable;
 	int x, y, i;
 
 	/* expand the appropriate delta */
@@ -575,7 +575,7 @@ static void DRAW_FUNC(struct osd_bitmap *bitmap)
 	for (y = 4; y < VIEW_HEIGHT - 4; y++, base += dy)
 	{
 		int sel, coch, babit, slipar_acciar, area, area1, area2, area3, area4, area5, road = 0;
-		UINT32 *sprite_data = sprite_buffer;
+		uint32_t *sprite_data = sprite_buffer;
 		TYPE *dest = base;
 
 		/* compute the Y sum between opa and the current scanline (p. 141) */
@@ -585,7 +585,7 @@ static void DRAW_FUNC(struct osd_bitmap *bitmap)
 		if (!(turbo_opc & 0x80)) va ^= 0xff;
 
 		/* clear the sprite buffer and draw the road sprites */
-		memset(sprite_buffer, 0, VIEW_WIDTH * sizeof(UINT32));
+		memset(sprite_buffer, 0, VIEW_WIDTH * sizeof(uint32_t));
 		draw_road_sprites(sprite_buffer, y);
 
 		/* loop over 8-pixel chunks */
@@ -594,13 +594,13 @@ static void DRAW_FUNC(struct osd_bitmap *bitmap)
 		for (x = 8; x < VIEW_WIDTH; x += 8)
 		{
 			int area5_buffer = road_gfxdata_base[0x4000 + (x >> 3)];
-			UINT8 back_data = videoram[(y / 8) * 32 + (x / 8) - 33];
-			UINT16 backbits_buffer = back_expanded_data[(back_data << 3) | (y & 7)];
+			uint8_t back_data = videoram[(y / 8) * 32 + (x / 8) - 33];
+			uint16_t backbits_buffer = back_expanded_data[(back_data << 3) | (y & 7)];
 
 			/* loop over columns */
 			for (i = 0; i < 8; i++, dest += dx)
 			{
-				UINT32 sprite = *sprite_data++;
+				uint32_t sprite = *sprite_data++;
 
 				/* compute the X sum between opb and the current column; only the carry matters (p. 141) */
 				int carry = (x + i + turbo_opb) >> 8;

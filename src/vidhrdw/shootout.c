@@ -38,7 +38,7 @@ int shootout_vh_start( void ){
 
 static void get_sprite_info( void ){
 	const struct GfxElement *gfx = Machine->gfx[1];
-	const UINT8 *source = spriteram;
+	const uint8_t *source = spriteram;
 	struct sprite *sprite = sprite_list->sprite;
 	int count = NUM_SPRITES;
 
@@ -84,7 +84,7 @@ static void get_sprite_info( void ){
 
 static void get_sprite_info2( void ){
 	const struct GfxElement *gfx = Machine->gfx[1];
-	const UINT8 *source = spriteram;
+	const uint8_t *source = spriteram;
 	struct sprite *sprite = sprite_list->sprite;
 	int count = NUM_SPRITES;
 

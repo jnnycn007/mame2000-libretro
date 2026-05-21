@@ -91,12 +91,12 @@
 
 
 /* external video code and data */
-extern UINT8 spyhunt_sprite_color_mask;
-extern INT16 spyhunt_scroll_offset;
-extern UINT8 spyhunt_draw_lamps;
-extern UINT8 spyhunt_lamp[8];
+extern uint8_t spyhunt_sprite_color_mask;
+extern int16_t spyhunt_scroll_offset;
+extern uint8_t spyhunt_draw_lamps;
+extern uint8_t spyhunt_lamp[8];
 
-extern UINT8 *spyhunt_alpharam;
+extern uint8_t *spyhunt_alpharam;
 extern size_t spyhunt_alpharam_size;
 
 WRITE_HANDLER( mcr3_videoram_w );
@@ -123,13 +123,13 @@ void spyhunt_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
  *
  *************************************/
 
-static UINT8 input_mux;
-static UINT8 maxrpm_last_shift;
-static INT8 maxrpm_p1_shift;
-static INT8 maxrpm_p2_shift;
+static uint8_t input_mux;
+static uint8_t maxrpm_last_shift;
+static int8_t maxrpm_p1_shift;
+static int8_t maxrpm_p2_shift;
 
 /* Translation table for one-joystick emulation */
-static const UINT8 one_joy_trans[16] =
+static const uint8_t one_joy_trans[16] =
 {
 	0x00,0x05,0x0A,0x00,0x06,0x04,0x08,0x00,
 	0x09,0x01,0x02,0x00,0x00,0x00,0x00,0x00
@@ -281,9 +281,9 @@ static READ_HANDLER( maxrpm_port_1_r )
 
 static READ_HANDLER( maxrpm_port_2_r )
 {
-	static const UINT8 shift_bits[5] = { 0x00, 0x05, 0x06, 0x01, 0x02 };
-	UINT8 start = readinputport(0);
-	UINT8 shift = readinputport(10);
+	static const uint8_t shift_bits[5] = { 0x00, 0x05, 0x06, 0x01, 0x02 };
+	uint8_t start = readinputport(0);
+	uint8_t shift = readinputport(10);
 
 	/* reset on a start */
 	if (!(start & 0x08))
@@ -339,7 +339,7 @@ static READ_HANDLER( spyhunt_port_2_r )
 
 static WRITE_HANDLER( spyhunt_port_4_w )
 {
-	static UINT8 lastport4;
+	static uint8_t lastport4;
 
 	/* Spy Hunter uses port 4 for talking to the Chip Squeak Deluxe */
 	/* (and for toggling the lamps and muxing the analog inputs) */
@@ -1982,7 +1982,7 @@ static void spyhunt_decode(void)
 
 		for (i = 0; i < 0x2000; i++)
 		{
-			UINT8 temp = RAM[0xa000 + i];
+			uint8_t temp = RAM[0xa000 + i];
 			RAM[0xa000 + i] = RAM[0xc000 + i];
 			RAM[0xc000 + i] = temp;
 		}

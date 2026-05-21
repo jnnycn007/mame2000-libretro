@@ -150,11 +150,11 @@ WRITE_HANDLER( turbo_8279_w );
 WRITE_HANDLER( turbo_coin_and_lamp_w );
 
 /* from vidhrdw */
-extern UINT8 *turbo_sprite_position;
+extern uint8_t *turbo_sprite_position;
 
 int turbo_vh_start(void);
 void turbo_vh_stop(void);
-void turbo_vh_convert_color_prom(UINT8 *palette, UINT16 *colortable, const UINT8 *color_prom);
+void turbo_vh_convert_color_prom(uint8_t *palette, uint16_t *colortable, const uint8_t *color_prom);
 void turbo_vh_eof(void);
 void turbo_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh);
 WRITE_HANDLER( turbo_collision_clear_w );
@@ -592,7 +592,7 @@ static void rom_decode(void)
  *
  */
 
-	static const UINT8 xortable[4][32]=
+	static const uint8_t xortable[4][32]=
 	{
 		/* Table 0 */
 		/* 0x0000-0x3ff */
@@ -653,9 +653,9 @@ static void rom_decode(void)
 		2,1,2,1	 /* 0x5000-0x5fff */
 	};
 
-	UINT8 *RAM = memory_region(REGION_CPU1);
+	uint8_t *RAM = memory_region(REGION_CPU1);
 	int offs, i, j;
-	UINT8 src;
+	uint8_t src;
 
 	for (offs = 0x0000; offs < 0x6000; offs++)
 	{
@@ -674,7 +674,7 @@ static void rom_decode(void)
 
 static void init_turbo(void)
 {
-	static const UINT8 led_number_data[] =
+	static const uint8_t led_number_data[] =
 	{
 		0x3e,0x41,0x41,0x41,0x00,0x41,0x41,0x41,0x3e,0x00,
 		0x00,0x01,0x01,0x01,0x00,0x01,0x01,0x01,0x00,0x00,
@@ -688,7 +688,7 @@ static void init_turbo(void)
 		0x3e,0x41,0x41,0x41,0x3e,0x01,0x01,0x01,0x3e,0x00
 	};
 
-	static const UINT8 led_tach_data[] =
+	static const uint8_t led_tach_data[] =
 	{
 		0xff,0x00
 	};

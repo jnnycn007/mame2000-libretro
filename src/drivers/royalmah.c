@@ -54,8 +54,8 @@ void royalmah_vh_convert_color_prom(unsigned char *palette, unsigned short *colo
 WRITE_HANDLER( royalmah_videoram_w )
 {
 	int i;
-	UINT8 x, y;
-	UINT8 col1, col2;
+	uint8_t x, y;
+	uint8_t col1, col2;
 
 
 	videoram[offset] = data;

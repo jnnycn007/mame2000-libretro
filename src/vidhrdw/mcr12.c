@@ -16,19 +16,19 @@
 
 #ifndef INCLUDE_DRAW_CORE
 
-static UINT8 last_cocktail_flip;
-static UINT8 *spritebitmap;
-static UINT32 spritebitmap_width;
-static UINT32 spritebitmap_height;
+static uint8_t last_cocktail_flip;
+static uint8_t *spritebitmap;
+static uint32_t spritebitmap_width;
+static uint32_t spritebitmap_height;
 
 static void render_one_sprite(int code, int sx, int sy, int hflip, int vflip);
-static void render_sprite_tile_8(struct osd_bitmap *bitmap, const UINT16 *pens, int sx, int sy);
-static void render_sprite_tile_16(struct osd_bitmap *bitmap, const UINT16 *pens, int sx, int sy);
+static void render_sprite_tile_8(struct osd_bitmap *bitmap, const uint16_t *pens, int sx, int sy);
+static void render_sprite_tile_16(struct osd_bitmap *bitmap, const uint16_t *pens, int sx, int sy);
 
-INT8 mcr12_sprite_xoffs;
-INT8 mcr12_sprite_xoffs_flip;
+int8_t mcr12_sprite_xoffs;
+int8_t mcr12_sprite_xoffs_flip;
 
-static UINT8 xtiles, ytiles;
+static uint8_t xtiles, ytiles;
 
 
 /*************************************
@@ -44,7 +44,7 @@ int mcr12_vh_start(void)
 	/* allocate a temporary bitmap for the sprite rendering */
 	spritebitmap_width = Machine->drv->screen_width + 2 * 32;
 	spritebitmap_height = Machine->drv->screen_height + 2 * 32;
-	spritebitmap = (UINT8*)malloc(spritebitmap_width * spritebitmap_height);
+	spritebitmap = (uint8_t*)malloc(spritebitmap_width * spritebitmap_height);
 	if (!spritebitmap)
 		return 1;
 	memset(spritebitmap, 0, spritebitmap_width * spritebitmap_height);
@@ -53,7 +53,7 @@ int mcr12_vh_start(void)
 	/* but that's not what we want, so we swap it back here */
 	if (gfx && (Machine->orientation & ORIENTATION_SWAP_XY))
 	{
-		UINT8 *base = gfx->gfxdata;
+		uint8_t *base = gfx->gfxdata;
 		int c, x, y;
 		for (c = 0; c < gfx->total_elements; c++)
 		{
@@ -402,7 +402,7 @@ void journey_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 static void render_one_sprite(int code, int sx, int sy, int hflip, int vflip)
 {
 	const struct GfxElement *gfx = Machine->gfx[1];
-	UINT8 *src = gfx->gfxdata + gfx->char_modulo * code;
+	uint8_t *src = gfx->gfxdata + gfx->char_modulo * code;
 	int y, x;
 
 	/* adjust for vflip */
@@ -412,7 +412,7 @@ static void render_one_sprite(int code, int sx, int sy, int hflip, int vflip)
 	/* loop over lines in the sprite */
 	for (y = 0; y < 32; y++, sy++)
 	{
-		UINT8 *dst = spritebitmap + spritebitmap_width * sy + sx;
+		uint8_t *dst = spritebitmap + spritebitmap_width * sy + sx;
 
 		/* redraw the line */
 		if (!hflip)
@@ -469,13 +469,13 @@ static void render_one_sprite(int code, int sx, int sy, int hflip, int vflip)
 #define INCLUDE_DRAW_CORE
 
 #define DRAW_FUNC render_sprite_tile_8
-#define TYPE UINT8
+#define TYPE uint8_t
 #include "mcr12.c"
 #undef TYPE
 #undef DRAW_FUNC
 
 #define DRAW_FUNC render_sprite_tile_16
-#define TYPE UINT16
+#define TYPE uint16_t
 #include "mcr12.c"
 #undef TYPE
 #undef DRAW_FUNC
@@ -490,7 +490,7 @@ static void render_one_sprite(int code, int sx, int sy, int hflip, int vflip)
  *
  *************************************/
 
-void DRAW_FUNC(struct osd_bitmap *bitmap, const UINT16 *pens, int sx, int sy)
+void DRAW_FUNC(struct osd_bitmap *bitmap, const uint16_t *pens, int sx, int sy)
 {
 	int orientation = Machine->orientation;
 	int x, y;
@@ -498,7 +498,7 @@ void DRAW_FUNC(struct osd_bitmap *bitmap, const UINT16 *pens, int sx, int sy)
 	/* draw any dirty scanlines from the VRAM directly */
 	for (y = 0; y < 16; y++, sy++)
 	{
-		UINT8 *src = &spritebitmap[(sy + 32) * spritebitmap_width + (sx + 32)];
+		uint8_t *src = &spritebitmap[(sy + 32) * spritebitmap_width + (sx + 32)];
 		TYPE *dst = &((TYPE *)bitmap->line[sy])[sx];
 		int xadv = 1;
 

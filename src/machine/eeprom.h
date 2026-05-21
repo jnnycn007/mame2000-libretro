@@ -24,6 +24,6 @@ void EEPROM_set_clock_line(int state);
 void EEPROM_load(void *file);
 void EEPROM_save(void *file);
 
-void EEPROM_set_data(UINT8 *data, int length);
+void EEPROM_set_data(uint8_t *data, int length);
 
 #endif

@@ -125,7 +125,7 @@
 #include "vidhrdw/generic.h"
 
 
-extern UINT8 vindctr2_screen_refresh;
+extern uint8_t vindctr2_screen_refresh;
 
 WRITE_HANDLER( gauntlet_playfieldram_w );
 WRITE_HANDLER( gauntlet_hscroll_w );
@@ -138,14 +138,14 @@ void gauntlet_vh_stop(void);
 void gauntlet_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
 
 
-static UINT8 *speed_check;
-static UINT32 last_speed_check;
+static uint8_t *speed_check;
+static uint32_t last_speed_check;
 
-static UINT8 speech_val;
-static UINT8 last_speech_write;
-static UINT8 speech_squeak;
+static uint8_t speech_val;
+static uint8_t last_speech_write;
+static uint8_t speech_squeak;
 
-static UINT16 last_sound_reset;
+static uint16_t last_sound_reset;
 
 
 
@@ -1018,29 +1018,29 @@ ROM_END
 
 static void rom_decode(void)
 {
-	UINT32 *p1, *p2, temp;
-	UINT8 *data;
+	uint32_t *p1, *p2, temp;
+	uint8_t *data;
 	int i;
 
 	/* swap the top and bottom halves of the main CPU ROM images */
-	p1 = (UINT32 *)&memory_region(REGION_CPU1)[0x000000];
-	p2 = (UINT32 *)&memory_region(REGION_CPU1)[0x008000];
+	p1 = (uint32_t *)&memory_region(REGION_CPU1)[0x000000];
+	p2 = (uint32_t *)&memory_region(REGION_CPU1)[0x008000];
 	for (i = 0; i < 0x8000 / 4; i++)
 		temp = *p1, *p1++ = *p2, *p2++ = temp;
-	p1 = (UINT32 *)&memory_region(REGION_CPU1)[0x040000];
-	p2 = (UINT32 *)&memory_region(REGION_CPU1)[0x048000];
+	p1 = (uint32_t *)&memory_region(REGION_CPU1)[0x040000];
+	p2 = (uint32_t *)&memory_region(REGION_CPU1)[0x048000];
 	for (i = 0; i < 0x8000 / 4; i++)
 		temp = *p1, *p1++ = *p2, *p2++ = temp;
-	p1 = (UINT32 *)&memory_region(REGION_CPU1)[0x050000];
-	p2 = (UINT32 *)&memory_region(REGION_CPU1)[0x058000];
+	p1 = (uint32_t *)&memory_region(REGION_CPU1)[0x050000];
+	p2 = (uint32_t *)&memory_region(REGION_CPU1)[0x058000];
 	for (i = 0; i < 0x8000 / 4; i++)
 		temp = *p1, *p1++ = *p2, *p2++ = temp;
-	p1 = (UINT32 *)&memory_region(REGION_CPU1)[0x060000];
-	p2 = (UINT32 *)&memory_region(REGION_CPU1)[0x068000];
+	p1 = (uint32_t *)&memory_region(REGION_CPU1)[0x060000];
+	p2 = (uint32_t *)&memory_region(REGION_CPU1)[0x068000];
 	for (i = 0; i < 0x8000 / 4; i++)
 		temp = *p1, *p1++ = *p2, *p2++ = temp;
-	p1 = (UINT32 *)&memory_region(REGION_CPU1)[0x070000];
-	p2 = (UINT32 *)&memory_region(REGION_CPU1)[0x078000];
+	p1 = (uint32_t *)&memory_region(REGION_CPU1)[0x070000];
+	p2 = (uint32_t *)&memory_region(REGION_CPU1)[0x078000];
 	for (i = 0; i < 0x8000 / 4; i++)
 		temp = *p1, *p1++ = *p2, *p2++ = temp;
 
@@ -1048,7 +1048,7 @@ static void rom_decode(void)
 	   chip) are scrambled -- this is verified on the schematics! */
 	if (memory_region_length(REGION_GFX2) >= 0xc0000)
 	{
-		data = (UINT8*)malloc(0x8000);
+		data = (uint8_t*)malloc(0x8000);
 		if (data)
 		{
 			memcpy(data, &memory_region(REGION_GFX2)[0x88000], 0x8000);
@@ -1085,7 +1085,7 @@ static void init_gauntlet(void)
 	atarigen_init_6502_speedup(1, 0x410f, 0x4127);
 
 	/* speed up the 68010 */
-	speed_check = (UINT8*)install_mem_write_handler(0, 0x904002, 0x904003, speedup_68010_w);
+	speed_check = (uint8_t*)install_mem_write_handler(0, 0x904002, 0x904003, speedup_68010_w);
 	install_mem_read_handler(0, 0x904002, 0x904003, speedup_68010_r);
 
 	/* display messages */
@@ -1106,7 +1106,7 @@ static void init_gaunt2p(void)
 	atarigen_init_6502_speedup(1, 0x410f, 0x4127);
 
 	/* speed up the 68010 */
-	speed_check = (UINT8*)install_mem_write_handler(0, 0x904002, 0x904003, speedup_68010_w);
+	speed_check = (uint8_t*)install_mem_write_handler(0, 0x904002, 0x904003, speedup_68010_w);
 	install_mem_read_handler(0, 0x904002, 0x904003, speedup_68010_r);
 
 	/* display messages */
@@ -1127,7 +1127,7 @@ static void init_gauntlet2(void)
 	atarigen_init_6502_speedup(1, 0x410f, 0x4127);
 
 	/* speed up the 68010 */
-	speed_check = (UINT8*)install_mem_write_handler(0, 0x904002, 0x904003, speedup_68010_w);
+	speed_check = (uint8_t*)install_mem_write_handler(0, 0x904002, 0x904003, speedup_68010_w);
 	install_mem_read_handler(0, 0x904002, 0x904003, speedup_68010_r);
 
 	/* display messages */

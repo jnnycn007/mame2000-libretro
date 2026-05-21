@@ -17,38 +17,38 @@
 
 /* 6532 variables */
 static void *riot_timer;
-static UINT8 riot_irq_flag;
-static UINT8 riot_irq_enable;
-static UINT8 riot_porta_data;
-static UINT8 riot_porta_ddr;
-static UINT8 riot_portb_data;
-static UINT8 riot_portb_ddr;
-static UINT32 riot_divider;
-static UINT8 riot_state;
+static uint8_t riot_irq_flag;
+static uint8_t riot_irq_enable;
+static uint8_t riot_porta_data;
+static uint8_t riot_porta_ddr;
+static uint8_t riot_portb_data;
+static uint8_t riot_portb_ddr;
+static uint32_t riot_divider;
+static uint8_t riot_state;
 
 /* 6840 variables */
-static UINT8 sh6840_CR[3];
-static UINT8 sh6840_MSB;
-static UINT16 sh6840_count[3];
-static UINT16 sh6840_timer[3];
-static UINT8 exidy_sfxctrl;
+static uint8_t sh6840_CR[3];
+static uint8_t sh6840_MSB;
+static uint16_t sh6840_count[3];
+static uint16_t sh6840_timer[3];
+static uint8_t exidy_sfxctrl;
 
 /* 8253 variables */
-static UINT16 sh8253_count[3];
+static uint16_t sh8253_count[3];
 static int sh8253_clstate[3];
 
 /* 5220/CVSD variables */
-static UINT8 has_hc55516;
-static UINT8 has_tms5220;
+static uint8_t has_hc55516;
+static uint8_t has_tms5220;
 
 /* sound streaming variables */
 struct channel_data
 {
-	UINT8	enable;
-	UINT8	noisy;
-	INT16	volume;
-	UINT32	step;
-	UINT32	fraction;
+	uint8_t	enable;
+	uint8_t	noisy;
+	int16_t	volume;
+	uint32_t	step;
+	uint32_t	fraction;
 };
 static int exidy_stream;
 static float freq_to_step;
@@ -96,7 +96,7 @@ static struct pia6821_interface victory_pia_0_intf =
     Start/Stop Sound
 ***************************************************************************/
 
-static void exidy_stream_update(int param, INT16 *buffer, int length)
+static void exidy_stream_update(int param, int16_t *buffer, int length)
 {
 	float noise_freq=0;
 	int chan, i;
@@ -135,8 +135,8 @@ static void exidy_stream_update(int param, INT16 *buffer, int length)
 			/* otherwise, generate normally: non-noisy case first */
 			else if (!c->noisy)
 			{
-				UINT32 frac = c->fraction, step = c->step;
-				INT16 vol = c->volume;
+				uint32_t frac = c->fraction, step = c->step;
+				int16_t vol = c->volume;
 				for (i = 0; i < length; i++)
 				{
 					if (frac & 0x1000000)
@@ -165,9 +165,9 @@ static void exidy_stream_update(int param, INT16 *buffer, int length)
 					the variance, we compute the effective step value, and then apply a random
 					offset to it after each sample is generated
 				*/
-				UINT32 avgstep = (sh6840_timer[chan]) ? freq_to_step * (noise_freq * 0.25) / (float)sh6840_timer[chan] : 0;
-				UINT32 frac = c->fraction;
-				INT16 vol = c->volume;
+				uint32_t avgstep = (sh6840_timer[chan]) ? freq_to_step * (noise_freq * 0.25) / (float)sh6840_timer[chan] : 0;
+				uint32_t frac = c->fraction;
+				int16_t vol = c->volume;
 
 				avgstep /= 32768;
 				for (i = 0; i < length; i++)
@@ -190,8 +190,8 @@ static void exidy_stream_update(int param, INT16 *buffer, int length)
 		/* only process enabled channels */
 		if (c->enable)
 		{
-			UINT32 step = c->step;
-			UINT32 frac = c->fraction;
+			uint32_t step = c->step;
+			uint32_t frac = c->fraction;
 
 			for (i = 0; i < length; i++)
 			{

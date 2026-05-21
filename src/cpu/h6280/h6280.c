@@ -77,14 +77,14 @@ typedef struct
     PAIR  sp;           /* stack pointer (always 100 - 1FF) */
     PAIR  zp;           /* zero page address */
     PAIR  ea;           /* effective address */
-    UINT8 a;            /* Accumulator */
-    UINT8 x;            /* X index register */
-    UINT8 y;            /* Y index register */
-    UINT8 p;            /* Processor status */
-    UINT8 mmr[8];       /* Hu6280 memory mapper registers */
-    UINT8 irq_mask;     /* interrupt enable/disable */
-    UINT8 timer_status; /* timer status */
-	UINT8 timer_ack;	/* timer acknowledge */
+    uint8_t a;            /* Accumulator */
+    uint8_t x;            /* X index register */
+    uint8_t y;            /* Y index register */
+    uint8_t p;            /* Processor status */
+    uint8_t mmr[8];       /* Hu6280 memory mapper registers */
+    uint8_t irq_mask;     /* interrupt enable/disable */
+    uint8_t timer_status; /* timer status */
+	uint8_t timer_ack;	/* timer acknowledge */
     int timer_value;    /* timer interrupt */
     int timer_load;		/* reload value */
 	int extra_cycles;	/* cycles used taking an interrupt */

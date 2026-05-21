@@ -40,23 +40,23 @@
 Z8000_exec *z8000_exec = NULL;
 
 typedef union {
-    UINT8   B[16]; /* RL0,RH0,RL1,RH1...RL7,RH7 */
-    UINT16  W[16]; /* R0,R1,R2...R15 */
-    UINT32  L[8];  /* RR0,RR2,RR4..RR14 */
-    UINT64  Q[4];  /* RQ0,RQ4,..RQ12 */
+    uint8_t   B[16]; /* RL0,RH0,RL1,RH1...RL7,RH7 */
+    uint16_t  W[16]; /* R0,R1,R2...R15 */
+    uint32_t  L[8];  /* RR0,RR2,RR4..RR14 */
+    uint64_t  Q[4];  /* RQ0,RQ4,..RQ12 */
 }   z8000_reg_file;
 
 typedef struct {
-    UINT16  op[4];      /* opcodes/data of current instruction */
-	UINT16	ppc;		/* previous program counter */
-    UINT16  pc;         /* program counter */
-    UINT16  psap;       /* program status pointer */
-    UINT16  fcw;        /* flags and control word */
-    UINT16  refresh;    /* refresh timer/counter */
-    UINT16  nsp;        /* system stack pointer */
-    UINT16  irq_req;    /* CPU is halted, interrupt or trap request */
-    UINT16  irq_srv;    /* serviced interrupt request */
-    UINT16  irq_vec;    /* interrupt vector */
+    uint16_t  op[4];      /* opcodes/data of current instruction */
+	uint16_t	ppc;		/* previous program counter */
+    uint16_t  pc;         /* program counter */
+    uint16_t  psap;       /* program status pointer */
+    uint16_t  fcw;        /* flags and control word */
+    uint16_t  refresh;    /* refresh timer/counter */
+    uint16_t  nsp;        /* system stack pointer */
+    uint16_t  irq_req;    /* CPU is halted, interrupt or trap request */
+    uint16_t  irq_srv;    /* serviced interrupt request */
+    uint16_t  irq_vec;    /* interrupt vector */
     z8000_reg_file regs;/* registers */
 	int nmi_state;		/* NMI line state */
 	int irq_state[2];	/* IRQ line states (NVI, VI) */
@@ -69,7 +69,7 @@ int z8000_ICount;
 static z8000_Regs Z;
 
 /* zero, sign and parity flags for logical byte operations */
-static UINT8 z8000_zsp[256];
+static uint8_t z8000_zsp[256];
 
 /* conversion table for Z8000 DAB opcode */
 #include "z8000dab.h"
@@ -106,7 +106,7 @@ static UINT8 z8000_zsp[256];
 
 
     /* pointers to byte (8bit) registers */
-	static UINT8	*pRB[16] =
+	static uint8_t	*pRB[16] =
 	{
 		&Z.regs.B[ 0],&Z.regs.B[ 2],&Z.regs.B[ 4],&Z.regs.B[ 6],
 		&Z.regs.B[ 8],&Z.regs.B[10],&Z.regs.B[12],&Z.regs.B[14],
@@ -115,7 +115,7 @@ static UINT8 z8000_zsp[256];
 	};
 
 	/* pointers to word (16bit) registers */
-	static UINT16	*pRW[16] =
+	static uint16_t	*pRW[16] =
 	{
 		&Z.regs.W[ 0],&Z.regs.W[ 1],&Z.regs.W[ 2],&Z.regs.W[ 3],
 		&Z.regs.W[ 4],&Z.regs.W[ 5],&Z.regs.W[ 6],&Z.regs.W[ 7],
@@ -124,7 +124,7 @@ static UINT8 z8000_zsp[256];
 	};
 
 	/* pointers to long (32bit) registers */
-	static UINT32	*pRL[16] =
+	static uint32_t	*pRL[16] =
 	{
 		&Z.regs.L[ 0],&Z.regs.L[ 0],&Z.regs.L[ 1],&Z.regs.L[ 1],
 		&Z.regs.L[ 2],&Z.regs.L[ 2],&Z.regs.L[ 3],&Z.regs.L[ 3],
@@ -134,7 +134,7 @@ static UINT8 z8000_zsp[256];
 
 #else
 	/* pointers to byte (8bit) registers */
-	static UINT8	*pRB[16] =
+	static uint8_t	*pRB[16] =
 	{
 		&Z.regs.B[ 7],&Z.regs.B[ 5],&Z.regs.B[ 3],&Z.regs.B[ 1],
 		&Z.regs.B[15],&Z.regs.B[13],&Z.regs.B[11],&Z.regs.B[ 9],
@@ -142,7 +142,7 @@ static UINT8 z8000_zsp[256];
 		&Z.regs.B[14],&Z.regs.B[12],&Z.regs.B[10],&Z.regs.B[ 8]
 	};
 
-	static UINT16	*pRW[16] =
+	static uint16_t	*pRW[16] =
 	{
         &Z.regs.W[ 3],&Z.regs.W[ 2],&Z.regs.W[ 1],&Z.regs.W[ 0],
         &Z.regs.W[ 7],&Z.regs.W[ 6],&Z.regs.W[ 5],&Z.regs.W[ 4],
@@ -151,7 +151,7 @@ static UINT8 z8000_zsp[256];
     };
 
     /* pointers to long (32bit) registers */
-	static UINT32	*pRL[16] =
+	static uint32_t	*pRL[16] =
 	{
 		&Z.regs.L[ 1],&Z.regs.L[ 1],&Z.regs.L[ 0],&Z.regs.L[ 0],
 		&Z.regs.L[ 3],&Z.regs.L[ 3],&Z.regs.L[ 2],&Z.regs.L[ 2],
@@ -161,57 +161,57 @@ static UINT8 z8000_zsp[256];
 #endif
 
 /* pointers to quad word (64bit) registers */
-static UINT64   *pRQ[16] = {
+static uint64_t   *pRQ[16] = {
     &Z.regs.Q[ 0],&Z.regs.Q[ 0],&Z.regs.Q[ 0],&Z.regs.Q[ 0],
     &Z.regs.Q[ 1],&Z.regs.Q[ 1],&Z.regs.Q[ 1],&Z.regs.Q[ 1],
     &Z.regs.Q[ 2],&Z.regs.Q[ 2],&Z.regs.Q[ 2],&Z.regs.Q[ 2],
     &Z.regs.Q[ 3],&Z.regs.Q[ 3],&Z.regs.Q[ 3],&Z.regs.Q[ 3]};
 
-static INLINE UINT16 RDOP(void)
+static INLINE uint16_t RDOP(void)
 {
-	UINT16 res = cpu_readop16(PC);
+	uint16_t res = cpu_readop16(PC);
     PC += 2;
     return res;
 }
 
-static INLINE UINT8 RDMEM_B(UINT16 addr)
+static INLINE uint8_t RDMEM_B(uint16_t addr)
 {
 	return cpu_readmem16bew(addr);
 }
 
-static INLINE UINT16 RDMEM_W(UINT16 addr)
+static INLINE uint16_t RDMEM_W(uint16_t addr)
 {
 	addr &= ~1;
 	return cpu_readmem16bew_word(addr);
 }
 
-static INLINE UINT32 RDMEM_L(UINT16 addr)
+static INLINE uint32_t RDMEM_L(uint16_t addr)
 {
-	UINT32 result;
+	uint32_t result;
 	addr &= ~1;
 	result = cpu_readmem16bew_word(addr) << 16;
 	return result + cpu_readmem16bew_word(addr + 2);
 }
 
-static INLINE void WRMEM_B(UINT16 addr, UINT8 value)
+static INLINE void WRMEM_B(uint16_t addr, uint8_t value)
 {
 	cpu_writemem16bew(addr, value);
 }
 
-static INLINE void WRMEM_W(UINT16 addr, UINT16 value)
+static INLINE void WRMEM_W(uint16_t addr, uint16_t value)
 {
 	addr &= ~1;
 	cpu_writemem16bew_word(addr, value);
 }
 
-static INLINE void WRMEM_L(UINT16 addr, UINT32 value)
+static INLINE void WRMEM_L(uint16_t addr, uint32_t value)
 {
 	addr &= ~1;
 	cpu_writemem16bew_word(addr, value >> 16);
-	cpu_writemem16bew_word((UINT16)(addr + 2), value & 0xffff);
+	cpu_writemem16bew_word((uint16_t)(addr + 2), value & 0xffff);
 }
 
-static INLINE UINT8 RDPORT_B(int mode, UINT16 addr)
+static INLINE uint8_t RDPORT_B(int mode, uint16_t addr)
 {
 	if( mode == 0 )
 	{
@@ -224,12 +224,12 @@ static INLINE UINT8 RDPORT_B(int mode, UINT16 addr)
 	}
 }
 
-static INLINE UINT16 RDPORT_W(int mode, UINT16 addr)
+static INLINE uint16_t RDPORT_W(int mode, uint16_t addr)
 {
 	if( mode == 0 )
 	{
-		return cpu_readport((UINT16)(addr)) +
-			  (cpu_readport((UINT16)(addr+1)) << 8);
+		return cpu_readport((uint16_t)(addr)) +
+			  (cpu_readport((uint16_t)(addr+1)) << 8);
 	}
 	else
 	{
@@ -238,14 +238,14 @@ static INLINE UINT16 RDPORT_W(int mode, UINT16 addr)
 	}
 }
 
-static INLINE UINT32 RDPORT_L(int mode, UINT16 addr)
+static INLINE uint32_t RDPORT_L(int mode, uint16_t addr)
 {
 	if( mode == 0 )
 	{
-		return	cpu_readport((UINT16)(addr)) +
-			   (cpu_readport((UINT16)(addr+1)) <<  8) +
-			   (cpu_readport((UINT16)(addr+2)) << 16) +
-			   (cpu_readport((UINT16)(addr+3)) << 24);
+		return	cpu_readport((uint16_t)(addr)) +
+			   (cpu_readport((uint16_t)(addr+1)) <<  8) +
+			   (cpu_readport((uint16_t)(addr+2)) << 16) +
+			   (cpu_readport((uint16_t)(addr+3)) << 24);
 	}
 	else
 	{
@@ -254,7 +254,7 @@ static INLINE UINT32 RDPORT_L(int mode, UINT16 addr)
 	}
 }
 
-static INLINE void WRPORT_B(int mode, UINT16 addr, UINT8 value)
+static INLINE void WRPORT_B(int mode, uint16_t addr, uint8_t value)
 {
 	if( mode == 0 )
 	{
@@ -266,12 +266,12 @@ static INLINE void WRPORT_B(int mode, UINT16 addr, UINT8 value)
     }
 }
 
-static INLINE void WRPORT_W(int mode, UINT16 addr, UINT16 value)
+static INLINE void WRPORT_W(int mode, uint16_t addr, uint16_t value)
 {
 	if( mode == 0 )
 	{
-		cpu_writeport((UINT16)(addr),value & 0xff);
-		cpu_writeport((UINT16)(addr+1),(value >> 8) & 0xff);
+		cpu_writeport((uint16_t)(addr),value & 0xff);
+		cpu_writeport((uint16_t)(addr+1),(value >> 8) & 0xff);
 	}
 	else
 	{
@@ -279,14 +279,14 @@ static INLINE void WRPORT_W(int mode, UINT16 addr, UINT16 value)
     }
 }
 
-static INLINE void WRPORT_L(int mode, UINT16 addr, UINT32 value)
+static INLINE void WRPORT_L(int mode, uint16_t addr, uint32_t value)
 {
 	if( mode == 0 )
 	{
-		cpu_writeport((UINT16)(addr),value & 0xff);
-		cpu_writeport((UINT16)(addr+1),(value >> 8) & 0xff);
-		cpu_writeport((UINT16)(addr+2),(value >> 16) & 0xff);
-		cpu_writeport((UINT16)(addr+3),(value >> 24) & 0xff);
+		cpu_writeport((uint16_t)(addr),value & 0xff);
+		cpu_writeport((uint16_t)(addr+1),(value >> 8) & 0xff);
+		cpu_writeport((uint16_t)(addr+2),(value >> 16) & 0xff);
+		cpu_writeport((uint16_t)(addr+3),(value >> 24) & 0xff);
 	}
 	else
 	{
@@ -343,7 +343,7 @@ static INLINE void set_irq(int type)
 
 static INLINE void Interrupt(void)
 {
-    UINT16 fcw = FCW;
+    uint16_t fcw = FCW;
 
     if (IRQ_REQ & Z8000_NVI)
     {

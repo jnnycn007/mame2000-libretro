@@ -130,7 +130,7 @@ WRITE_HANDLER( tecmo_bgvideoram_w )
 
 WRITE_HANDLER( tecmo_fgscroll_w )
 {
-	static UINT8 scroll[3];
+	static uint8_t scroll[3];
 
 	scroll[offset] = data;
 
@@ -140,7 +140,7 @@ WRITE_HANDLER( tecmo_fgscroll_w )
 
 WRITE_HANDLER( tecmo_bgscroll_w )
 {
-	static UINT8 scroll[3];
+	static uint8_t scroll[3];
 
 	scroll[offset] = data;
 
@@ -164,7 +164,7 @@ WRITE_HANDLER( tecmo_flipscreen_w )
 static void draw_sprites(struct osd_bitmap *bitmap)
 {
 	int offs;
-	const UINT8 layout[8][8] =
+	const uint8_t layout[8][8] =
 	{
 		{0,1,4,5,16,17,20,21},
 		{2,3,6,7,18,19,22,23},

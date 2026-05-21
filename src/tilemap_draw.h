@@ -35,14 +35,14 @@ DECLARE( draw, (int xpos, int ypos),
 
 		//int priority_bitmap_row_offset = priority_bitmap_line_offset*TILE_HEIGHT;
 		int priority_bitmap_row_offset = priority_bitmap_line_offset<<(TILE_HEIGHT/8+2);
-		UINT8 *priority_bitmap_baseaddr = xpos + (UINT8 *)priority_bitmap->line[y1];
-		UINT8 *priority_bitmap_next;
+		uint8_t *priority_bitmap_baseaddr = xpos + (uint8_t *)priority_bitmap->line[y1];
+		uint8_t *priority_bitmap_next;
 
 		int priority = blit.tile_priority;
 		const DATA_TYPE *source_baseaddr;
 		const DATA_TYPE *source_next;
-		const UINT8 *mask_baseaddr;
-		const UINT8 *mask_next;
+		const uint8_t *mask_baseaddr;
+		const uint8_t *mask_next;
 
 		int c1;
 		int c2; /* leftmost and rightmost visible columns in source tilemap */
@@ -79,8 +79,8 @@ DECLARE( draw, (int xpos, int ypos),
 		for(;;){
 			//int row = y/TILE_HEIGHT;
 			int row = y>>(TILE_HEIGHT/8+2);
-			UINT8 *mask_data = blit.mask_data_row[row];
-			UINT8 *priority_data = blit.priority_data_row[row];
+			uint8_t *mask_data = blit.mask_data_row[row];
+			uint8_t *priority_data = blit.priority_data_row[row];
 
 			int tile_type;
 			int prev_tile_type = TILE_TRANSPARENT;
@@ -105,14 +105,14 @@ DECLARE( draw, (int xpos, int ypos),
 						if( prev_tile_type == TILE_MASKED ){
 							//int count = (x_end+7)/8 - x_start/8;
 							int count = ((x_end+7)>>3) - (x_start>>3);
-							//const UINT8 *mask0 = mask_baseaddr + x_start/8;
-							const UINT8 *mask0 = mask_baseaddr + (x_start>>3);
+							//const uint8_t *mask0 = mask_baseaddr + x_start/8;
+							const uint8_t *mask0 = mask_baseaddr + (x_start>>3);
 							const DATA_TYPE *source0 = source_baseaddr + (x_start&0xfff8);
 							DATA_TYPE *dest0 = dest_baseaddr + (x_start&0xfff8);
-							UINT8 *pmap0 = priority_bitmap_baseaddr + (x_start&0xfff8);
+							uint8_t *pmap0 = priority_bitmap_baseaddr + (x_start&0xfff8);
 							int i = y;
 							for(;;){
-								memcpybitmask( dest0, (UINT32 *)source0, mask0, count );
+								memcpybitmask( dest0, (uint32_t *)source0, mask0, count );
 								memsetbitmask8( pmap0, tilemap_priority_code, mask0, count );
 								if( ++i == y_next ) break;
 
@@ -126,7 +126,7 @@ DECLARE( draw, (int xpos, int ypos),
 							int num_pixels = x_end - x_start;
 							DATA_TYPE *dest0 = dest_baseaddr+x_start;
 							const DATA_TYPE *source0 = source_baseaddr+x_start;
-							UINT8 *pmap0 = priority_bitmap_baseaddr + x_start;
+							uint8_t *pmap0 = priority_bitmap_baseaddr + x_start;
 							int i = y;
 							for(;;){
 								//memcpy( dest0, source0, num_pixels*sizeof(DATA_TYPE));
@@ -183,7 +183,7 @@ DECLARE( draw_opaque, (int xpos, int ypos),
 	if( y2>blit.clip_bottom ) y2 = blit.clip_bottom;
 
 	if( x1<x2 && y1<y2 ){ /* do nothing if totally clipped */
-		UINT8 *priority_bitmap_baseaddr = xpos + (UINT8 *)priority_bitmap->line[y1];
+		uint8_t *priority_bitmap_baseaddr = xpos + (uint8_t *)priority_bitmap->line[y1];
 		//int priority_bitmap_row_offset = priority_bitmap_line_offset*TILE_HEIGHT;
 		int priority_bitmap_row_offset = priority_bitmap_line_offset<<(TILE_HEIGHT/8+2);
 
@@ -225,7 +225,7 @@ DECLARE( draw_opaque, (int xpos, int ypos),
 		for(;;){
 			//int row = y/TILE_HEIGHT;
 			int row = y>>(TILE_HEIGHT/8+2);
-			UINT8 *priority_data = blit.priority_data_row[row];
+			uint8_t *priority_data = blit.priority_data_row[row];
 
 			int tile_type;
 			int prev_tile_type = TILE_TRANSPARENT;
@@ -250,7 +250,7 @@ DECLARE( draw_opaque, (int xpos, int ypos),
 						/* TILE_OPAQUE */
 						int num_pixels = x_end - x_start;
 						DATA_TYPE *dest0 = dest_baseaddr+x_start;
-						UINT8 *pmap0 = priority_bitmap_baseaddr+x_start;
+						uint8_t *pmap0 = priority_bitmap_baseaddr+x_start;
 						const DATA_TYPE *source0 = source_baseaddr+x_start;
 						int i = y;
 						for(;;){

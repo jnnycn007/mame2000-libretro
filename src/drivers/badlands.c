@@ -109,10 +109,10 @@ void badlands_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
 void badlands_scanline_update(int scanline);
 
 
-static UINT8 pedal_value[2];
+static uint8_t pedal_value[2];
 
-static UINT8 *bank_base;
-static UINT8 *bank_source_data;
+static uint8_t *bank_base;
+static uint8_t *bank_source_data;
 
 
 

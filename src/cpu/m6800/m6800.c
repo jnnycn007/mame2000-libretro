@@ -12,9 +12,9 @@
 		6809 Microcomputer Programming & Interfacing with Experiments"
 			by Andrew C. Staugaard, Jr.; Howard W. Sams & Co., Inc.
 
-	System dependencies:	UINT16 must be 16 bit unsigned int
-							UINT8 must be 8 bit unsigned int
-							UINT32 must be more than 16 bits
+	System dependencies:	uint16_t must be 16 bit unsigned int
+							uint8_t must be 8 bit unsigned int
+							uint32_t must be more than 16 bits
 							arrays up to 65536 bytes must be supported
 							machine must be twos complement
 
@@ -69,28 +69,28 @@ typedef struct
 	PAIR	s;				/* Stack pointer */
 	PAIR	x;				/* Index register */
 	PAIR	d;				/* Accumulators */
-	UINT8	cc; 			/* Condition codes */
-	UINT8	wai_state;		/* WAI opcode state ,(or sleep opcode state) */
-	UINT8	nmi_state;		/* NMI line state */
-	UINT8	irq_state[2];	/* IRQ line state [IRQ1,TIN] */
-	UINT8	ic_eddge;		/* InputCapture eddge , b.0=fall,b.1=raise */
+	uint8_t	cc; 			/* Condition codes */
+	uint8_t	wai_state;		/* WAI opcode state ,(or sleep opcode state) */
+	uint8_t	nmi_state;		/* NMI line state */
+	uint8_t	irq_state[2];	/* IRQ line state [IRQ1,TIN] */
+	uint8_t	ic_eddge;		/* InputCapture eddge , b.0=fall,b.1=raise */
 
 	int		(*irq_callback)(int irqline);
 	int 	extra_cycles;	/* cycles used for interrupts */
 	void	(* const * insn)(void);	/* instruction table */
-	const UINT8 *cycles;			/* clock cycle of instruction table */
+	const uint8_t *cycles;			/* clock cycle of instruction table */
 	/* internal registers */
-	UINT8	port1_ddr;
-	UINT8	port2_ddr;
-	UINT8	port1_data;
-	UINT8	port2_data;
-	UINT8	tcsr;			/* Timer Control and Status Register */
-	UINT8	pending_tcsr;	/* pending IRQ flag for clear IRQflag process */
-	UINT8	irq2;			/* IRQ2 flags */
-	UINT8	ram_ctrl;
+	uint8_t	port1_ddr;
+	uint8_t	port2_ddr;
+	uint8_t	port1_data;
+	uint8_t	port2_data;
+	uint8_t	tcsr;			/* Timer Control and Status Register */
+	uint8_t	pending_tcsr;	/* pending IRQ flag for clear IRQflag process */
+	uint8_t	irq2;			/* IRQ2 flags */
+	uint8_t	ram_ctrl;
 	PAIR	counter;		/* free running counter */
 	PAIR	output_compare;	/* output compare       */
-	UINT16	input_capture;	/* input capture        */
+	uint16_t	input_capture;	/* input capture        */
 
 	PAIR	timer_over;
 }   m6800_Regs;
@@ -138,7 +138,7 @@ static PAIR ea; 		/* effective address */
 int m6800_ICount=50000;
 
 /* point of next timer event */
-static UINT32 timer_next;
+static uint32_t timer_next;
 
 /* DS -- THESE ARE RE-DEFINED IN m6800.h TO RAM, ROM or FUNCTIONS IN cpuintrf.c */
 #define RM				M6800_RDMEM
@@ -207,7 +207,7 @@ static UINT32 timer_next;
 
 /* operate one instruction for */
 #define ONE_MORE_INSN() {		\
-	UINT8 ireg; 							\
+	uint8_t ireg; 							\
 	pPPC = pPC; 							\
 	ireg=M_RDOP(PCD);						\
 	PC++;									\
@@ -243,8 +243,8 @@ static UINT32 timer_next;
 
 /* macros for CC -- CC bits affected should be reset before calling */
 #define SET_Z(a)		if(!a)SEZ
-#define SET_Z8(a)		SET_Z((UINT8)a)
-#define SET_Z16(a)		SET_Z((UINT16)a)
+#define SET_Z8(a)		SET_Z((uint8_t)a)
+#define SET_Z16(a)		SET_Z((uint16_t)a)
 #define SET_N8(a)		CC|=((a&0x80)>>4)
 #define SET_N16(a)		CC|=((a&0x8000)>>12)
 #define SET_H(a,b,r)	CC|=(((a^b^r)&0x10)<<1)
@@ -253,7 +253,7 @@ static UINT32 timer_next;
 #define SET_V8(a,b,r)	CC|=(((a^b^r^(r>>1))&0x80)>>6)
 #define SET_V16(a,b,r)	CC|=(((a^b^r^(r>>1))&0x8000)>>14)
 
-static const UINT8 flags8i[256]=	 /* increment */
+static const uint8_t flags8i[256]=	 /* increment */
 {
 0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -272,7 +272,7 @@ static const UINT8 flags8i[256]=	 /* increment */
 0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,
 0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08,0x08
 };
-static const UINT8 flags8d[256]= /* decrement */
+static const uint8_t flags8d[256]= /* decrement */
 {
 0x04,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -300,15 +300,15 @@ static const UINT8 flags8d[256]= /* decrement */
 #define SET_FLAGS8(a,b,r)	{SET_N8(r);SET_Z8(r);SET_V8(a,b,r);SET_C8(r);}
 #define SET_FLAGS16(a,b,r)	{SET_N16(r);SET_Z16(r);SET_V16(a,b,r);SET_C16(r);}
 
-/* for treating an UINT8 as a signed INT16 */
-#define SIGNED(b) ((INT16)(b&0x80?b|0xff00:b))
+/* for treating an uint8_t as a signed int16_t */
+#define SIGNED(b) ((int16_t)(b&0x80?b|0xff00:b))
 
 /* Macros for addressing modes */
 #define DIRECT IMMBYTE(EAD)
 #define IMM8 EA=PC++
 #define IMM16 {EA=PC;PC+=2;}
 #define EXTENDED IMMWORD(ea)
-#define INDEXED {EA=X+(UINT8)M_RDOP_ARG(PCD);PC++;}
+#define INDEXED {EA=X+(uint8_t)M_RDOP_ARG(PCD);PC++;}
 
 /* macros to set status flags */
 #define SEC CC|=0x01
@@ -368,7 +368,7 @@ static const UINT8 flags8d[256]= /* decrement */
 #define BRANCH(f) {IMMBYTE(t);if(f){PC+=SIGNED(t);CHANGE_PC();}}
 #define NXORV  ((CC&0x08)^((CC&0x02)<<2))
 
-static const UINT8 cycles_6800[] =
+static const uint8_t cycles_6800[] =
 {
 		/* 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F */
 	/*0*/  0, 2, 0, 0, 0, 0, 2, 2, 4, 4, 2, 2, 2, 2, 2, 2,
@@ -389,7 +389,7 @@ static const UINT8 cycles_6800[] =
 	/*F*/  4, 4, 4, 0, 4, 4, 4, 5, 4, 4, 4, 4, 0, 0, 5, 6
 };
 
-static const UINT8 cycles_6803[] =
+static const uint8_t cycles_6803[] =
 {
 		/* 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F */
 	/*0*/  0, 2, 0, 0, 3, 3, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2,
@@ -410,7 +410,7 @@ static const UINT8 cycles_6803[] =
 	/*F*/  4, 4, 4, 6, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5
 };
 
-static const UINT8 cycles_63701[] =
+static const uint8_t cycles_63701[] =
 {
 		/* 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F */
 	/*0*/  0, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -431,7 +431,7 @@ static const UINT8 cycles_63701[] =
 	/*F*/  4, 4, 4, 5, 4, 4, 4, 4, 4, 4, 4, 4, 5, 5, 5, 5
 };
 
-static const UINT8 cycles_nsc8105[] =
+static const uint8_t cycles_nsc8105[] =
 {
 		/* 0  1  2  3  4  5  6  7  8  9  A  B  C  D  E  F */
 	/*0*/  0, 0, 2, 0, 0, 2, 0, 2, 4, 2, 4, 2, 2, 2, 2, 2,
@@ -452,20 +452,20 @@ static const UINT8 cycles_nsc8105[] =
 	/*F*/  4, 4, 4, 0, 4, 4, 4, 5, 4, 4, 4, 4, 4, 5, 0, 6
 };
 
-static INLINE UINT32 RM16( UINT32 Addr )
+static INLINE uint32_t RM16( uint32_t Addr )
 {
-	UINT32 result = RM(Addr) << 8;
+	uint32_t result = RM(Addr) << 8;
 	return result | RM((Addr+1)&0xffff);
 }
 
-static INLINE void WM16( UINT32 Addr, PAIR *p )
+static INLINE void WM16( uint32_t Addr, PAIR *p )
 {
 	WM( Addr, p->b.h );
 	WM( (Addr+1)&0xffff, p->b.l );
 }
 
 /* IRQ enter */
-static void ENTER_INTERRUPT(UINT16 irq_vector)
+static void ENTER_INTERRUPT(uint16_t irq_vector)
 {
 	if( m6800.wai_state & (M6800_WAI|M6800_SLP) )
 	{
@@ -761,7 +761,7 @@ void m6800_state_load(void *file) { state_load(file,"m6800"); }
  ****************************************************************************/
 int m6800_execute(int cycles)
 {
-	UINT8 ireg;
+	uint8_t ireg;
 	m6800_ICount = cycles;
 
 	CLEANUP_conters;
@@ -1173,7 +1173,7 @@ void m6803_exit(void) { m6800_exit(); }
 #if (HAS_M6803||HAS_M6801)
 int m6803_execute(int cycles)
 {
-	UINT8 ireg;
+	uint8_t ireg;
 	m6803_ICount = cycles;
 
 	CLEANUP_conters;
@@ -1550,7 +1550,7 @@ void hd63701_exit(void) { m6800_exit(); }
  ****************************************************************************/
 int hd63701_execute(int cycles)
 {
-	UINT8 ireg;
+	uint8_t ireg;
 	hd63701_ICount = cycles;
 
 	CLEANUP_conters;
@@ -1907,7 +1907,7 @@ void nsc8105_exit(void) { m6800_exit(); }
  ****************************************************************************/
 int nsc8105_execute(int cycles)
 {
-	UINT8 ireg;
+	uint8_t ireg;
 	nsc8105_ICount = cycles;
 
 	CLEANUP_conters;

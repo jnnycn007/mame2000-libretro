@@ -228,7 +228,7 @@ void EEPROM_save(void *f)
 	osd_fwrite(f,eeprom_data,(1 << intf->address_bits) * intf->data_bits / 8);
 }
 
-void EEPROM_set_data(UINT8 *data, int length)
+void EEPROM_set_data(uint8_t *data, int length)
 {
 	memcpy(eeprom_data, data, length);
 }

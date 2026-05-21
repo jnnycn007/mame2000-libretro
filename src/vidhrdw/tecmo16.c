@@ -218,7 +218,7 @@ WRITE_HANDLER( tecmo16_scroll_char_y_w )
 static void draw_sprites(struct osd_bitmap *bitmap)
 {
 	int offs;
-	const UINT8 layout[8][8] =
+	const uint8_t layout[8][8] =
 	{
 		{0,1,4,5,16,17,20,21},
 		{2,3,6,7,18,19,22,23},
@@ -287,7 +287,7 @@ static void draw_sprites(struct osd_bitmap *bitmap)
 static void mark_sprites_colors(void)
 {
 	int offs,i;
-	UINT16 palette_map[16];
+	uint16_t palette_map[16];
 
 
 	memset(palette_map,0,sizeof(palette_map));

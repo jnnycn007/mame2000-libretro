@@ -87,7 +87,7 @@ int screen_line_offset;
 static struct sprite_list *first_sprite_list = NULL; /* used for resource tracking */
 static int FlickeringInvisible;
 
-static UINT16 *shade_table;
+static uint16_t *shade_table;
 
 static void sprite_order_setup( struct sprite_list *sprite_list, int *first, int *last, int *delta ){
 	if( sprite_list->flags&SPRITE_LIST_FRONT_TO_BACK ){
@@ -838,14 +838,14 @@ static void _do_blit_zoom16( const struct sprite *sprite ){
 		int x,y;
 		unsigned int pen;
 		int pitch = blit.line_offset*dy/2;
-		UINT16 *dest = (UINT16 *)(blit.baseaddr + blit.line_offset*y1);
+		uint16_t *dest = (uint16_t *)(blit.baseaddr + blit.line_offset*y1);
 		int ycount = ycount0;
 
 		if( orientation & ORIENTATION_SWAP_XY ){ /* manually rotate the sprite graphics */
 			int xcount = xcount0;
 			for( x=x1; x!=x2; x+=dx ){
 				const unsigned char *source;
-				UINT16 *dest1;
+				uint16_t *dest1;
 
 				ycount = ycount0;
 				while( xcount>=sprite->total_width ){
@@ -899,14 +899,14 @@ static void _do_blit_zoom16( const struct sprite *sprite ){
 		int x,y;
 		unsigned int pen;
 		int pitch = (blit.line_offset*dy)>>1;
-		UINT16 *dest = (UINT16 *)(blit.baseaddr + blit.line_offset*y1);
+		uint16_t *dest = (uint16_t *)(blit.baseaddr + blit.line_offset*y1);
 		int ycount = ycount0;
 
 		if( orientation & ORIENTATION_SWAP_XY ){ /* manually rotate the sprite graphics */
 			int xcount = xcount0;
 			for( x=x1; x!=x2; x+=dx ){
 				const unsigned char *source;
-				UINT16 *dest1;
+				uint16_t *dest1;
 
 				ycount = ycount0;
 				while( xcount>=sprite->total_width ){
@@ -961,14 +961,14 @@ static void _do_blit_zoom16( const struct sprite *sprite ){
 		int x,y;
 		unsigned int pen;
 		int pitch = (blit.line_offset*dy)>>1;
-		UINT16 *dest = (UINT16 *)(blit.baseaddr + blit.line_offset*y1);
+		uint16_t *dest = (uint16_t *)(blit.baseaddr + blit.line_offset*y1);
 		int ycount = ycount0;
 
 		if( orientation & ORIENTATION_SWAP_XY ){ /* manually rotate the sprite graphics */
 			int xcount = xcount0;
 			for( x=x1; x!=x2; x+=dx ){
 				const unsigned char *source;
-				UINT16 *dest1;
+				uint16_t *dest1;
 
 				ycount = ycount0;
 				while( xcount>=sprite->total_width ){
@@ -1076,13 +1076,13 @@ static void _do_blit_zoom16_noscale( const struct sprite *sprite ){
 		int x,y;
 		unsigned int pen;
 		int pitch = (blit.line_offset*dy)>>1;
-		UINT16 *dest = (UINT16 *)(blit.baseaddr + blit.line_offset*y1);
+		uint16_t *dest = (uint16_t *)(blit.baseaddr + blit.line_offset*y1);
 		if( orientation & ORIENTATION_SWAP_XY ){ /* manually rotate the sprite graphics */
     		const unsigned char *pen_data = sprite->pen_data+xcount0*sprite->line_offset+ycount0;
     		const unsigned short *pal_data = sprite->pal_data;
 			for( x=x1; x!=x2; x+=dx ){
 				const unsigned char *source;
-				UINT16 *dest1;
+				uint16_t *dest1;
 				source = pen_data;
 				dest1 = &dest[x];
 				for( y=y1; y!=y2; y+=dy ){
@@ -1115,14 +1115,14 @@ static void _do_blit_zoom16_noscale( const struct sprite *sprite ){
 		int x,y;
 		unsigned int pen;
 		int pitch = (blit.line_offset*dy)>>1;
-		UINT16 *dest = (UINT16 *)(blit.baseaddr + blit.line_offset*y1);
+		uint16_t *dest = (uint16_t *)(blit.baseaddr + blit.line_offset*y1);
 
 		if( orientation & ORIENTATION_SWAP_XY ){ /* manually rotate the sprite graphics */
     		const unsigned char *pen_data = sprite->pen_data+xcount0*sprite->line_offset+ycount0;
     		const unsigned short *pal_data = sprite->pal_data;
 			for( x=x1; x!=x2; x+=dx ){
 				const unsigned char *source;
-				UINT16 *dest1;
+				uint16_t *dest1;
 				source = pen_data;
 				dest1 = &dest[x];
 				for( y=y1; y!=y2; y+=dy ){
@@ -1157,13 +1157,13 @@ static void _do_blit_zoom16_noscale( const struct sprite *sprite ){
 		int x,y;
 		unsigned int pen;
 		int pitch = blit.line_offset*dy/2;
-		UINT16 *dest = (UINT16 *)(blit.baseaddr + blit.line_offset*y1);
+		uint16_t *dest = (uint16_t *)(blit.baseaddr + blit.line_offset*y1);
 
 		if( orientation & ORIENTATION_SWAP_XY ){ /* manually rotate the sprite graphics */
     		const unsigned char *pen_data = sprite->pen_data+xcount0*sprite->line_offset+ycount0;
 			for( x=x1; x!=x2; x+=dx ){
 				const unsigned char *source;
-				UINT16 *dest1;
+				uint16_t *dest1;
 				source = pen_data;
 				dest1 = &dest[x];
 				for( y=y1; y!=y2; y+=dy ){
@@ -1381,7 +1381,7 @@ static void sprite_update_helper( struct sprite_list *sprite_list ){
 				int priority = sprite->priority;
 
 				if( palette_used_colors ){
-					UINT32 pen_usage = sprite->pen_usage;
+					uint32_t pen_usage = sprite->pen_usage;
 					int indx = sprite->pal_data - Machine->remapped_colortable;
 					while( pen_usage ){
 						if( pen_usage&1 ) palette_used_colors[indx] = PALETTE_COLOR_USED;
@@ -1504,7 +1504,7 @@ void sprite_draw( struct sprite_list *sprite_list, int priority ){
 }
 
 
-void sprite_set_shade_table(UINT16 *table)
+void sprite_set_shade_table(uint16_t *table)
 {
 	shade_table=table;
 }

@@ -38,7 +38,7 @@
 
 timer_tm mcr68_timing_factor;
 
-UINT8 mcr_cocktail_flip;
+uint8_t mcr_cocktail_flip;
 
 
 
@@ -48,28 +48,28 @@ UINT8 mcr_cocktail_flip;
  *
  *************************************/
 
-static UINT8 m6840_status;
-static UINT8 m6840_status_read_since_int;
-static UINT8 m6840_msb_buffer;
-static UINT8 m6840_lsb_buffer;
+static uint8_t m6840_status;
+static uint8_t m6840_status_read_since_int;
+static uint8_t m6840_msb_buffer;
+static uint8_t m6840_lsb_buffer;
 static struct counter_state
 {
-	UINT8	control;
-	UINT16	latch;
-	UINT16	count;
+	uint8_t	control;
+	uint16_t	latch;
+	uint16_t	count;
 	void *	timer;
 	timer_tm	period;
 } m6840_state[3];
 
 /* MCR/68k interrupt states */
-static UINT8 m6840_irq_state;
-static UINT8 m6840_irq_vector;
-static UINT8 v493_irq_state;
-static UINT8 v493_irq_vector;
+static uint8_t m6840_irq_state;
+static uint8_t m6840_irq_vector;
+static uint8_t v493_irq_state;
+static uint8_t v493_irq_vector;
 
 static void (*v493_callback)(int param);
 
-static UINT8 zwackery_sound_data;
+static uint8_t zwackery_sound_data;
 
 static const timer_tm m6840_counter_periods[3] = { TIME_ONE_SEC / 30, TIME_NEVER, TIME_ONE_SEC / (512 * 30) };
 static timer_tm m6840_internal_counter_period;	/* 68000 CLK / 10 */
@@ -603,7 +603,7 @@ static void reload_count(int counter)
 }
 
 
-static UINT16 compute_counter(int counter)
+static uint16_t compute_counter(int counter)
 {
 	timer_tm period;
 	int remaining;
@@ -649,7 +649,7 @@ static WRITE_HANDLER( mcr68_6840_w_common )
 	if (offset < 2)
 	{
 		int counter = (offset == 1) ? 1 : (m6840_state[1].control & 0x01) ? 0 : 2;
-		UINT8 diffs = data ^ m6840_state[counter].control;
+		uint8_t diffs = data ^ m6840_state[counter].control;
 
 		m6840_state[counter].control = data;
 

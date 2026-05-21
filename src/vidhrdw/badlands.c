@@ -36,7 +36,7 @@ static struct atarigen_pf_state pf_state;
 static void pf_render_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 static void pf_overrender_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param);
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param);
 
 
 
@@ -88,7 +88,7 @@ int badlands_vh_start(void)
 	{
 		int i;
 
-		memset(palette_used_colors, PALETTE_COLOR_USED, Machine->drv->total_colors * sizeof(UINT8));
+		memset(palette_used_colors, PALETTE_COLOR_USED, Machine->drv->total_colors * sizeof(uint8_t));
 		for (i = 0; i < 8; i++)
 			palette_used_colors[0x80 + i * 16] = PALETTE_COLOR_TRANSPARENT;
 	}
@@ -271,7 +271,7 @@ static void pf_overrender_callback(const struct rectangle *clip, const struct re
  *
  *************************************/
 
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
 	struct GfxElement *gfx = Machine->gfx[1];
 	struct osd_bitmap *bitmap = (struct osd_bitmap *)param;

@@ -59,14 +59,14 @@
 
 
 /* code-related variables */
-extern UINT8 *	wms_code_rom;
-extern UINT8 *	wms_scratch_ram;
+extern uint8_t *	wms_code_rom;
+extern uint8_t *	wms_scratch_ram;
 
 /* CMOS-related variables */
-extern UINT8 *	wms_cmos_ram;
+extern uint8_t *	wms_cmos_ram;
 
 /* graphics-related variables */
-extern UINT8 *	wms_gfx_rom;
+extern uint8_t *	wms_gfx_rom;
 extern size_t 	wms_gfx_rom_size;
 
 
@@ -120,7 +120,7 @@ void wms_yunit_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh);
 void wms_yunit_vh_eof(void);
 void wms_zunit_vh_eof(void);
 void wms_yunit_display_interrupt(int scanline);
-void wms_yunit_display_addr_changed(UINT32 offs, int rowbytes, int scanline);
+void wms_yunit_display_addr_changed(uint32_t offs, int rowbytes, int scanline);
 void wms_yunit_to_shiftreg(offs_t address, unsigned short *shiftreg);
 void wms_yunit_from_shiftreg(offs_t address, unsigned short *shiftreg);
 

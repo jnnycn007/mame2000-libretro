@@ -36,25 +36,25 @@
 struct ADPCMVoice
 {
 	int stream;				/* which stream are we playing on? */
-	UINT8 playing;			/* 1 if we are actively playing */
+	uint8_t playing;			/* 1 if we are actively playing */
 
-	UINT8 *region_base;		/* pointer to the base of the region */
-	UINT8 *base;			/* pointer to the base memory location */
-	UINT32 sample;			/* current sample number */
-	UINT32 count;			/* total samples to play */
+	uint8_t *region_base;		/* pointer to the base of the region */
+	uint8_t *base;			/* pointer to the base memory location */
+	uint32_t sample;			/* current sample number */
+	uint32_t count;			/* total samples to play */
 
-	UINT32 signal;			/* current ADPCM signal */
-	UINT32 step;			/* current ADPCM step */
-	UINT32 volume;			/* output volume */
+	uint32_t signal;			/* current ADPCM signal */
+	uint32_t step;			/* current ADPCM step */
+	uint32_t volume;			/* output volume */
 
-	INT16 last_sample;		/* last sample output */
-	INT16 curr_sample;		/* current sample target */
-	UINT32 source_step;		/* step value for frequency conversion */
-	UINT32 source_pos;		/* current fractional position */
+	int16_t last_sample;		/* last sample output */
+	int16_t curr_sample;		/* current sample target */
+	uint32_t source_step;		/* step value for frequency conversion */
+	uint32_t source_pos;		/* current fractional position */
 };
 
 /* array of ADPCM voices */
-static UINT8 num_voices;
+static uint8_t num_voices;
 static struct ADPCMVoice adpcm[MAX_ADPCM];
 
 /* global pointer to the current array of samples */
@@ -67,7 +67,7 @@ static int index_shift[8] = { -1, -1, -1, -1, 2, 4, 6, 8 };
 static int diff_lookup[49*16];
 
 /* volume lookup table */
-static UINT32 volume_table[16];
+static uint32_t volume_table[16];
 
 
 
@@ -116,7 +116,7 @@ static void compute_tables(void)
 		/* 3dB per step */
 		while (vol-- > 0)
 			out /= 1.412537545;	/* = 10 ^ (3/20) = 3dB */
-		volume_table[step] = (UINT32)out;
+		volume_table[step] = (uint32_t)out;
 	}
 }
 
@@ -128,12 +128,12 @@ static void compute_tables(void)
 
 ***********************************************************************************************/
 
-static void generate_adpcm(struct ADPCMVoice *voice, INT16 *buffer, int samples)
+static void generate_adpcm(struct ADPCMVoice *voice, int16_t *buffer, int samples)
 {
 	/* if this voice is active */
 	if (voice->playing)
 	{
-		UINT8 *base = voice->base;
+		uint8_t *base = voice->base;
 		int sample = voice->sample;
 		int signal = voice->signal;
 		int count = voice->count;
@@ -191,13 +191,13 @@ static void generate_adpcm(struct ADPCMVoice *voice, INT16 *buffer, int samples)
 
 ***********************************************************************************************/
 
-static void adpcm_update(int num, INT16 *buffer, int length)
+static void adpcm_update(int num, int16_t *buffer, int length)
 {
 	struct ADPCMVoice *voice = &adpcm[num];
-	INT16 sample_data[MAX_SAMPLE_CHUNK], *curr_data = sample_data;
-	INT16 prev = voice->last_sample, curr = voice->curr_sample;
-	UINT32 final_pos;
-	UINT32 new_samples;
+	int16_t sample_data[MAX_SAMPLE_CHUNK], *curr_data = sample_data;
+	int16_t prev = voice->last_sample, curr = voice->curr_sample;
+	uint32_t final_pos;
+	uint32_t new_samples;
 
 	/* finish off the current sample */
 	if (voice->source_pos > 0)
@@ -205,7 +205,7 @@ static void adpcm_update(int num, INT16 *buffer, int length)
 		/* interpolate */
 		while (length > 0 && voice->source_pos < FRAC_ONE)
 		{
-			*buffer++ = (((INT32)prev * (FRAC_ONE - voice->source_pos)) + ((INT32)curr * voice->source_pos)) >> FRAC_BITS;
+			*buffer++ = (((int32_t)prev * (FRAC_ONE - voice->source_pos)) + ((int32_t)curr * voice->source_pos)) >> FRAC_BITS;
 			voice->source_pos += voice->source_step;
 			length--;
 		}
@@ -234,7 +234,7 @@ static void adpcm_update(int num, INT16 *buffer, int length)
 		/* interpolate */
 		while (length > 0 && voice->source_pos < FRAC_ONE)
 		{
-			*buffer++ = (((INT32)prev * (FRAC_ONE - voice->source_pos)) + ((INT32)curr * voice->source_pos)) >> FRAC_BITS;
+			*buffer++ = (((int32_t)prev * (FRAC_ONE - voice->source_pos)) + ((int32_t)curr * voice->source_pos)) >> FRAC_BITS;
 			voice->source_pos += voice->source_step;
 			length--;
 		}
@@ -300,7 +300,7 @@ int ADPCM_sh_start(const struct MachineSound *msound)
 		adpcm[i].volume = 255;
 		adpcm[i].signal = -2;
 		if (Machine->sample_rate)
-			adpcm[i].source_step = (UINT32)((float)intf->frequency * (float)FRAC_ONE / (float)Machine->sample_rate);
+			adpcm[i].source_step = (uint32_t)((float)intf->frequency * (float)FRAC_ONE / (float)Machine->sample_rate);
 	}
 
 	/* success */
@@ -569,7 +569,7 @@ int OKIM6295_sh_start(const struct MachineSound *msound)
 		adpcm[i].volume = 255;
 		adpcm[i].signal = -2;
 		if (Machine->sample_rate)
-			adpcm[i].source_step = (UINT32)((float)intf->frequency[chip] * (float)FRAC_ONE / (float)Machine->sample_rate);
+			adpcm[i].source_step = (uint32_t)((float)intf->frequency[chip] * (float)FRAC_ONE / (float)Machine->sample_rate);
 	}
 
 	/* success */
@@ -652,7 +652,7 @@ void OKIM6295_set_frequency(int which, int channel, int frequency)
 	/* update the stream and set the new base */
 	stream_update(voice->stream, 0);
 	if (Machine->sample_rate)
-		voice->source_step = (UINT32)((float)frequency * (float)FRAC_ONE / (float)Machine->sample_rate);
+		voice->source_step = (uint32_t)((float)frequency * (float)FRAC_ONE / (float)Machine->sample_rate);
 }
 
 

@@ -3572,10 +3572,10 @@ static void init_tmnt(void)
 	free(temp);
 }
 
-static void shuffle(UINT8 *buf,int len)
+static void shuffle(uint8_t *buf,int len)
 {
 	int i;
-	UINT8 t;
+	uint8_t t;
 
 	if (len == 2) return;
 

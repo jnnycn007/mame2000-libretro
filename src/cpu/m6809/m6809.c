@@ -12,9 +12,9 @@
 		6809 Microcomputer Programming & Interfacing with Experiments"
 			by Andrew C. Staugaard, Jr.; Howard W. Sams & Co., Inc.
 
-	System dependencies:	UINT16 must be 16 bit unsigned int
-							UINT8 must be 8 bit unsigned int
-							UINT32 must be more than 16 bits
+	System dependencies:	uint16_t must be 16 bit unsigned int
+							uint8_t must be 8 bit unsigned int
+							uint32_t must be more than 16 bits
 							arrays up to 65536 bytes must be supported
 							machine must be twos complement
 
@@ -89,13 +89,13 @@ typedef struct
 	PAIR	dp; 		/* Direct Page register (page in MSB) */
 	PAIR	u, s;		/* Stack pointers */
 	PAIR	x, y;		/* Index registers */
-    UINT8   cc;
-	UINT8	ireg;		/* First opcode */
-	UINT8	irq_state[2];
+    uint8_t   cc;
+	uint8_t	ireg;		/* First opcode */
+	uint8_t	irq_state[2];
     int     extra_cycles; /* cycles used up by interrupts */
     int     (*irq_callback)(int irqline);
-    UINT8   int_state;  /* SYNC and CWAI flags */
-    UINT8   nmi_state;
+    uint8_t   int_state;  /* SYNC and CWAI flags */
+    uint8_t   nmi_state;
 } m6809_Regs;
 
 /* flag bits in the cc register */
@@ -235,8 +235,8 @@ int m6809_ICount=50000;
 
 /* macros for CC -- CC bits affected should be reset before calling */
 #define SET_Z(a)		if(!a)SEZ
-#define SET_Z8(a)		SET_Z((UINT8)a)
-#define SET_Z16(a)		SET_Z((UINT16)a)
+#define SET_Z8(a)		SET_Z((uint8_t)a)
+#define SET_Z16(a)		SET_Z((uint16_t)a)
 #define SET_N8(a)		CC|=((a&0x80)>>4)
 #define SET_N16(a)		CC|=((a&0x8000)>>12)
 #define SET_H(a,b,r)	CC|=(((a^b^r)&0x10)<<1)
@@ -245,7 +245,7 @@ int m6809_ICount=50000;
 #define SET_V8(a,b,r)	CC|=(((a^b^r^(r>>1))&0x80)>>6)
 #define SET_V16(a,b,r)	CC|=(((a^b^r^(r>>1))&0x8000)>>14)
 
-static UINT8 flags8i[256]=	 /* increment */
+static uint8_t flags8i[256]=	 /* increment */
 {
 CC_Z,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -264,7 +264,7 @@ CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,
 CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,
 CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N
 };
-static UINT8 flags8d[256]= /* decrement */
+static uint8_t flags8d[256]= /* decrement */
 {
 CC_Z,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
 0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,
@@ -293,8 +293,8 @@ CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N
 #define SET_FLAGS16(a,b,r)	{SET_N16(r);SET_Z16(r);SET_V16(a,b,r);SET_C16(r);}
 
 /* for treating an unsigned byte as a signed word */
-#define SIGNED(b) ((UINT16)(b&0x80?b|0xff00:b))
-//#define SIGNED(b) ((UINT16)((INT8)b))
+#define SIGNED(b) ((uint16_t)(b&0x80?b|0xff00:b))
+//#define SIGNED(b) ((uint16_t)((int8_t)b))
 
 /* macros for addressing modes (postbytes have their own code) */
 #define DIRECT	EAD = DPD; IMMBYTE(ea.b.l)
@@ -322,7 +322,7 @@ CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N
 
 /* macros for branch instructions */
 #define BRANCH(f) { 					\
-	UINT8 t;							\
+	uint8_t t;							\
 	IMMBYTE(t); 						\
 	if( f ) 							\
 	{									\
@@ -346,12 +346,12 @@ CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N,CC_N
 
 /* macros for setting/getting registers in TFR/EXG instructions */
 
-static INLINE UINT32 RM16( UINT32 Addr )
+static INLINE uint32_t RM16( uint32_t Addr )
 {
 	return (RM(Addr) << 8) | (RM((Addr+1)&0xffff));
 }
 
-static INLINE void WM16( UINT32 Addr, PAIR *p )
+static INLINE void WM16( uint32_t Addr, PAIR *p )
 {
 	WM( Addr, p->b.h );
 	WM( (Addr+1)&0xffff, p->b.l );
@@ -1046,7 +1046,7 @@ static INLINE void fetch_effective_address( void )
     &&l_0xf8, &&l_0xf9, &&l_0xfa, &&l_0xfb, &&l_0xfc, &&l_0xfd, &&l_0xfe, &&l_0xff
     };
 
-	UINT8 postbyte = ROP_ARG(PCD);
+	uint8_t postbyte = ROP_ARG(PCD);
 	PC++;
 
     goto *a_jump_table[postbyte];

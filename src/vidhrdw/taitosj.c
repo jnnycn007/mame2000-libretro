@@ -399,7 +399,7 @@ WRITE_HANDLER( taitosj_collision_reg_clear_w )
 	taitosj_collision_reg[3] = 0;
 }
 
-static INLINE int get_sprite_xy(UINT8 num, UINT8* sx, UINT8* sy)
+static INLINE int get_sprite_xy(uint8_t num, uint8_t* sx, uint8_t* sy)
 {
 	int offs = num * 4;
 
@@ -477,7 +477,7 @@ static int check_sprite_sprite_bitpattern(int sx1, int sy1, int num1,
 
 static void check_sprite_sprite_collision(void)
 {
-	UINT8 i,j,sx1,sx2,sy1,sy2;
+	uint8_t i,j,sx1,sx2,sy1,sy2;
 
 
 	/* chech each pair of sprites */
@@ -496,8 +496,8 @@ static void check_sprite_sprite_collision(void)
 				if (get_sprite_xy(j, &sx2, &sy2))
 				{
 					/* rule out any pairs that cannot be touching */
-					if ((abs((INT8)sx1 - (INT8)sx2) < 16) &&
-						(abs((INT8)sy1 - (INT8)sy2) < 16))
+					if ((abs((int8_t)sx1 - (int8_t)sx2) < 16) &&
+						(abs((int8_t)sy1 - (int8_t)sy2) < 16))
 					{
 						if (check_sprite_sprite_bitpattern(sx1, sy1, i, sx2, sy2, j))
 						{
@@ -523,7 +523,7 @@ static void check_sprite_sprite_collision(void)
 
 static void calculate_sprites_areas(void)
 {
-	UINT8 sx,sy;
+	uint8_t sx,sy;
 	int i,minx,miny,maxx,maxy;
 
 	for (i = 0x00; i < 0x20; i++)
@@ -634,7 +634,7 @@ done:
 
 static void check_sprite_plane_collision(void)
 {
-	UINT8 i;
+	uint8_t i;
 
 
 	/* check each sprite */
@@ -661,7 +661,7 @@ static void drawsprites(struct osd_bitmap *bitmap)
 
 		for (offs = spriteram_size - 4;offs >= 0;offs -= 4)
 		{
-			UINT8 sx,sy,flipx,flipy;
+			uint8_t sx,sy,flipx,flipy;
 
 
 			if ((offs >= 0x40) && (offs <= 0x5f))  continue;	/* no sprites here */

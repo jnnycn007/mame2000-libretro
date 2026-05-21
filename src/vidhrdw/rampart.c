@@ -56,10 +56,10 @@ static int *color_usage;
  *
  *************************************/
 
-static const UINT8 *update_palette(void);
+static const uint8_t *update_palette(void);
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param);
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param);
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param);
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param);
 
 
 
@@ -201,7 +201,7 @@ void rampart_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 			if (atarigen_pf_dirty[y])
 			{
 				int xx = 0;
-				const UINT8 *src = &atarigen_playfieldram[512 * y];
+				const uint8_t *src = &atarigen_playfieldram[512 * y];
 
 				/* regenerate the line */
 				for (x = 0; x < XDIM/2; x++)
@@ -233,9 +233,9 @@ void rampart_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
  *
  *************************************/
 
-static const UINT8 *update_palette(void)
+static const uint8_t *update_palette(void)
 {
-	UINT16 mo_map[16];
+	uint16_t mo_map[16];
 	int i, j;
 
 	/* reset color tracking */
@@ -253,7 +253,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the motion object palette */
 	for (i = 0; i < 16; i++)
 	{
-		UINT16 used = mo_map[i];
+		uint16_t used = mo_map[i];
 		if (used)
 		{
 			palette_used_colors[0x100 + i * 16 + 0] = PALETTE_COLOR_TRANSPARENT;
@@ -274,16 +274,16 @@ static const UINT8 *update_palette(void)
  *
  *************************************/
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
 	const unsigned int *usage = Machine->gfx[0]->pen_usage;
-	UINT16 *colormap = (UINT16 *)param;
+	uint16_t *colormap = (uint16_t *)param;
 	int code = data[1] & 0x7fff;
 	int color = data[2] & 0x000f;
 	int hsize = ((data[3] >> 4) & 7) + 1;
 	int vsize = (data[3] & 7) + 1;
 	int tiles = hsize * vsize;
-	UINT16 temp = 0;
+	uint16_t temp = 0;
 	int i;
 
 	for (i = 0; i < tiles; i++)
@@ -299,7 +299,7 @@ static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, 
  *
  *************************************/
 
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
 	const struct GfxElement *gfx = Machine->gfx[0];
 	struct osd_bitmap *bitmap = (struct osd_bitmap *)param;

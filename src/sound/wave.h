@@ -78,7 +78,7 @@ extern int wave_output_chunk(int id, void *src, int chunks);
 struct wave_args {
     void *file;
 	int display;
-	int (*fill_wave)(INT16 *buffer, int length, UINT8 *bytes);
+	int (*fill_wave)(int16_t *buffer, int length, uint8_t *bytes);
 	int smpfreq;
     int header_samples;
     int trailer_samples;
@@ -87,13 +87,13 @@ struct wave_args {
 };
 
 /*****************************************************************************
- * Your (optional) fill_wave callback will be called with "UINT8 *bytes" set
+ * Your (optional) fill_wave callback will be called with "uint8_t *bytes" set
  * to one of these values if you should fill in the (optional) header or
  * trailer samples into the buffer.
  * Otherwise 'bytes' is a pointer to the chunk of data
  *****************************************************************************/
-#define CODE_HEADER 	((UINT8*)-1)
-#define CODE_TRAILER	((UINT8*)-2)
+#define CODE_HEADER 	((uint8_t*)-1)
+#define CODE_TRAILER	((uint8_t*)-2)
 
 #endif
 

@@ -758,7 +758,7 @@ void name(int pc)																		\
 {																						\
 	MHELE hw;																			\
 																						\
-	pc = (UINT32)pc >> shift;															\
+	pc = (uint32_t)pc >> shift;															\
 																						\
 	/* allow overrides */																\
 	if (OPbasefunc) 																	\
@@ -769,11 +769,11 @@ void name(int pc)																		\
 	}																					\
 																						\
 	/* perform the lookup */															\
-	hw = cur_mrhard[(UINT32)pc >> (ABITS2_##abits + ABITS_MIN_##abits)];				\
+	hw = cur_mrhard[(uint32_t)pc >> (ABITS2_##abits + ABITS_MIN_##abits)];				\
 	if (hw >= MH_HARDMAX)																\
 	{																					\
 		hw -= MH_HARDMAX;																\
-		hw = readhardware[(hw << MH_SBITS) + (((UINT32)pc >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))]; \
+		hw = readhardware[(hw << MH_SBITS) + (((uint32_t)pc >> ABITS_MIN_##abits) & MHMASK(ABITS2_##abits))]; \
 	}																					\
 	ophw = hw;																			\
 																						\

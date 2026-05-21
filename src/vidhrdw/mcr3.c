@@ -30,13 +30,13 @@
  *************************************/
 
 /* Spy Hunter hardware extras */
-UINT8 spyhunt_sprite_color_mask;
-INT16 spyhunt_scrollx, spyhunt_scrolly;
-INT16 spyhunt_scroll_offset;
-UINT8 spyhunt_draw_lamps;
-UINT8 spyhunt_lamp[8];
+uint8_t spyhunt_sprite_color_mask;
+int16_t spyhunt_scrollx, spyhunt_scrolly;
+int16_t spyhunt_scroll_offset;
+uint8_t spyhunt_draw_lamps;
+uint8_t spyhunt_lamp[8];
 
-UINT8 *spyhunt_alpharam;
+uint8_t *spyhunt_alpharam;
 size_t spyhunt_alpharam_size;
 
 
@@ -51,10 +51,10 @@ size_t spyhunt_alpharam_size;
 static struct osd_bitmap *spyhunt_backbitmap;
 
 /* Discs of Tron artwork globals */
-static UINT8 dotron_palettes[3][3*256];
-static UINT8 light_status;
+static uint8_t dotron_palettes[3][3*256];
+static uint8_t light_status;
 
-static UINT8 last_cocktail_flip;
+static uint8_t last_cocktail_flip;
 
 
 
@@ -109,7 +109,7 @@ WRITE_HANDLER( mcr3_videoram_w )
  *
  *************************************/
 
-static void mcr3_update_background(struct osd_bitmap *bitmap, UINT8 color_xor)
+static void mcr3_update_background(struct osd_bitmap *bitmap, uint8_t color_xor)
 {
 	int offs;
 
@@ -461,7 +461,7 @@ void dotron_change_light(int light)
 
 static void dotron_change_palette(int which)
 {
-	UINT8 *new_palette;
+	uint8_t *new_palette;
 	int i, offset;
 
 	/* get the palette indices */

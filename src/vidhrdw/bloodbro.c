@@ -75,11 +75,11 @@ int bloodbro_vh_start(void) {
 
 static void draw_text( struct osd_bitmap *bitmap ){
 	const struct rectangle *clip = &Machine->visible_area;
-	const UINT16 *source = (const UINT16 *)textlayoutram;
+	const uint16_t *source = (const uint16_t *)textlayoutram;
 	int sx, sy;
 	for( sy=0; sy<32; sy++ ){
 		for( sx=0; sx<32; sx++ ){
-			UINT16 data = *source++;
+			uint16_t data = *source++;
 
 			drawgfx(bitmap,Machine->gfx[0],
 					data&0xfff, /* tile number */
@@ -93,13 +93,13 @@ static void draw_text( struct osd_bitmap *bitmap ){
 
 static void draw_background( struct osd_bitmap *bitmap ) {
 	const struct GfxElement *gfx = Machine->gfx[1];
-	const UINT16 *source = (UINT16 *)videoram;
+	const uint16_t *source = (uint16_t *)videoram;
 	int offs;
 	for( offs=0; offs<32*16; offs++ ){
 		if( dirtybuffer[offs] ){
 			int sx = 16*(offs%32);
 			int sy = 16*(offs/32);
-			UINT16 data = source[offs];
+			uint16_t data = source[offs];
 			dirtybuffer[offs] = 0;
 
 			drawgfx(tmpbitmap,gfx,
@@ -124,13 +124,13 @@ static void draw_background( struct osd_bitmap *bitmap ) {
 static void draw_foreground( struct osd_bitmap *bitmap ) {
 	struct rectangle r;
 	const struct GfxElement *gfx = Machine->gfx[2];
-	const UINT16 *source = (UINT16 *)bloodbro_videoram2;
+	const uint16_t *source = (uint16_t *)bloodbro_videoram2;
 	int offs;
 	for( offs=0; offs<32*16; offs++ ){
 		if( dirtybuffer2[offs] ){
 			int sx = 16*(offs%32);
 			int sy = 16*(offs/32);
-			UINT16 data = source[offs];
+			uint16_t data = source[offs];
 			dirtybuffer2[offs] = 0;
 
 			/* Necessary to use TRANSPARENCY_PEN here */
@@ -164,7 +164,7 @@ static void draw_foreground( struct osd_bitmap *bitmap ) {
    -------- YYYYYYYY */
 static void get_sprite_info( void ){
 	const struct GfxElement *gfx = Machine->gfx[3];
-	const unsigned short *source = (const UINT16 *)spriteram;
+	const unsigned short *source = (const uint16_t *)spriteram;
 	struct sprite *sprite = sprite_list->sprite;
 	int count = NUM_SPRITES;
 

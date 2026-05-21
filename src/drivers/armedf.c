@@ -39,11 +39,11 @@ WRITE_HANDLER( armedf_text_videoram_w );
 READ_HANDLER( terraf_text_videoram_r );
 WRITE_HANDLER( terraf_text_videoram_w );
 
-extern UINT16 armedf_vreg;
-extern UINT16 terraf_scroll_msb;
-extern UINT16 armedf_bg_scrollx,armedf_bg_scrolly;
+extern uint16_t armedf_vreg;
+extern uint16_t terraf_scroll_msb;
+extern uint16_t armedf_bg_scrollx,armedf_bg_scrolly;
 extern unsigned char *armedf_bg_videoram;
-extern UINT16 armedf_fg_scrollx,armedf_fg_scrolly;
+extern uint16_t armedf_fg_scrollx,armedf_fg_scrolly;
 extern unsigned char *armedf_fg_videoram;
 
 static WRITE_HANDLER( io_w ){

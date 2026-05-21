@@ -138,7 +138,7 @@ static struct node_description* find_node(int node)
 	return NULL;
 }
 
-static void discrete_stream_update_stereo(int ch, INT16 **buffer, int length)
+static void discrete_stream_update_stereo(int ch, int16_t **buffer, int length)
 {
 	/* Now we must do length iterations of the node list, one output for each step */
 	int loop,loop2;
@@ -170,7 +170,7 @@ static void discrete_stream_update_stereo(int ch, INT16 **buffer, int length)
 	}
 }
 
-static void discrete_stream_update_mono(int ch,INT16 *buffer, int length)
+static void discrete_stream_update_mono(int ch,int16_t *buffer, int length)
 {
 	/* Now we must do length iterations of the node list, one output for each step */
 	int loop,loop2;

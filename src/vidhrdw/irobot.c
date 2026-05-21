@@ -12,10 +12,10 @@
 static struct osd_bitmap *polybitmap1,*polybitmap2;
 static struct osd_bitmap *polybitmap;
 
-extern UINT8 irvg_clear;
-extern UINT8 irobot_bufsel;
-extern UINT8 irobot_alphamap;
-extern UINT8 *irobot_combase;
+extern uint8_t irvg_clear;
+extern uint8_t irobot_bufsel;
+extern uint8_t irobot_alphamap;
+extern uint8_t *irobot_combase;
 
 static int ir_xmin, ir_ymin, ir_xmax, ir_ymax; /* clipping area */
 
@@ -127,25 +127,25 @@ WRITE_HANDLER( irobot_paletteram_w )
 			*dest = col;												\
 	}
 
-DRAW_HLINE_FUNC(draw_hline_8, UINT8, x1, y, 1)
-DRAW_HLINE_FUNC(draw_hline_8_fx, UINT8, ir_xmax - x1, y, -1)
-DRAW_HLINE_FUNC(draw_hline_8_fy, UINT8, x1, ir_ymax - y, 1)
-DRAW_HLINE_FUNC(draw_hline_8_fx_fy, UINT8, ir_xmax - x1, ir_ymax - y, -1)
+DRAW_HLINE_FUNC(draw_hline_8, uint8_t, x1, y, 1)
+DRAW_HLINE_FUNC(draw_hline_8_fx, uint8_t, ir_xmax - x1, y, -1)
+DRAW_HLINE_FUNC(draw_hline_8_fy, uint8_t, x1, ir_ymax - y, 1)
+DRAW_HLINE_FUNC(draw_hline_8_fx_fy, uint8_t, ir_xmax - x1, ir_ymax - y, -1)
 
-DRAW_HLINE_FUNC(draw_hline_8_swap, UINT8, y, x1, polybitmap->line[1] - polybitmap->line[0])
-DRAW_HLINE_FUNC(draw_hline_8_swap_fx, UINT8, ir_ymax - y, x1, polybitmap->line[1] - polybitmap->line[0])
-DRAW_HLINE_FUNC(draw_hline_8_swap_fy, UINT8, y, ir_xmax - x1, polybitmap->line[0] - polybitmap->line[1])
-DRAW_HLINE_FUNC(draw_hline_8_swap_fx_fy, UINT8, ir_ymax - y, ir_xmax - x1, polybitmap->line[0] - polybitmap->line[1])
+DRAW_HLINE_FUNC(draw_hline_8_swap, uint8_t, y, x1, polybitmap->line[1] - polybitmap->line[0])
+DRAW_HLINE_FUNC(draw_hline_8_swap_fx, uint8_t, ir_ymax - y, x1, polybitmap->line[1] - polybitmap->line[0])
+DRAW_HLINE_FUNC(draw_hline_8_swap_fy, uint8_t, y, ir_xmax - x1, polybitmap->line[0] - polybitmap->line[1])
+DRAW_HLINE_FUNC(draw_hline_8_swap_fx_fy, uint8_t, ir_ymax - y, ir_xmax - x1, polybitmap->line[0] - polybitmap->line[1])
 
-DRAW_HLINE_FUNC(draw_hline_16, UINT16, x1, y, 1)
-DRAW_HLINE_FUNC(draw_hline_16_fx, UINT16, ir_xmax - x1, y, -1)
-DRAW_HLINE_FUNC(draw_hline_16_fy, UINT16, x1, ir_ymax - y, 1)
-DRAW_HLINE_FUNC(draw_hline_16_fx_fy, UINT16, ir_xmax - x1, ir_ymax - y, -1)
+DRAW_HLINE_FUNC(draw_hline_16, uint16_t, x1, y, 1)
+DRAW_HLINE_FUNC(draw_hline_16_fx, uint16_t, ir_xmax - x1, y, -1)
+DRAW_HLINE_FUNC(draw_hline_16_fy, uint16_t, x1, ir_ymax - y, 1)
+DRAW_HLINE_FUNC(draw_hline_16_fx_fy, uint16_t, ir_xmax - x1, ir_ymax - y, -1)
 
-DRAW_HLINE_FUNC(draw_hline_16_swap, UINT16, y, x1, (polybitmap->line[1] - polybitmap->line[0]) / 2)
-DRAW_HLINE_FUNC(draw_hline_16_swap_fx, UINT16, ir_ymax - y, x1, (polybitmap->line[1] - polybitmap->line[0]) / 2)
-DRAW_HLINE_FUNC(draw_hline_16_swap_fy, UINT16, y, ir_xmax - x1, (polybitmap->line[0] - polybitmap->line[1]) / 2)
-DRAW_HLINE_FUNC(draw_hline_16_swap_fx_fy, UINT16, ir_ymax - y, ir_xmax - x1, (polybitmap->line[0] - polybitmap->line[1]) / 2)
+DRAW_HLINE_FUNC(draw_hline_16_swap, uint16_t, y, x1, (polybitmap->line[1] - polybitmap->line[0]) / 2)
+DRAW_HLINE_FUNC(draw_hline_16_swap_fx, uint16_t, ir_ymax - y, x1, (polybitmap->line[1] - polybitmap->line[0]) / 2)
+DRAW_HLINE_FUNC(draw_hline_16_swap_fy, uint16_t, y, ir_xmax - x1, (polybitmap->line[0] - polybitmap->line[1]) / 2)
+DRAW_HLINE_FUNC(draw_hline_16_swap_fx_fy, uint16_t, ir_ymax - y, ir_xmax - x1, (polybitmap->line[0] - polybitmap->line[1]) / 2)
 
 static void (*draw_hline)(int x1, int x2, int y, int col);
 
@@ -316,7 +316,7 @@ void run_video(void)
 	unsigned int d1;
 	int lpnt,spnt,spnt2;
 	int shp;
-	INT32 word1,word2;
+	int32_t word1,word2;
 
 	//logerror("Starting Polygon Generator, Clear=%d\n",irvg_clear);
 
@@ -360,7 +360,7 @@ void run_video(void)
 				color = Machine->pens[sy & 0x3F];
 				sy = ROUND_TO_PIXEL(sy);
 				sx = READ_WORD(&irobot_combase[spnt+6]);
-				word1 = (INT16)READ_WORD(&irobot_combase[spnt+4]);
+				word1 = (int16_t)READ_WORD(&irobot_combase[spnt+4]);
 				ex = sx + word1 * (ey - sy + 1);
 				irobot_draw_line(ROUND_TO_PIXEL(sx),sy,ROUND_TO_PIXEL(ex),ey,color);
 				spnt+=8;
@@ -380,7 +380,7 @@ void run_video(void)
 			sy = ROUND_TO_PIXEL(sy);
 			spnt+=8;
 
-			word1 = (INT16)READ_WORD(&irobot_combase[spnt]);
+			word1 = (int16_t)READ_WORD(&irobot_combase[spnt]);
 			ey = READ_WORD(&irobot_combase[spnt+2]);
 			if (word1 != -1 || ey != 0xFFFF)
 			{
@@ -389,7 +389,7 @@ void run_video(void)
 
 			//	sx += word1;
 
-				word2 = (INT16)READ_WORD(&irobot_combase[spnt2]);
+				word2 = (int16_t)READ_WORD(&irobot_combase[spnt2]);
 				ey2 = ROUND_TO_PIXEL(READ_WORD(&irobot_combase[spnt2+2]));
 				spnt2+=4;
 
@@ -415,7 +415,7 @@ void run_video(void)
 
 					if (sy > ey)
 					{
-						word1 = (INT16)READ_WORD(&irobot_combase[spnt]);
+						word1 = (int16_t)READ_WORD(&irobot_combase[spnt]);
 						ey = READ_WORD(&irobot_combase[spnt+2]);
 						if (word1 == -1 && ey == 0xFFFF)
 							break;
@@ -427,7 +427,7 @@ void run_video(void)
 
 					if (sy > ey2)
 					{
-						word2 = (INT16)READ_WORD(&irobot_combase[spnt2]);
+						word2 = (int16_t)READ_WORD(&irobot_combase[spnt2]);
 						ey2 = ROUND_TO_PIXEL(READ_WORD(&irobot_combase[spnt2+2]));
 						spnt2+=4;
 					}

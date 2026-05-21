@@ -40,7 +40,7 @@ void advaudio_reset_w(int state);
 
 /************ Sound Configuration ***************/
 
-extern UINT8 mcr_sound_config;
+extern uint8_t mcr_sound_config;
 
 #define MCR_SSIO				0x01
 #define MCR_CHIP_SQUEAK_DELUXE	0x02

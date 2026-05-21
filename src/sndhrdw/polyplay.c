@@ -20,7 +20,7 @@ int lfovol[2] = {LFO_VOLUME,LFO_VOLUME};
 
 //const double pi = 3.14159265359;
 
-static INT16 backgroundwave[SAMPLE_LENGTH];
+static int16_t backgroundwave[SAMPLE_LENGTH];
 
 int polyplay_sh_start(const struct MachineSound *msound)
 {

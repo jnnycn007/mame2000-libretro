@@ -111,10 +111,10 @@
 #include <math.h>
 
 
-UINT8 pipedrm_video_control;
+uint8_t pipedrm_video_control;
 
-static UINT8 pending_command;
-static UINT8 sound_command;
+static uint8_t pending_command;
+static uint8_t sound_command;
 
 
 /* video driver data & functions */
@@ -141,7 +141,7 @@ WRITE_HANDLER( hatris_videoram_w );
 
 static void init_machine(void)
 {
-	UINT8 *ram;
+	uint8_t *ram;
 
 	ram = memory_region(REGION_CPU1);
 	cpu_setbank(1, &ram[0x10000]);
@@ -163,7 +163,7 @@ static WRITE_HANDLER( pipedrm_bankswitch_w )
 		D3 = background videoram select
 		D2-D0 = program ROM bank select
 	*/
-	UINT8 *ram = memory_region(REGION_CPU1);
+	uint8_t *ram = memory_region(REGION_CPU1);
 
 	/* set the memory bank on the Z80 using the low 3 bits */
 	cpu_setbank(1, &ram[0x10000 + (data & 0x7) * 0x2000]);
@@ -175,7 +175,7 @@ static WRITE_HANDLER( pipedrm_bankswitch_w )
 
 static WRITE_HANDLER( sound_bankswitch_w )
 {
-	UINT8 *ram = memory_region(REGION_CPU2);
+	uint8_t *ram = memory_region(REGION_CPU2);
 	cpu_setbank(2, &ram[0x10000 + (data & 0x01) * 0x8000]);
 }
 

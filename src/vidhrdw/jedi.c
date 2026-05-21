@@ -291,15 +291,15 @@ void jedi_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 	/* compose the three layers */
 	{
 		int x,y;
-		UINT8 *s1,*s2,*s3,*s3b;
-		UINT8 *prom = memory_region(REGION_PROMS) + smooth_table * 0x100;
+		uint8_t *s1,*s2,*s3,*s3b;
+		uint8_t *prom = memory_region(REGION_PROMS) + smooth_table * 0x100;
 
 
 		if (bitmap->depth == 16)
 		{
 			for (y = 0;y < bitmap->height;y++)
 			{
-				UINT16 *d = (UINT16 *)bitmap->line[y];
+				uint16_t *d = (uint16_t *)bitmap->line[y];
 
 				s1 = tmpbitmap->line[y];
 				s2 = tmpbitmap2->line[y];
@@ -332,7 +332,7 @@ void jedi_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 		{
 			for (y = 0;y < bitmap->height;y++)
 			{
-				UINT8 *d = bitmap->line[y];
+				uint8_t *d = bitmap->line[y];
 
 				s1 = tmpbitmap->line[y];
 				s2 = tmpbitmap2->line[y];

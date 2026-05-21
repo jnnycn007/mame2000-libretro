@@ -10,13 +10,13 @@
 #include "arm.h"
 
 struct ARM {
-	UINT32 queue[3];	/* instruction queue */
-	UINT32 psw; 		/* status word */
-	UINT32 reg[16]; 	/* user register set */
-	UINT32 reg_firq[7]; /* swapped R8-R14 during FIRQ */
-	UINT32 reg_irq[2];	/* swapped R13-R14 during IRQ */
-	UINT32 reg_svc[2];	/* swapped R13-R14 during SVC */
-	UINT32 ppc; 		/* previous PC */
+	uint32_t queue[3];	/* instruction queue */
+	uint32_t psw; 		/* status word */
+	uint32_t reg[16]; 	/* user register set */
+	uint32_t reg_firq[7]; /* swapped R8-R14 during FIRQ */
+	uint32_t reg_irq[2];	/* swapped R13-R14 during IRQ */
+	uint32_t reg_svc[2];	/* swapped R13-R14 during SVC */
+	uint32_t ppc; 		/* previous PC */
 };
 
 static struct ARM arm;
@@ -27,14 +27,14 @@ int arm_ICount;
 /****************************************************************************
  * Read a byte from given memory location
  ****************************************************************************/
-static INLINE UINT32 ARM_RDMEM(UINT32 addr)
+static INLINE uint32_t ARM_RDMEM(uint32_t addr)
 {
 	return cpu_readmem26lew(addr & AMASK);
 }
 
-static INLINE UINT32 ARM_RDMEM_32(UINT32 addr)
+static INLINE uint32_t ARM_RDMEM_32(uint32_t addr)
 {
-	UINT32 data = cpu_readmem26lew_dword(addr & AMASK);
+	uint32_t data = cpu_readmem26lew_dword(addr & AMASK);
 	/*logerror("ARM_RDMEM_32 (%08x) -> %08x\n", addr, data);*/
 	return data;
 }
@@ -42,12 +42,12 @@ static INLINE UINT32 ARM_RDMEM_32(UINT32 addr)
 /****************************************************************************
  * Write a byte to given memory location
  ****************************************************************************/
-static INLINE void ARM_WRMEM(UINT32 addr, UINT32 val)
+static INLINE void ARM_WRMEM(uint32_t addr, uint32_t val)
 {
 	cpu_writemem26lew(addr & AMASK, val & 0xff);
 }
 
-static INLINE void ARM_WRMEM_32(UINT32 addr, UINT32 val)
+static INLINE void ARM_WRMEM_32(uint32_t addr, uint32_t val)
 {
 	cpu_writemem26lew_dword(addr & AMASK, val);
 }
@@ -137,12 +137,12 @@ static INLINE void ARM_WRMEM_32(UINT32 addr, UINT32 val)
  *  rrrr0 mm1 xxxx
  *	reg   mod Rs
  */
-static INLINE UINT32 RS(void)
+static INLINE uint32_t RS(void)
 {
-	UINT32 m = OP & 0x70;
-	UINT32 s = (OP>>7) & 31;
-	UINT32 r = OP & 15;
-	UINT32 rs = arm.reg[r];
+	uint32_t m = OP & 0x70;
+	uint32_t s = (OP>>7) & 31;
+	uint32_t r = OP & 15;
+	uint32_t rs = arm.reg[r];
 
 	if( r == 15 )
 		rs |= PSW;
@@ -174,21 +174,21 @@ static INLINE UINT32 RS(void)
 	case 0x40:
 		/* ASR #1 .. #32 */
 		if (s)
-			return (UINT32)((INT32)rs >> s);
+			return (uint32_t)((int32_t)rs >> s);
 		/* ASR #32 effectively returns 0 or 0xffffffff depending on bit 31 */
 		return (rs & N) ? 0xffffffffL : 0;
 
 	case 0x50:
 		/* ASR R0 .. R15 */
 		s = arm.reg[s >> 1];
-		return (UINT32)((INT32)rs >> s);
+		return (uint32_t)((int32_t)rs >> s);
 
 	case 0x60:
 		/* shift count == 0 is RRX */
 		if (s == 0)
 		{
-			UINT32 c = rs & 1;
-			UINT32 rc = ((PSW & C) << 3) | (rs >> 1);
+			uint32_t c = rs & 1;
+			uint32_t rc = ((PSW & C) << 3) | (rs >> 1);
 			PSW = (PSW & ~C) | (c << 29);
 			return rc;
 		}
@@ -208,9 +208,9 @@ static INLINE UINT32 RS(void)
  * The 8 bit pattern is rotated right 0 two 30 times inside
  * the 32 bit data word.
  */
-#define CS(bits,value)	((UINT32)value>>bits)|((UINT32)value<<(31-bits))
+#define CS(bits,value)	((uint32_t)value>>bits)|((uint32_t)value<<(31-bits))
 
-static UINT32 imm12[4096] =
+static uint32_t imm12[4096] =
 {
 	CS( 0,0x00),CS( 0,0x01),CS( 0,0x02),CS( 0,0x03),CS( 0,0x04),CS( 0,0x05),CS( 0,0x06),CS( 0,0x07),CS( 0,0x08),CS( 0,0x09),CS( 0,0x0a),CS( 0,0x0b),CS( 0,0x0c),CS( 0,0x0d),CS( 0,0x0e),CS( 0,0x0f),
 	CS( 0,0x10),CS( 0,0x11),CS( 0,0x12),CS( 0,0x13),CS( 0,0x14),CS( 0,0x15),CS( 0,0x16),CS( 0,0x17),CS( 0,0x18),CS( 0,0x19),CS( 0,0x1a),CS( 0,0x1b),CS( 0,0x1c),CS( 0,0x1d),CS( 0,0x1e),CS( 0,0x1f),
@@ -486,11 +486,11 @@ static UINT32 imm12[4096] =
 /* immediate operand #2 */
 #define IM	imm12[OP & 0xfff]
 
-static INLINE void swapregs(UINT32 *dst, UINT32 *src, int num_regs)
+static INLINE void swapregs(uint32_t *dst, uint32_t *src, int num_regs)
 {
 	while (num_regs-- > 0)
 	{
-		UINT32 tmp = *src;
+		uint32_t tmp = *src;
 		*src++ = *dst;
 		*dst++ = tmp;
 	}
@@ -518,7 +518,7 @@ static INLINE void shift_queue(void)
 	PC = (PC + 4) & AMASK;
 }
 
-static INLINE void PUT_PC(UINT32 val, int link)
+static INLINE void PUT_PC(uint32_t val, int link)
 {
 	switch( (PSW & S01) | ((val & S01) << 2) )
 	{
@@ -607,9 +607,9 @@ static INLINE void PUT_PC(UINT32 val, int link)
  * which is a combination of the program counter
  * and the processor status word
  */
-static INLINE void PUT_RD(UINT32 val)
+static INLINE void PUT_RD(uint32_t val)
 {
-	UINT32 rd = (OP>>12)&15;
+	uint32_t rd = (OP>>12)&15;
 	if ( rd == 15 ) /* destination is R15 (PC) ? */
 		PUT_PC(val, 0);
 	else
@@ -628,16 +628,16 @@ static INLINE void PUT_RD(UINT32 val)
 		(d & N) |											\
 		(d ? Z : 0) |										\
 		(v != 0 && d < s ? C : 0) | 						\
-		( ((INT32)v > 0 && (INT32)d < (INT32)s) ||			\
-		  ((INT32)v < 0 && (INT32)d > (INT32)d) ? V : 0)
+		( ((int32_t)v > 0 && (int32_t)d < (int32_t)s) ||			\
+		  ((int32_t)v < 0 && (int32_t)d > (int32_t)d) ? V : 0)
 
 #define SET_NZCV_SUB(d,s,v) 								\
 	PSW = (PSW & ~(N | Z | C | V)) |						\
 		(d & N) |											\
 		(d ? Z : 0) |										\
 		(v != 0 && d > s ? C : 0) | 						\
-		( ((INT32)v < 0 && (INT32)d < (INT32)s) ||			\
-		  ((INT32)v > 0 && (INT32)d > (INT32)d) ? V : 0)
+		( ((int32_t)v < 0 && (int32_t)d < (int32_t)s) ||			\
+		  ((int32_t)v > 0 && (int32_t)d > (int32_t)d) ? V : 0)
 
 
 /*****************************************************************************
@@ -654,8 +654,8 @@ static INLINE void PUT_RD(UINT32 val)
  */
 static void and_r (void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN & rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN & rs;
 	PUT_RD(rd);
 }
 
@@ -665,8 +665,8 @@ static void and_r (void)
  */
 static void ands_r(void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN & rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN & rs;
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -677,8 +677,8 @@ static void ands_r(void)
  */
 static void eor_r (void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN ^ rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN ^ rs;
 	PUT_RD(rd);
 }
 
@@ -688,8 +688,8 @@ static void eor_r (void)
  */
 static void eors_r(void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN ^ rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN ^ rs;
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -700,8 +700,8 @@ static void eors_r(void)
  */
 static void sub_r (void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN - rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN - rs;
 	PUT_RD(rd);
 }
 
@@ -711,8 +711,8 @@ static void sub_r (void)
  */
 static void subs_r(void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN - rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN - rs;
 	SET_NZCV_SUB(rd,RN,rs);
 	PUT_RD(rd);
 }
@@ -724,8 +724,8 @@ static void subs_r(void)
  */
 static void rsb_r (void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN - rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN - rs;
 	PUT_RD(rd);
 }
 
@@ -736,8 +736,8 @@ static void rsb_r (void)
  */
 static void rsbs_r(void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = rs - RN;
+	uint32_t rs = RS();
+	uint32_t rd = rs - RN;
 	SET_NZCV_SUB(rd,rs,RN);
 	PUT_RD(rd);
 }
@@ -748,8 +748,8 @@ static void rsbs_r(void)
  */
 static void add_r (void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN + rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN + rs;
 	PUT_RD(rd);
 }
 
@@ -759,8 +759,8 @@ static void add_r (void)
  */
 static void adds_r(void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN + rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN + rs;
 	SET_NZCV_ADD(rd,RN,rs);
 	PUT_RD(rd);
 }
@@ -771,9 +771,9 @@ static void adds_r(void)
  */
 static void adc_r (void)
 {
-	UINT32 c = GET_C;
-	UINT32 rs = RS();
-	UINT32 rd = RN + rs + c;
+	uint32_t c = GET_C;
+	uint32_t rs = RS();
+	uint32_t rd = RN + rs + c;
 	PUT_RD(rd);
 }
 
@@ -783,9 +783,9 @@ static void adc_r (void)
  */
 static void adcs_r(void)
 {
-	UINT32 c = GET_C;
-	UINT32 rs = RS();
-	UINT32 rd = RN + rs + c;
+	uint32_t c = GET_C;
+	uint32_t rs = RS();
+	uint32_t rd = RN + rs + c;
 	SET_NZCV_ADD(rd,RN,rs + c);
 	PUT_RD(rd);
 }
@@ -796,9 +796,9 @@ static void adcs_r(void)
  */
 static void sbc_r (void)
 {
-	UINT32 c = GET_C;
-	UINT32 rs = RS();
-	UINT32 rd = RN - rs - c;
+	uint32_t c = GET_C;
+	uint32_t rs = RS();
+	uint32_t rd = RN - rs - c;
 	PUT_RD(rd);
 }
 
@@ -808,9 +808,9 @@ static void sbc_r (void)
  */
 static void sbcs_r(void)
 {
-	UINT32 c = GET_C;
-	UINT32 rs = RS();
-	UINT32 rd = RN - rs - c;
+	uint32_t c = GET_C;
+	uint32_t rs = RS();
+	uint32_t rd = RN - rs - c;
 	SET_NZCV_SUB(rd,RN,rs - c);
 	PUT_RD(rd);
 }
@@ -821,9 +821,9 @@ static void sbcs_r(void)
  */
 static void rsc_r (void)
 {
-	UINT32 c = GET_C;
-	UINT32 rs = RS();
-	UINT32 rd = rs - RN - c;
+	uint32_t c = GET_C;
+	uint32_t rs = RS();
+	uint32_t rd = rs - RN - c;
 	PUT_RD(rd);
 }
 
@@ -833,9 +833,9 @@ static void rsc_r (void)
  */
 static void rscs_r(void)
 {
-	UINT32 c = GET_C;
-	UINT32 rs = RS();
-	UINT32 rd = rs - RN - c;
+	uint32_t c = GET_C;
+	uint32_t rs = RS();
+	uint32_t rd = rs - RN - c;
 	SET_NZCV_SUB(rd,rs,RN - c);
 	PUT_RD(rd);
 }
@@ -847,8 +847,8 @@ static void rscs_r(void)
  */
 static void tst_r (void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN & rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN & rs;
 }
 #endif
 
@@ -858,8 +858,8 @@ static void tst_r (void)
  */
 static void tsts_r(void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN & rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN & rs;
 	SET_NZ(rd);
 }
 
@@ -870,8 +870,8 @@ static void tsts_r(void)
  */
 static void teq_r (void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN ^ rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN ^ rs;
 }
 #endif
 
@@ -881,8 +881,8 @@ static void teq_r (void)
  */
 static void teqs_r(void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN ^ rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN ^ rs;
 	SET_NZ(rd);
 }
 
@@ -893,8 +893,8 @@ static void teqs_r(void)
  */
 static void cmp_r (void)
 {
-	UINT32 rs = RS();
-	UINT32 dst = RN - rs;
+	uint32_t rs = RS();
+	uint32_t dst = RN - rs;
 }
 #endif
 
@@ -904,8 +904,8 @@ static void cmp_r (void)
  */
 static void cmps_r(void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN - rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN - rs;
 	SET_NZCV_SUB(rd,RN,rs);
 }
 
@@ -916,8 +916,8 @@ static void cmps_r(void)
  */
 static void cmn_r (void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN - ~rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN - ~rs;
 }
 #endif
 
@@ -927,8 +927,8 @@ static void cmn_r (void)
  */
 static void cmns_r(void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN - ~rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN - ~rs;
 	SET_NZCV_SUB(rd,RN,~rs);
 }
 
@@ -938,8 +938,8 @@ static void cmns_r(void)
  */
 static void orr_r (void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN | rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN | rs;
 	PUT_RD(rd);
 }
 
@@ -949,8 +949,8 @@ static void orr_r (void)
  */
 static void orrs_r(void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RN | rs;
+	uint32_t rs = RS();
+	uint32_t rd = RN | rs;
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -961,7 +961,7 @@ static void orrs_r(void)
  */
 static void mov_r (void)
 {
-	UINT32 rs = RS();
+	uint32_t rs = RS();
 	PUT_RD(rs);
 }
 
@@ -971,7 +971,7 @@ static void mov_r (void)
  */
 static void movs_r(void)
 {
-	UINT32 rd = RS();
+	uint32_t rd = RS();
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -982,8 +982,8 @@ static void movs_r(void)
  */
 static void bic_r (void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RD & ~rs;
+	uint32_t rs = RS();
+	uint32_t rd = RD & ~rs;
 	PUT_RD(rd);
 }
 
@@ -993,8 +993,8 @@ static void bic_r (void)
  */
 static void bics_r(void)
 {
-	UINT32 rs = RS();
-	UINT32 rd = RD & ~rs;
+	uint32_t rs = RS();
+	uint32_t rd = RD & ~rs;
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -1005,7 +1005,7 @@ static void bics_r(void)
  */
 static void mvn_r (void)
 {
-	UINT32 rs = RS();
+	uint32_t rs = RS();
 	PUT_RD(~rs);
 }
 
@@ -1015,7 +1015,7 @@ static void mvn_r (void)
  */
 static void mvns_r(void)
 {
-	UINT32 rd = ~RS();
+	uint32_t rd = ~RS();
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -1035,7 +1035,7 @@ static void and_i (void)
  */
 static void ands_i(void)
 {
-	UINT32 rd = RN & IM;
+	uint32_t rd = RN & IM;
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -1055,7 +1055,7 @@ static void eor_i (void)
  */
 static void eors_i(void)
 {
-	UINT32 rd = RN ^ IM;
+	uint32_t rd = RN ^ IM;
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -1075,8 +1075,8 @@ static void sub_i (void)
  */
 static void subs_i(void)
 {
-	UINT32 im = IM;
-	UINT32 rd = RN - im;
+	uint32_t im = IM;
+	uint32_t rd = RN - im;
 	SET_NZCV_SUB(rd,RN,im);
 	PUT_RD(rd);
 }
@@ -1096,8 +1096,8 @@ static void rsb_i (void)
  */
 static void rsbs_i(void)
 {
-	UINT32 im = IM;
-	UINT32 rd = im - RN;
+	uint32_t im = IM;
+	uint32_t rd = im - RN;
 	SET_NZCV_SUB(rd,im,RN);
 	PUT_RD(rd);
 }
@@ -1117,8 +1117,8 @@ static void add_i (void)
  */
 static void adds_i(void)
 {
-	UINT32 im = IM;
-	UINT32 rd = RN + im;
+	uint32_t im = IM;
+	uint32_t rd = RN + im;
 	SET_NZCV_ADD(rd,RN,im);
 	PUT_RD(rd);
 }
@@ -1129,7 +1129,7 @@ static void adds_i(void)
  */
 static void adc_i (void)
 {
-	UINT32 c = GET_C;
+	uint32_t c = GET_C;
 	PUT_RD(RN + IM + c);
 }
 
@@ -1139,9 +1139,9 @@ static void adc_i (void)
  */
 static void adcs_i(void)
 {
-	UINT32 c = GET_C;
-	UINT32 im = IM;
-	UINT32 rd = RN + (im + c);
+	uint32_t c = GET_C;
+	uint32_t im = IM;
+	uint32_t rd = RN + (im + c);
 	SET_NZCV_ADD(rd,RN,im + c);
 	PUT_RD(rd);
 }
@@ -1152,7 +1152,7 @@ static void adcs_i(void)
  */
 static void sbc_i (void)
 {
-	UINT32 c = GET_C;
+	uint32_t c = GET_C;
 	PUT_RD(RN - IM - c);
 }
 
@@ -1162,9 +1162,9 @@ static void sbc_i (void)
  */
 static void sbcs_i(void)
 {
-	UINT32 c = GET_C;
-	UINT32 im = IM;
-	UINT32 rd = RN - (im + c);
+	uint32_t c = GET_C;
+	uint32_t im = IM;
+	uint32_t rd = RN - (im + c);
 	SET_NZCV_SUB(rd,RN,im + c);
 	PUT_RD(rd);
 }
@@ -1175,7 +1175,7 @@ static void sbcs_i(void)
  */
 static void rsc_i (void)
 {
-	UINT32 c = GET_C;
+	uint32_t c = GET_C;
 	PUT_RD(RN - (IM+c));
 }
 
@@ -1185,9 +1185,9 @@ static void rsc_i (void)
  */
 static void rscs_i(void)
 {
-	UINT32 c = GET_C;
-	UINT32 im = IM;
-	UINT32 rd = RN - (im + c);
+	uint32_t c = GET_C;
+	uint32_t im = IM;
+	uint32_t rd = RN - (im + c);
 	SET_NZCV_SUB(rd,RN,im + c);
 	PUT_RD(rd);
 }
@@ -1199,7 +1199,7 @@ static void rscs_i(void)
  */
 static void tst_i (void)
 {
-	UINT32 rd = RN & IM;
+	uint32_t rd = RN & IM;
 }
 #endif
 
@@ -1209,7 +1209,7 @@ static void tst_i (void)
  */
 static void tsts_i(void)
 {
-	UINT32 rd = RN & IM;
+	uint32_t rd = RN & IM;
 	SET_NZ(rd);
 }
 
@@ -1220,7 +1220,7 @@ static void tsts_i(void)
  */
 static void teq_i (void)
 {
-	UINT32 rd = RN ^ IM;
+	uint32_t rd = RN ^ IM;
 }
 #endif
 
@@ -1230,7 +1230,7 @@ static void teq_i (void)
  */
 static void teqs_i(void)
 {
-	UINT32 rd = RN ^ IM;
+	uint32_t rd = RN ^ IM;
 	SET_NZ(rd);
 }
 
@@ -1241,7 +1241,7 @@ static void teqs_i(void)
  */
 static void cmp_i (void)
 {
-	UINT32 dst = RN - IM;
+	uint32_t dst = RN - IM;
 }
 #endif
 
@@ -1251,8 +1251,8 @@ static void cmp_i (void)
  */
 static void cmps_i(void)
 {
-	UINT32 im = IM;
-	UINT32 rd = RN - im;
+	uint32_t im = IM;
+	uint32_t rd = RN - im;
 	SET_NZCV_SUB(rd,RN,im);
 }
 
@@ -1263,8 +1263,8 @@ static void cmps_i(void)
  */
 static void cmn_i (void)
 {
-	UINT32 im = im;
-	UINT32 rd = RN - ~im;
+	uint32_t im = im;
+	uint32_t rd = RN - ~im;
 }
 #endif
 
@@ -1274,8 +1274,8 @@ static void cmn_i (void)
  */
 static void cmns_i(void)
 {
-	UINT32 im = IM;
-	UINT32 rd = RN - ~im;
+	uint32_t im = IM;
+	uint32_t rd = RN - ~im;
 	SET_NZCV_SUB(rd,RN,~im);
 }
 
@@ -1294,7 +1294,7 @@ static void orr_i (void)
  */
 static void orrs_i(void)
 {
-	UINT32 rd = RN | IM;
+	uint32_t rd = RN | IM;
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -1314,7 +1314,7 @@ static void mov_i (void)
  */
 static void movs_i(void)
 {
-	UINT32 rd = IM;
+	uint32_t rd = IM;
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -1325,7 +1325,7 @@ static void movs_i(void)
  */
 static void bic_i (void)
 {
-	UINT32 rd = RN & ~IM;
+	uint32_t rd = RN & ~IM;
 	PUT_RD(rd);
 }
 
@@ -1335,7 +1335,7 @@ static void bic_i (void)
  */
 static void bics_i(void)
 {
-	UINT32 rd = RN & ~IM;
+	uint32_t rd = RN & ~IM;
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -1355,7 +1355,7 @@ static void mvn_i (void)
  */
 static void mvns_i(void)
 {
-	UINT32 rd = ~IM;
+	uint32_t rd = ~IM;
 	SET_NZ(rd);
 	PUT_RD(rd);
 }
@@ -1373,8 +1373,8 @@ static void mvns_i(void)
  */
 static void str_1rs(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN - rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN - rs) & AMASK;
 	ARM_WRMEM_32(ea,RD);
 }
 
@@ -1384,8 +1384,8 @@ static void str_1rs(void)
  */
 static void ldr_1rs(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN - rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN - rs) & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 }
 
@@ -1395,8 +1395,8 @@ static void ldr_1rs(void)
  */
 static void str_1rsw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN - rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN - rs) & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN = ea;
 }
@@ -1407,8 +1407,8 @@ static void str_1rsw(void)
  */
 static void ldr_1rsw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN - rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN - rs) & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN = ea;
 }
@@ -1419,8 +1419,8 @@ static void ldr_1rsw(void)
  */
 static void strb_1rs(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN - rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN - rs) & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 }
 
@@ -1430,8 +1430,8 @@ static void strb_1rs(void)
  */
 static void ldrb_1rs(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN - rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN - rs) & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 }
 
@@ -1441,8 +1441,8 @@ static void ldrb_1rs(void)
  */
 static void strb_1rsw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN - rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN - rs) & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN = ea;
 }
@@ -1453,8 +1453,8 @@ static void strb_1rsw(void)
  */
 static void ldrb_1rsw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN - rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN - rs) & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN = ea;
 }
@@ -1465,8 +1465,8 @@ static void ldrb_1rsw(void)
  */
 static void str_1ra(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN + rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN + rs) & AMASK;
 	ARM_WRMEM_32(ea,RD);
 }
 
@@ -1476,8 +1476,8 @@ static void str_1ra(void)
  */
 static void ldr_1ra(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN + rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN + rs) & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 }
 
@@ -1487,8 +1487,8 @@ static void ldr_1ra(void)
  */
 static void str_1raw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN + rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN + rs) & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN = ea;
 }
@@ -1499,8 +1499,8 @@ static void str_1raw(void)
  */
 static void ldr_1raw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN + rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN + rs) & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN = ea;
 }
@@ -1511,8 +1511,8 @@ static void ldr_1raw(void)
  */
 static void strb_1ra(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN + rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN + rs) & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 }
 
@@ -1522,8 +1522,8 @@ static void strb_1ra(void)
  */
 static void ldrb_1ra(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN + rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN + rs) & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 }
 
@@ -1533,8 +1533,8 @@ static void ldrb_1ra(void)
  */
 static void strb_1raw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN + rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN + rs) & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN = ea;
 }
@@ -1545,8 +1545,8 @@ static void strb_1raw(void)
  */
 static void ldrb_1raw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = (RN + rs) & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = (RN + rs) & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN = ea;
 }
@@ -1558,8 +1558,8 @@ static void ldrb_1raw(void)
  */
 static void str_2rs(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN -= rs;
 }
@@ -1570,8 +1570,8 @@ static void str_2rs(void)
  */
 static void ldr_2rs(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN -= rs;
 }
@@ -1582,8 +1582,8 @@ static void ldr_2rs(void)
  */
 static void str_2rsw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN -= rs;
 }
@@ -1594,8 +1594,8 @@ static void str_2rsw(void)
  */
 static void ldr_2rsw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN -= rs;
 }
@@ -1606,8 +1606,8 @@ static void ldr_2rsw(void)
  */
 static void strb_2rs(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN -= rs;
 }
@@ -1618,8 +1618,8 @@ static void strb_2rs(void)
  */
 static void ldrb_2rs(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN -= rs;
 }
@@ -1630,8 +1630,8 @@ static void ldrb_2rs(void)
  */
 static void strb_2rsw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN -= rs;
 }
@@ -1642,8 +1642,8 @@ static void strb_2rsw(void)
  */
 static void ldrb_2rsw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN -= rs;
 }
@@ -1654,8 +1654,8 @@ static void ldrb_2rsw(void)
  */
 static void str_2ra(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN += rs;
 }
@@ -1666,8 +1666,8 @@ static void str_2ra(void)
  */
 static void ldr_2ra(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN += rs;
 }
@@ -1678,8 +1678,8 @@ static void ldr_2ra(void)
  */
 static void str_2raw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN += rs;
 }
@@ -1690,8 +1690,8 @@ static void str_2raw(void)
  */
 static void ldr_2raw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN += rs;
 }
@@ -1702,8 +1702,8 @@ static void ldr_2raw(void)
  */
 static void strb_2ra(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN += rs;
 }
@@ -1714,8 +1714,8 @@ static void strb_2ra(void)
  */
 static void ldrb_2ra(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN += rs;
 }
@@ -1726,8 +1726,8 @@ static void ldrb_2ra(void)
  */
 static void strb_2raw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN += rs;
 }
@@ -1738,8 +1738,8 @@ static void strb_2raw(void)
  */
 static void ldrb_2raw(void)
 {
-	UINT32 rs = RS();
-	UINT32 ea = RN & AMASK;
+	uint32_t rs = RS();
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN += rs;
 }
@@ -1752,8 +1752,8 @@ static void ldrb_2raw(void)
  */
 static void str_1is(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN - im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN - im) & AMASK;
 	ARM_WRMEM_32(ea,RD);
 }
 
@@ -1763,8 +1763,8 @@ static void str_1is(void)
  */
 static void ldr_1is(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN - im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN - im) & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 }
 
@@ -1774,8 +1774,8 @@ static void ldr_1is(void)
  */
 static void str_1isw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN - im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN - im) & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN = ea;
 }
@@ -1786,8 +1786,8 @@ static void str_1isw(void)
  */
 static void ldr_1isw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN - im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN - im) & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN = ea;
 }
@@ -1798,8 +1798,8 @@ static void ldr_1isw(void)
  */
 static void strb_1is(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN - im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN - im) & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 }
 
@@ -1809,8 +1809,8 @@ static void strb_1is(void)
  */
 static void ldrb_1is(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN - im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN - im) & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 }
 
@@ -1820,8 +1820,8 @@ static void ldrb_1is(void)
  */
 static void strb_1isw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN - im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN - im) & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN = ea;
 }
@@ -1832,8 +1832,8 @@ static void strb_1isw(void)
  */
 static void ldrb_1isw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN - im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN - im) & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN = ea;
 }
@@ -1844,8 +1844,8 @@ static void ldrb_1isw(void)
  */
 static void str_1ia(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN + im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN + im) & AMASK;
 	ARM_WRMEM_32(ea,RD);
 }
 
@@ -1855,8 +1855,8 @@ static void str_1ia(void)
  */
 static void ldr_1ia(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN + im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN + im) & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 }
 
@@ -1866,8 +1866,8 @@ static void ldr_1ia(void)
  */
 static void str_1iaw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN + im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN + im) & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN = ea;
 }
@@ -1878,8 +1878,8 @@ static void str_1iaw(void)
  */
 static void ldr_1iaw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN + im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN + im) & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN = ea;
 }
@@ -1890,8 +1890,8 @@ static void ldr_1iaw(void)
  */
 static void strb_1ia(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN + im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN + im) & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 }
 
@@ -1901,8 +1901,8 @@ static void strb_1ia(void)
  */
 static void ldrb_1ia(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN + im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN + im) & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 }
 
@@ -1912,8 +1912,8 @@ static void ldrb_1ia(void)
  */
 static void strb_1iaw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN + im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN + im) & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN = ea;
 }
@@ -1924,8 +1924,8 @@ static void strb_1iaw(void)
  */
 static void ldrb_1iaw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = (RN + im) & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = (RN + im) & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN = ea;
 }
@@ -1937,8 +1937,8 @@ static void ldrb_1iaw(void)
  */
 static void str_2is(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN -= im;
 }
@@ -1949,8 +1949,8 @@ static void str_2is(void)
  */
 static void ldr_2is(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN -= im;
 }
@@ -1961,8 +1961,8 @@ static void ldr_2is(void)
  */
 static void str_2isw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN -= im;
 }
@@ -1973,8 +1973,8 @@ static void str_2isw(void)
  */
 static void ldr_2isw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN -= im;
 }
@@ -1985,8 +1985,8 @@ static void ldr_2isw(void)
  */
 static void strb_2is(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN -= im;
 }
@@ -1997,8 +1997,8 @@ static void strb_2is(void)
  */
 static void ldrb_2is(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN -= im;
 }
@@ -2009,8 +2009,8 @@ static void ldrb_2is(void)
  */
 static void strb_2isw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN -= im;
 }
@@ -2021,8 +2021,8 @@ static void strb_2isw(void)
  */
 static void ldrb_2isw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN -= im;
 }
@@ -2033,8 +2033,8 @@ static void ldrb_2isw(void)
  */
 static void str_2ia(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN += im;
 }
@@ -2045,8 +2045,8 @@ static void str_2ia(void)
  */
 static void ldr_2ia(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN += im;
 }
@@ -2057,8 +2057,8 @@ static void ldr_2ia(void)
  */
 static void str_2iaw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM_32(ea,RD);
 	RN += im;
 }
@@ -2069,8 +2069,8 @@ static void str_2iaw(void)
  */
 static void ldr_2iaw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM_32(ea));
 	RN += im;
 }
@@ -2081,8 +2081,8 @@ static void ldr_2iaw(void)
  */
 static void strb_2ia(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN += im;
 }
@@ -2093,8 +2093,8 @@ static void strb_2ia(void)
  */
 static void ldrb_2ia(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN += im;
 }
@@ -2105,8 +2105,8 @@ static void ldrb_2ia(void)
  */
 static void strb_2iaw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	ARM_WRMEM(ea,RD & 0xff);
 	RN += im;
 }
@@ -2117,8 +2117,8 @@ static void strb_2iaw(void)
  */
 static void ldrb_2iaw(void)
 {
-	UINT32 im = IM;
-	UINT32 ea = RN & AMASK;
+	uint32_t im = IM;
+	uint32_t ea = RN & AMASK;
 	PUT_RD(ARM_RDMEM(ea));
 	RN += im;
 }
@@ -2137,7 +2137,7 @@ static void ldrb_2iaw(void)
  */
 static void stmda(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM_32,0,-4);
 }
 
@@ -2147,7 +2147,7 @@ static void stmda(void)
  */
 static void ldmda(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM_32,0,-4);
 }
 
@@ -2157,7 +2157,7 @@ static void ldmda(void)
  */
 static void stmda_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM_32,0,-4);
 	RN = ea;
 }
@@ -2168,7 +2168,7 @@ static void stmda_w(void)
  */
 static void ldmda_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM_32,0,-4);
 	RN = ea;
 }
@@ -2179,7 +2179,7 @@ static void ldmda_w(void)
  */
 static void stmdab(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM,0,-1);
 }
 
@@ -2189,7 +2189,7 @@ static void stmdab(void)
  */
 static void ldmdab(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM,0,-1);
 }
 
@@ -2199,7 +2199,7 @@ static void ldmdab(void)
  */
 static void stmdab_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM,0,-1);
 	RN = ea;
 }
@@ -2210,7 +2210,7 @@ static void stmdab_w(void)
  */
 static void ldmdab_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM,0,-1);
 	RN = ea;
 }
@@ -2221,7 +2221,7 @@ static void ldmdab_w(void)
  */
 static void stmia(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM_32,0,+4);
 }
 
@@ -2231,7 +2231,7 @@ static void stmia(void)
  */
 static void ldmia(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM_32,0,+4);
 }
 
@@ -2241,7 +2241,7 @@ static void ldmia(void)
  */
 static void stmia_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM_32,0,+4);
 	RN = ea;
 }
@@ -2252,7 +2252,7 @@ static void stmia_w(void)
  */
 static void ldmia_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM_32,0,+4);
 	RN = ea;
 }
@@ -2263,7 +2263,7 @@ static void ldmia_w(void)
  */
 static void stmiab(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM,0,+1);
 }
 
@@ -2273,7 +2273,7 @@ static void stmiab(void)
  */
 static void ldmiab(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM,0,+1);
 }
 
@@ -2283,7 +2283,7 @@ static void ldmiab(void)
  */
 static void stmiab_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM,0,+1);
 	RN = ea;
 }
@@ -2294,7 +2294,7 @@ static void stmiab_w(void)
  */
 static void ldmiab_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM,0,+1);
 	RN = ea;
 }
@@ -2305,7 +2305,7 @@ static void ldmiab_w(void)
  */
 static void stmdb(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM_32,-4,0);
 }
 
@@ -2315,7 +2315,7 @@ static void stmdb(void)
  */
 static void ldmdb(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM_32,-4,0);
 }
 
@@ -2325,7 +2325,7 @@ static void ldmdb(void)
  */
 static void stmdb_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM_32,-4,0);
 	RN = ea;
 }
@@ -2336,7 +2336,7 @@ static void stmdb_w(void)
  */
 static void ldmdb_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM_32,-4,0);
 	RN = ea;
 }
@@ -2347,7 +2347,7 @@ static void ldmdb_w(void)
  */
 static void stmdbb(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM,-1,0);
 }
 
@@ -2357,7 +2357,7 @@ static void stmdbb(void)
  */
 static void ldmdbb(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM,-1,0);
 }
 
@@ -2367,7 +2367,7 @@ static void ldmdbb(void)
  */
 static void stmdbb_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM,-1,0);
 	RN = ea;
 }
@@ -2378,7 +2378,7 @@ static void stmdbb_w(void)
  */
 static void ldmdbb_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM,-1,0);
 	RN = ea;
 }
@@ -2389,7 +2389,7 @@ static void ldmdbb_w(void)
  */
 static void stmib(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM_32,+4,0);
 }
 
@@ -2399,7 +2399,7 @@ static void stmib(void)
  */
 static void ldmib(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM_32,+4,0);
 }
 
@@ -2409,7 +2409,7 @@ static void ldmib(void)
  */
 static void stmib_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM_32,+4,0);
 	RN = ea;
 }
@@ -2420,7 +2420,7 @@ static void stmib_w(void)
  */
 static void ldmib_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM_32,+4,0);
 	RN = ea;
 }
@@ -2431,7 +2431,7 @@ static void ldmib_w(void)
  */
 static void stmibb(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM,+1,0);
 }
 
@@ -2441,7 +2441,7 @@ static void stmibb(void)
  */
 static void ldmibb(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM,+1,0);
 }
 
@@ -2451,7 +2451,7 @@ static void ldmibb(void)
  */
 static void stmibb_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	STM(ARM_WRMEM,+1,0);
 	RN = ea;
 }
@@ -2462,7 +2462,7 @@ static void stmibb_w(void)
  */
 static void ldmibb_w(void)
 {
-	UINT32 ea = (RN) & AMASK;
+	uint32_t ea = (RN) & AMASK;
 	LDM(ARM_RDMEM,+1,0);
 	RN = ea;
 }
@@ -2480,7 +2480,7 @@ static void ldmibb_w(void)
  */
 static void b(void)
 {
-	UINT32 offs = OP & 0x00ffffff;
+	uint32_t offs = OP & 0x00ffffff;
 
 	PC = (arm.ppc + (offs << 2)) & AMASK;
 	fill_queue();
@@ -2492,7 +2492,7 @@ static void b(void)
  */
 static void bl(void)
 {
-	UINT32 offs = OP & 0x00ffffff;
+	uint32_t offs = OP & 0x00ffffff;
 
 	/* save PC */
 	arm.reg[14] = PC | PSW;

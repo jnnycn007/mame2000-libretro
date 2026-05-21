@@ -7,12 +7,12 @@
 ****************************************************************************/
 #include "driver.h"
 
-static INT16 default_levels[2] = {0,32767};
+static int16_t default_levels[2] = {0,32767};
 
 struct speaker
 {
 	int channel;
-	INT16 *levels;
+	int16_t *levels;
 	int num_levels;
 	int level;
 	int mixing_level;
@@ -21,14 +21,14 @@ struct speaker
 static struct Speaker_interface *intf;
 static struct speaker speaker[MAX_SPEAKER];
 
-void speaker_sh_init(int which, int speaker_num_levels, INT16 *speaker_levels)
+void speaker_sh_init(int which, int speaker_num_levels, int16_t *speaker_levels)
 {
 	struct speaker *sp = &speaker[which];
 	sp->levels = speaker_levels;
 	sp->num_levels = speaker_num_levels;
 }
 
-static void speaker_sound_update(int param, INT16 *buffer, int length)
+static void speaker_sound_update(int param, int16_t *buffer, int length)
 {
 	struct speaker *sp = &speaker[param];
 	int volume = sp->levels[sp->level] * sp->mixing_level / 100;

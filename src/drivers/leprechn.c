@@ -77,7 +77,7 @@ WRITE_HANDLER( leprechn_graphics_data_w );
 
 
 
-static UINT8 input_port_select;
+static uint8_t input_port_select;
 
 static WRITE_HANDLER( leprechn_input_port_select_w )
 {

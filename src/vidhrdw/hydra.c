@@ -73,8 +73,8 @@
  *************************************/
 
 struct rectangle hydra_mo_area;
-UINT32 hydra_mo_priority_offset;
-INT32 hydra_pf_xoffset;
+uint32_t hydra_mo_priority_offset;
+int32_t hydra_pf_xoffset;
 
 
 
@@ -106,7 +106,7 @@ struct mo_sort_entry
  *************************************/
 
 static struct atarigen_pf_state pf_state;
-static UINT16 current_control;
+static uint16_t current_control;
 
 
 
@@ -116,13 +116,13 @@ static UINT16 current_control;
  *
  *************************************/
 
-static const UINT8 *update_palette(void);
+static const uint8_t *update_palette(void);
 
 static void pf_color_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *param);
 static void pf_render_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *param);
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param);
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param);
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param);
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param);
 
 #if DEBUG_VIDEO
 static int debug(void);
@@ -152,10 +152,10 @@ int hydra_vh_start(void)
 	/* add the top bit to the playfield graphics */
 	if (Machine->gfx[0])
 	{
-		const UINT8 *src = &memory_region(REGION_GFX1)[0x80000];
+		const uint8_t *src = &memory_region(REGION_GFX1)[0x80000];
 		unsigned int *pen_usage = Machine->gfx[0]->pen_usage;
 		int n, h, w;
-		UINT8 *dst = Machine->gfx[0]->gfxdata;
+		uint8_t *dst = Machine->gfx[0]->gfxdata;
 
 		for (n = 0; n < Machine->gfx[0]->total_elements; n ++)
 		{
@@ -163,7 +163,7 @@ int hydra_vh_start(void)
 
 			for (h = 0; h < 8; h++)
 			{
-				UINT8 bits = *src++;
+				uint8_t bits = *src++;
 
 				for (w = 0; w < 8; w++, dst += (1 << HIGH_RES), bits <<= 1)
 				{
@@ -247,13 +247,13 @@ WRITE_HANDLER( hydra_mo_control_w )
 
 void hydra_scanline_update(int scanline)
 {
-	UINT16 *base = (UINT16 *)&atarigen_alpharam[((scanline / 8) * 64 + 47) * 2];
+	uint16_t *base = (uint16_t *)&atarigen_alpharam[((scanline / 8) * 64 + 47) * 2];
 	int i;
 
 	//if (scanline == 0) logerror("-------\n");
 
 	/* keep in range */
-	if ((UINT8 *)base >= &atarigen_alpharam[atarigen_alpharam_size])
+	if ((uint8_t *)base >= &atarigen_alpharam[atarigen_alpharam_size])
 		return;
 
 	/* update the current parameters */
@@ -294,7 +294,7 @@ void hydra_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 {
 	/* 	a note about this: I don't see how to compute the MO ROM checksums, so these
 		are just the values Pit Fighter is expecting. Hydra never checks. */
-	static UINT16 mo_checksum[16] =
+	static uint16_t mo_checksum[16] =
 	{
 		0xc289, 0x3103, 0x2b8d, 0xe048, 0xc12e, 0x0ede, 0x2cd7, 0x7dc8,
 		0x58fc, 0xb877, 0x9449, 0x59d4, 0x8b63, 0x241b, 0xa3de, 0x4724
@@ -351,7 +351,7 @@ void hydra_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 	/* now loop back and process */
 	for (x = 1; x < 256; x++)
 		for (current = list_head[x]; current; current = current->next)
-			mo_render_callback((const UINT16 *)&atarigen_spriteram[current->entry * 16], &hydra_mo_area, &modata);
+			mo_render_callback((const uint16_t *)&atarigen_spriteram[current->entry * 16], &hydra_mo_area, &modata);
 
 	/* draw the alphanumerics */
 	gfx = Machine->gfx[1];
@@ -377,10 +377,10 @@ void hydra_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
  *
  *************************************/
 
-static const UINT8 *update_palette(void)
+static const uint8_t *update_palette(void)
 {
-	UINT16 mo_map[16+4], al_map[16];
-	UINT32 pf_map[8];
+	uint16_t mo_map[16+4], al_map[16];
+	uint32_t pf_map[8];
 	const unsigned int *usage;
 	int i, j, x, y, offs;
 
@@ -398,7 +398,7 @@ static const UINT8 *update_palette(void)
 	{
 		int priority = READ_WORD(&atarigen_spriteram[j * 16 + hydra_mo_priority_offset]) & 0xff;
 		if (priority != 0)
-			mo_color_callback((const UINT16 *)&atarigen_spriteram[j * 16], &Machine->visible_area, mo_map);
+			mo_color_callback((const uint16_t *)&atarigen_spriteram[j * 16], &Machine->visible_area, mo_map);
 	}
 
 	/* update color usage for the alphanumerics */
@@ -415,7 +415,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the playfield palette */
 	for (i = 0; i < 8; i++)
 	{
-		UINT32 used = pf_map[i];
+		uint32_t used = pf_map[i];
 		if (used)
 			for (j = 0; j < 32; j++)
 				if (used & (1 << j))
@@ -425,7 +425,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the motion object palette */
 	for (i = 0; i < 16; i++)
 	{
-		UINT16 used = mo_map[i];
+		uint16_t used = mo_map[i];
 		if (used)
 		{
 			for (j = 0; j < 16; j++)
@@ -437,7 +437,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the alphanumerics palette */
 	for (i = 0; i < 16; i++)
 	{
-		UINT16 used = al_map[i];
+		uint16_t used = al_map[i];
 		if (used)
 		{
 			if (i < 8)
@@ -465,7 +465,7 @@ static const UINT8 *update_palette(void)
 static void pf_color_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *param)
 {
 	const unsigned int *usage = Machine->gfx[0]->pen_usage;
-	UINT32 *colormap = (UINT32 *)param;
+	uint32_t *colormap = (uint32_t *)param;
 	int bankbase = state->param[0] * 0x1000;
 	int x, y;
 
@@ -533,9 +533,9 @@ static void pf_render_callback(const struct rectangle *clip, const struct rectan
  *
  *************************************/
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
-	UINT16 *colormap = (UINT16 *)param;
+	uint16_t *colormap = (uint16_t *)param;
 
 	int scale = data[4];
 	int code = data[0] & 0x7fff;
@@ -584,7 +584,7 @@ static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, 
  *
  *************************************/
 
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
 	int scale = data[4];
 	int code = data[0] & 0x7fff;
@@ -594,8 +594,8 @@ static void mo_render_callback(const UINT16 *data, const struct rectangle *clip,
 		struct osd_bitmap *bitmap = modata->bitmap;
 		int hflip = data[0] & 0x8000;
 		int color = data[1] & 0xff;
-		int x = ((INT16)data[2] >> 6);
-		int y = ((INT16)data[3] >> 6);
+		int x = ((int16_t)data[2] >> 6);
+		int y = ((int16_t)data[3] >> 6);
 
 		atarigen_rle_render(bitmap, &atarigen_rle_info[code], color, hflip, 0, (x << HIGH_RES) + clip->min_x, y, scale << HIGH_RES, scale, clip);
 	}
@@ -611,7 +611,7 @@ static void mo_render_callback(const UINT16 *data, const struct rectangle *clip,
 
 #if DEBUG_VIDEO
 
-static void mo_print_callback(struct osd_bitmap *bitmap, struct rectangle *clip, UINT16 *data, void *param)
+static void mo_print_callback(struct osd_bitmap *bitmap, struct rectangle *clip, uint16_t *data, void *param)
 {
 	int code = (data[0] & 0x7fff);
 	int vsize = (data[1] & 15) + 1;

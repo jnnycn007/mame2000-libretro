@@ -23,8 +23,8 @@ void rampart_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
 void rampart_scanline_update(int scanline);
 
 
-static UINT8 *slapstic_base;
-static UINT32 current_bank;
+static uint8_t *slapstic_base;
+static uint32_t current_bank;
 
 
 
@@ -66,7 +66,7 @@ static void scanline_update(int scanline)
  *
  *************************************/
 
-static UINT32 bank_list[] = { 0x4000, 0x6000, 0x0000, 0x2000 };
+static uint32_t bank_list[] = { 0x4000, 0x6000, 0x0000, 0x2000 };
 
 static READ_HANDLER( slapstic_bank_r )
 {
@@ -602,7 +602,7 @@ ROM_END
 
 static void init_rampart(void)
 {
-	static const UINT16 compressed_default_eeprom[] =
+	static const uint16_t compressed_default_eeprom[] =
 	{
 		0x0001,0x01FF,0x0E00,0x01FF,0x0E00,0x01FF,0x0150,0x0101,
 		0x0100,0x0151,0x0300,0x0151,0x0400,0x0150,0x0101,0x01FB,
@@ -642,9 +642,9 @@ static void init_rampart(void)
 
 static void init_arcadecr(void)
 {
-	UINT32 length = 0x80000 * 2;
-	UINT16 *data = (UINT16 *)memory_region(REGION_CPU1);
-	UINT8 *temp1 = (UINT8*)malloc(length / 2), *temp2 = (UINT8*)malloc(length / 2);
+	uint32_t length = 0x80000 * 2;
+	uint16_t *data = (uint16_t *)memory_region(REGION_CPU1);
+	uint8_t *temp1 = (uint8_t*)malloc(length / 2), *temp2 = (uint8_t*)malloc(length / 2);
 	FILE *f;
 	int i;
 

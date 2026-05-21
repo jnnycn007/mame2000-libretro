@@ -96,7 +96,7 @@ static INLINE int limit( int val, int max, int min ) {
 #define MAXOUT 0x7fff
 #define MINOUT -0x8000
 
-void K053260_update( int param, INT16 **buffer, int length ) {
+void K053260_update( int param, int16_t **buffer, int length ) {
 	static long dpcmcnv[] = { 0, 1, 4, 9, 16, 25, 36, 49, -64, -49, -36, -25, -16, -9, -4, -1 };
 
 	int i, j, lvol[4], rvol[4], play[4], loop[4], ppcm_data[4], ppcm[4];

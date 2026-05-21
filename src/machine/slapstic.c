@@ -243,10 +243,10 @@ static struct slapstic_params slapstic_table[18] =
 static struct slapstic_params *slapstic;
 
 static enum state_type state;
-static INT8 next_bank;
-static INT8 extra_bank;
-static INT8 current_bank;
-static UINT8 version;
+static int8_t next_bank;
+static int8_t extra_bank;
+static int8_t current_bank;
+static uint8_t version;
 
 #if LOG_SLAPSTIC
 	static void slapstic_log(offs_t offset);

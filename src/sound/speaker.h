@@ -14,7 +14,7 @@ struct Speaker_interface
 	int num;
 	int mixing_level[MAX_SPEAKER];	/* mixing level in percent */
 	int num_level[MAX_SPEAKER]; 	/* optional: number of levels (if not two) */
-	INT16 *levels[MAX_SPEAKER]; 	/* optional: pointer to level lookup table */
+	int16_t *levels[MAX_SPEAKER]; 	/* optional: pointer to level lookup table */
 };
 
 int speaker_sh_start (const struct MachineSound *msound);

@@ -61,18 +61,18 @@ extern void twin16_spriteram_process( void );
 
 /******************************************************************************************/
 
-UINT16 twin16_custom_vidhrdw;
-UINT16 *twin16_gfx_rom;
+uint16_t twin16_custom_vidhrdw;
+uint16_t *twin16_gfx_rom;
 unsigned char *twin16_sprite_gfx_ram;
 unsigned char *twin16_tile_gfx_ram;
 unsigned char *twin16_fixram; /* text layer */
 
-static UINT16 twin16_CPUA_register, twin16_CPUB_register;
+static uint16_t twin16_CPUA_register, twin16_CPUB_register;
 #define CPUA_IRQ_ENABLE (twin16_CPUA_register&0x20)
 #define CPUB_IRQ_ENABLE (twin16_CPUB_register&0x02)
 
-static UINT8 twin16_soundlatch;
-static UINT16 twin16_sound_command;
+static uint8_t twin16_soundlatch;
+static uint16_t twin16_sound_command;
 
 static unsigned char *battery_backed_ram;
 
@@ -145,7 +145,7 @@ static void cuebrick_nvram_handler(void *file,int read_or_write)
 
 static READ_HANDLER( extra_rom_r )
 {
-	return ((UINT16 *)memory_region(REGION_GFX3))[offset/2];
+	return ((uint16_t *)memory_region(REGION_GFX3))[offset/2];
 }
 
 static READ_HANDLER( twin16_gfx_rom1_r )
@@ -222,7 +222,7 @@ static WRITE_HANDLER( twin16_CPUA_register_w )
 						X				0->1 trigger IRQ on sound CPU
 								x	x	coin counters
 	*/
-	UINT16 old = twin16_CPUA_register;
+	uint16_t old = twin16_CPUA_register;
 	twin16_CPUA_register = COMBINE_WORD( old, data );
 	if( twin16_CPUA_register!=old )
 	{
@@ -253,7 +253,7 @@ static WRITE_HANDLER( twin16_CPUB_register_w )
 								X		IRQ5 enable
 									X	0->1 trigger IRQ6 on CPUA
 	*/
-	UINT16 old = twin16_CPUB_register;
+	uint16_t old = twin16_CPUB_register;
 	twin16_CPUB_register = COMBINE_WORD( old, data );
 	if( twin16_CPUB_register!=old )
 	{
@@ -266,7 +266,7 @@ static WRITE_HANDLER( twin16_CPUB_register_w )
 
 static WRITE_HANDLER( fround_CPU_register_w )
 {
-	UINT16 old = twin16_CPUA_register;
+	uint16_t old = twin16_CPUA_register;
 	twin16_CPUA_register = COMBINE_WORD( old, data );
 	if( twin16_CPUA_register!=old )
 	{
@@ -1645,10 +1645,10 @@ ROM_END
 static void gfx_untangle( void )
 { /* sprite, tile data */
 	int i;
-	UINT16 *temp = (UINT16 *)malloc(0x200000);
+	uint16_t *temp = (uint16_t *)malloc(0x200000);
 	if( temp )
 	{
-		twin16_gfx_rom = (UINT16 *)memory_region(REGION_GFX2);
+		twin16_gfx_rom = (uint16_t *)memory_region(REGION_GFX2);
 		memcpy( temp, twin16_gfx_rom, 0x200000 );
 
 		for( i=0; i<0x080000; i++ )

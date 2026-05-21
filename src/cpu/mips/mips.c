@@ -40,15 +40,15 @@
 
 typedef struct
 {
-	UINT32 op;
-	UINT32 pc;
-	UINT32 nextop;
-	UINT32 nextpc;
-	UINT32 irq;
-	UINT32 hi;
-	UINT32 lo;
-	UINT32 r[ 32 ];
-	UINT32 cp0r[ 32 ];
+	uint32_t op;
+	uint32_t pc;
+	uint32_t nextop;
+	uint32_t nextpc;
+	uint32_t irq;
+	uint32_t hi;
+	uint32_t lo;
+	uint32_t r[ 32 ];
+	uint32_t cp0r[ 32 ];
 } mips_cpu_context;
 
 /*
@@ -56,7 +56,7 @@ typedef struct
  * renamed context and added some macros to access the contents
  */
 mips_cpu_context mcc;
-UINT32 context_pc = 0;
+uint32_t context_pc = 0;
 
 #define THISOP	mcc.op
 #define THISPC	mcc.pc
@@ -102,7 +102,7 @@ void mips_stop( void )
 {
 }
 
-static INLINE void mips_set_nextpc( UINT32 adr )
+static INLINE void mips_set_nextpc( uint32_t adr )
 {
 	THISPC = NEXTPC;
 	THISOP = mcc.nextop;
@@ -168,7 +168,7 @@ int mips_execute( int cycles )
 			case FUNCT_SRA:
 				if( INS_RD( THISOP ) != 0 )
 				{
-					RD = (INT32) RT >> SHAMT;
+					RD = (int32_t) RT >> SHAMT;
 				}
 				mips_advance_pc();
 				break;
@@ -189,7 +189,7 @@ int mips_execute( int cycles )
 			case FUNCT_SRAV:
 				if( INS_RD( THISOP ) != 0 )
 				{
-					RD = (INT32) RT >> ( RS & 31 );
+					RD = (int32_t) RT >> ( RS & 31 );
 				}
 				mips_advance_pc();
 				break;
@@ -259,8 +259,8 @@ int mips_execute( int cycles )
 				}
 				else
 				{
-					INT64 res;
-					res = MUL_64_32_32( (INT32)RS, (INT32)RT );
+					int64_t res;
+					res = MUL_64_32_32( (int32_t)RS, (int32_t)RT );
 					LO = LO32_32_64( res );
 					HI = HI32_32_64( res );
 					mips_advance_pc();
@@ -273,8 +273,8 @@ int mips_execute( int cycles )
 				}
 				else
 				{
-					UINT64 res;
-					res = MUL_U64_U32_U32( (INT32)RS, (INT32)RT );
+					uint64_t res;
+					res = MUL_U64_U32_U32( (int32_t)RS, (int32_t)RT );
 					LO = LO32_U32_U64( res );
 					HI = HI32_U32_U64( res );
 					mips_advance_pc();
@@ -287,8 +287,8 @@ int mips_execute( int cycles )
 				}
 				else
 				{
-					LO = (INT32)RS / (INT32)RT;
-					HI = (INT32)RS % (INT32)RT;
+					LO = (int32_t)RS / (int32_t)RT;
+					HI = (int32_t)RS % (int32_t)RT;
 					mips_advance_pc();
 				}
 				break;
@@ -306,9 +306,9 @@ int mips_execute( int cycles )
 				break;
 			case FUNCT_ADD:
 				{
-					UINT32 res;
+					uint32_t res;
 					res = RS + RT;
-					if( (INT32)( ( RS & RT & ~res ) | ( ~RS & ~RT & res ) ) < 0 )
+					if( (int32_t)( ( RS & RT & ~res ) | ( ~RS & ~RT & res ) ) < 0 )
 					{
 						mips_exception( EXC_OVF );
 					}
@@ -331,9 +331,9 @@ int mips_execute( int cycles )
 				break;
 			case FUNCT_SUB:
 				{
-					UINT32 res;
+					uint32_t res;
 					res = RS - RT;
-					if( (INT32)( ( RS & ~RT & ~res ) | ( ~RS & RT & res ) ) < 0 )
+					if( (int32_t)( ( RS & ~RT & ~res ) | ( ~RS & RT & res ) ) < 0 )
 					{
 						mips_exception( EXC_OVF );
 					}
@@ -385,7 +385,7 @@ int mips_execute( int cycles )
 			case FUNCT_SLT:
 				if( INS_RD( THISOP ) != 0 )
 				{
-					RD = (INT32)RS < (INT32)RT;
+					RD = (int32_t)RS < (int32_t)RT;
 				}
 				mips_advance_pc();
 				break;
@@ -405,7 +405,7 @@ int mips_execute( int cycles )
 			switch( INS_RT( THISOP ) )
 			{
 			case RT_BLTZ:
-				if( (INT32)RS < 0 )
+				if( (int32_t)RS < 0 )
 				{
 					mips_set_nextpc( NEXTPC + ( MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) ) << 2 ) );
 				}
@@ -415,7 +415,7 @@ int mips_execute( int cycles )
 				}
 				break;
 			case RT_BGEZ:
-				if( (INT32)RS >= 0 )
+				if( (int32_t)RS >= 0 )
 				{
 					mips_set_nextpc( NEXTPC + ( MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) ) << 2 ) );
 				}
@@ -426,7 +426,7 @@ int mips_execute( int cycles )
 				break;
 			case RT_BLTZAL:
 				R( 31 ) = NEXTPC + 4;
-				if( (INT32)RS < 0 )
+				if( (int32_t)RS < 0 )
 				{
 					mips_set_nextpc( NEXTPC + ( MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) ) << 2 ) );
 				}
@@ -437,7 +437,7 @@ int mips_execute( int cycles )
 				break;
 			case RT_BGEZAL:
 				R( 31 ) = NEXTPC + 4;
-				if( (INT32)RS >= 0 )
+				if( (int32_t)RS >= 0 )
 				{
 					mips_set_nextpc( NEXTPC + ( MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) ) << 2 ) );
 				}
@@ -480,7 +480,7 @@ int mips_execute( int cycles )
 			{
 				mips_exception( EXC_RI );
 			}
-			else if( (INT32)RS <= 0 )
+			else if( (int32_t)RS <= 0 )
 			{
 				mips_set_nextpc( NEXTPC + ( MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) ) << 2 ) );
 			}
@@ -494,7 +494,7 @@ int mips_execute( int cycles )
 			{
 				mips_exception( EXC_RI );
 			}
-			else if( (INT32)RS > 0 )
+			else if( (int32_t)RS > 0 )
 			{
 				mips_set_nextpc( NEXTPC + ( MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) ) << 2 ) );
 			}
@@ -505,10 +505,10 @@ int mips_execute( int cycles )
 			break;
 		case OP_ADDI:
 			{
-				UINT32 res,imm;
+				uint32_t res,imm;
 				imm = MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) );
 				res = RS + imm;
-				if( (INT32)( ( RS & imm & ~res ) | ( ~RS & ~imm & res ) ) < 0 )
+				if( (int32_t)( ( RS & imm & ~res ) | ( ~RS & ~imm & res ) ) < 0 )
 				{
 					mips_exception( EXC_OVF );
 				}
@@ -532,7 +532,7 @@ int mips_execute( int cycles )
 		case OP_SLTI:
 			if( INS_RT( THISOP ) != 0 )
 			{
-				RT = (INT32)RS < MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) );
+				RT = (int32_t)RS < MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) );
 			}
 			mips_advance_pc();
 			break;
@@ -756,7 +756,7 @@ int mips_execute( int cycles )
 			}
 			else
 			{
-				UINT32 adr;
+				uint32_t adr;
 				adr = RS + MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) );
 				if( ( adr & ( ( CP0R( CP0_SR ) & 0x02 ) << 31 ) ) != 0 )
 				{
@@ -778,7 +778,7 @@ int mips_execute( int cycles )
 			}
 			else
 			{
-				UINT32 adr;
+				uint32_t adr;
 				adr = RS + MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) );
 				if( ( adr & ( ( ( CP0R( CP0_SR ) & 0x02 ) << 31 ) | 1 ) ) != 0 )
 				{
@@ -805,7 +805,7 @@ int mips_execute( int cycles )
 			}
 			else
 			{
-				UINT32 adr;
+				uint32_t adr;
 				adr = RS + MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) );
 				if( ( adr & ( ( ( CP0R( CP0_SR ) & 0x02 ) << 31 ) | 3 ) ) != 0 )
 				{
@@ -827,7 +827,7 @@ int mips_execute( int cycles )
 			}
 			else
 			{
-				UINT32 adr;
+				uint32_t adr;
 				adr = RS + MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) );
 				if( ( adr & ( ( CP0R( CP0_SR ) & 0x02 ) << 31 ) ) != 0 )
 				{
@@ -849,7 +849,7 @@ int mips_execute( int cycles )
 			}
 			else
 			{
-				UINT32 adr;
+				uint32_t adr;
 				adr = RS + MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) );
 				if( ( adr & ( ( ( CP0R( CP0_SR ) & 0x02 ) << 31 ) | 1 ) ) != 0 )
 				{
@@ -876,7 +876,7 @@ int mips_execute( int cycles )
 			}
 			else
 			{
-				UINT32 adr;
+				uint32_t adr;
 				adr = RS + MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) );
 				if( ( adr & ( ( CP0R( CP0_SR ) & 0x02 ) << 31 ) ) != 0 )
 				{
@@ -898,7 +898,7 @@ int mips_execute( int cycles )
 			}
 			else
 			{
-				UINT32 adr;
+				uint32_t adr;
 				adr = RS + MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) );
 				if( ( adr & ( ( ( CP0R( CP0_SR ) & 0x02 ) << 31 ) | 1 ) ) != 0 )
 				{
@@ -925,7 +925,7 @@ int mips_execute( int cycles )
 			}
 			else
 			{
-				UINT32 adr;
+				uint32_t adr;
 				adr = RS + MIPS_WORD_EXTEND( INS_IMMEDIATE( THISOP ) );
 				if( ( adr & ( ( ( CP0R( CP0_SR ) & 0x02 ) << 31 ) | 3 ) ) != 0 )
 				{
@@ -1219,7 +1219,7 @@ const char *mips_info( void *context, int regnum )
 	return "";
 }
 
-unsigned mips_dasm( char *buffer, UINT32 pc )
+unsigned mips_dasm( char *buffer, uint32_t pc )
 {
 	unsigned ret;
 	change_pc32( pc );

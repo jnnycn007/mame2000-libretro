@@ -29,7 +29,7 @@ static void get_bg_tile_info(int tile_index)
 	SET_TILE_INFO(0,gundealr_bg_videoram[2*tile_index] + ((attr & 0x07) << 8),(attr & 0xf0) >> 4)
 }
 
-static UINT32 gundealr_scan(UINT32 col,UINT32 row,UINT32 num_cols,UINT32 num_rows)
+static uint32_t gundealr_scan(uint32_t col,uint32_t row,uint32_t num_cols,uint32_t num_rows)
 {
 	/* logical (col,row) -> memory offset */
 	return (row & 0x0f) + ((col & 0x3f) << 4) + ((row & 0x10) << 6);

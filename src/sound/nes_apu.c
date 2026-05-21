@@ -640,7 +640,7 @@ static INLINE void apu_regwrite(int chip,int address, uint8 value)
 /* UPDATE SOUND BUFFER USING CURRENT DATA */
 static INLINE void apu_update(int chip)
 {
-   static INT16 *buffer16 = NULL;
+   static int16_t *buffer16 = NULL;
    int accum;
    int endp = sound_scalebufferpos(samps_per_sync);
    int elapsed;
@@ -652,7 +652,7 @@ static INLINE void apu_update(int chip)
 #endif
 
    SETAPU(chip);
-   buffer16  = (INT16*)cur->buffer;
+   buffer16  = (int16_t*)cur->buffer;
 
 #ifndef USE_QUEUE
    /* Recall last position updated and restore pointers */
@@ -791,6 +791,6 @@ void NESPSG_sh_update(void)
 #ifndef USE_QUEUE
     APU[i].buf_pos=0;
 #endif
-    mixer_play_streamed_sample_16(channel+i,(INT16*)APU[i].buffer,buffer_size,real_rate);
+    mixer_play_streamed_sample_16(channel+i,(int16_t*)APU[i].buffer,buffer_size,real_rate);
   }
 }

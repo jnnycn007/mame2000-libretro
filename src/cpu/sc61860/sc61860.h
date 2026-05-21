@@ -69,7 +69,7 @@ WRITE_HANDLER(sc61860_write_internal);
 // timer_pulse(1/500.0, 0,sc61860_2ms_tick)
 void sc61860_2ms_tick(int param);
 // this is though for power on/off of the sharps
-UINT8 *sc61860_internal_ram(void);
+uint8_t *sc61860_internal_ram(void);
 
 #endif
 

@@ -12,9 +12,9 @@
 struct RomModule
 {
 	const char *name;	/* name of the file to load */
-	UINT32 offset;		/* offset to load it to */
-	UINT32 length;		/* length of the file */
-	UINT32 crc;			/* standard CRC-32 checksum */
+	uint32_t offset;		/* offset to load it to */
+	uint32_t length;		/* length of the file */
+	uint32_t crc;			/* standard CRC-32 checksum */
 };
 
 /* there are some special cases for the above. name, offset and size all set to 0 */

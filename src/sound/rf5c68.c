@@ -33,7 +33,7 @@ static unsigned char wreg[0x10]; /* write data */
 #define    RF_START  (1<<1)
 
 
-static void RF5C68Update( int num, INT16 **buffer, int length );
+static void RF5C68Update( int num, int16_t **buffer, int length );
 
 /************************************************/
 /*    RF5C68 start                              */
@@ -97,18 +97,18 @@ void RF5C68_sh_stop( void )
 
 static INLINE int ILimit(int v, int max, int min) { return v > max ? max : (v < min ? min : v); }
 
-static void RF5C68Update( int num, INT16 **buffer, int length )
+static void RF5C68Update( int num, int16_t **buffer, int length )
 {
 	int i, j, tmp;
 	unsigned int addr, old_addr;
 	signed int ld, rd;
-	INT16  *datap[2];
+	int16_t  *datap[2];
 
 	datap[RF_L_PAN] = buffer[0];
 	datap[RF_R_PAN] = buffer[1];
 
-	memset( datap[RF_L_PAN], 0x00, length * sizeof(INT16) );
-	memset( datap[RF_R_PAN], 0x00, length * sizeof(INT16) );
+	memset( datap[RF_L_PAN], 0x00, length * sizeof(int16_t) );
+	memset( datap[RF_R_PAN], 0x00, length * sizeof(int16_t) );
 
 	for( i = 0; i < RF5C68_PCM_MAX; i++ )
 	{

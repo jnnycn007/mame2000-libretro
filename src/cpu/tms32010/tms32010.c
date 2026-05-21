@@ -35,12 +35,12 @@
 
 typedef struct
 {
-	UINT16	PREPC;		/* previous program counter */
-	UINT16  PC;
-	INT32   ACC, Preg;
-	INT32   ALU;
-	UINT16  Treg;
-	UINT16  AR[2], STACK[4], STR;
+	uint16_t	PREPC;		/* previous program counter */
+	uint16_t  PC;
+	int32_t   ACC, Preg;
+	int32_t   ALU;
+	uint16_t  Treg;
+	uint16_t  AR[2], STACK[4], STR;
 	int     pending_irq, BIO_pending_irq;
 	int     irq_state;
 	int     (*irq_callback)(int irqline);
@@ -56,11 +56,11 @@ typedef struct
 #define ARP_REG		0x0100	/* ARP	(Auxiliary Register Pointer) */
 #define DP_REG		0x0001	/* DP	(Data memory Pointer (bank) bit) */
 
-static UINT16   opcode=0;
-static UINT8	opcode_major=0, opcode_minor, opcode_minr;	/* opcode split into MSB and LSB */
+static uint16_t   opcode=0;
+static uint8_t	opcode_major=0, opcode_minor, opcode_minr;	/* opcode split into MSB and LSB */
 static tms320c10_Regs R;
 int tms320c10_ICount;
-static INT32 tmpacc;
+static int32_t tmpacc;
 typedef void (*opcode_fn) (void);
 
 
@@ -74,15 +74,15 @@ typedef void (*opcode_fn) (void);
 #define dmapage1 (0x80 | opcode_minor)			/* address used in direct memory access operations for sst instruction */
 
 #define ind		 (R.AR[ARP] & 0x00ff)			/* address used in indirect memory access operations */
-UINT16			 memaccess;
+uint16_t			 memaccess;
 #define memacc	 (memaccess = (opcode_minor & 0x80) ? ind : dma)
 
 
 
-static INLINE void CLR(UINT16 flag) { R.STR &= ~flag; R.STR |= 0x1efe; }
-static INLINE void SET(UINT16 flag) { R.STR |=  flag; R.STR |= 0x1efe; }
+static INLINE void CLR(uint16_t flag) { R.STR &= ~flag; R.STR |= 0x1efe; }
+static INLINE void SET(uint16_t flag) { R.STR |=  flag; R.STR |= 0x1efe; }
 
-static INLINE void getdata(UINT8 shift,UINT8 signext)
+static INLINE void getdata(uint8_t shift,uint8_t signext)
 {
 	if (opcode_minor & 0x80) memaccess = ind;
 	else memaccess = dma;
@@ -92,7 +92,7 @@ static INLINE void getdata(UINT8 shift,UINT8 signext)
 	R.ALU <<= shift;
 	if (opcode_minor & 0x80) {
 		if ((opcode_minor & 0x20) || (opcode_minor & 0x10)) {
-			UINT16 tmpAR = R.AR[ARP];
+			uint16_t tmpAR = R.AR[ARP];
 			if (opcode_minor & 0x20) tmpAR++ ;
 			if (opcode_minor & 0x10) tmpAR-- ;
 			R.AR[ARP] = (R.AR[ARP] & 0xfe00) | (tmpAR & 0x01ff);
@@ -111,7 +111,7 @@ static INLINE void getdata_lar(void)
 	if (opcode_minor & 0x80) {
 		if ((opcode_minor & 0x20) || (opcode_minor & 0x10)) {
 			if ((opcode_major & 1) != ARP) {
-				UINT16 tmpAR = R.AR[ARP];
+				uint16_t tmpAR = R.AR[ARP];
 				if (opcode_minor & 0x20) tmpAR++ ;
 				if (opcode_minor & 0x10) tmpAR-- ;
 				R.AR[ARP] = (R.AR[ARP] & 0xfe00) | (tmpAR & 0x01ff);
@@ -124,13 +124,13 @@ static INLINE void getdata_lar(void)
 	}
 }
 
-static INLINE void putdata(UINT16 data)
+static INLINE void putdata(uint16_t data)
 {
 	if (opcode_minor & 0x80) memaccess = ind;
 	else memaccess = dma;
 	if (opcode_minor & 0x80) {
 		if ((opcode_minor & 0x20) || (opcode_minor & 0x10)) {
-			UINT16 tmpAR = R.AR[ARP];
+			uint16_t tmpAR = R.AR[ARP];
 			if (opcode_minor & 0x20) tmpAR++ ;
 			if (opcode_minor & 0x10) tmpAR-- ;
 			R.AR[ARP] = (R.AR[ARP] & 0xfe00) | (tmpAR & 0x01ff);
@@ -144,13 +144,13 @@ static INLINE void putdata(UINT16 data)
 		M_WRTRAM(memaccess,(R.AR[data])); }
 	else M_WRTRAM(memaccess,(data&0xffff));
 }
-static INLINE void putdata_sst(UINT16 data)
+static INLINE void putdata_sst(uint16_t data)
 {
 	if (opcode_minor & 0x80) memaccess = ind;
 	else memaccess = dmapage1;
 	if (opcode_minor & 0x80) {
 		if ((opcode_minor & 0x20) || (opcode_minor & 0x10)) {
-			UINT16 tmpAR = R.AR[ARP];
+			uint16_t tmpAR = R.AR[ARP];
 			if (opcode_minor & 0x20) tmpAR++ ;
 			if (opcode_minor & 0x10) tmpAR-- ;
 			R.AR[ARP] = (R.AR[ARP] & 0xfe00) | (tmpAR & 0x01ff);
@@ -332,7 +332,7 @@ static void larp_mar(void)
 		{
 			if (opcode_minor & 0x80) {
 				if ((opcode_minor & 0x20) || (opcode_minor & 0x10)) {
-					UINT16 tmpAR = R.AR[ARP];
+					uint16_t tmpAR = R.AR[ARP];
 					if (opcode_minor & 0x20) tmpAR++ ;
 					if (opcode_minor & 0x10) tmpAR-- ;
 					R.AR[ARP] = (R.AR[ARP] & 0xfe00) | (tmpAR & 0x01ff);
@@ -445,7 +445,7 @@ static void sar_ar1(void)	{ putdata(1); }
 static void sovm(void)		{ SET(OVM_FLAG); }
 static void spac(void)
 		{
-			INT32 tmpPreg = R.Preg;
+			int32_t tmpPreg = R.Preg;
 			tmpacc = R.ACC ;
 			/* if (tmpPreg & 0x8000) tmpPreg |= 0xffff0000; */
 			R.ACC -= tmpPreg ;

@@ -9,23 +9,23 @@
 
 static int scroll_type;
 
-UINT16 armedf_vreg;
+uint16_t armedf_vreg;
 
 unsigned char *armedf_bg_videoram;
-UINT16 armedf_bg_scrollx;
-UINT16 armedf_bg_scrolly;
+uint16_t armedf_bg_scrollx;
+uint16_t armedf_bg_scrolly;
 
 unsigned char *armedf_fg_videoram;
-UINT16 armedf_fg_scrollx;
-UINT16 armedf_fg_scrolly;
+uint16_t armedf_fg_scrollx;
+uint16_t armedf_fg_scrolly;
 
-UINT16 terraf_scroll_msb;
+uint16_t terraf_scroll_msb;
 
 static struct tilemap *background, *foreground, *text_layer;
 
 /******************************************************************/
 
-static UINT32 armedf_scan(UINT32 col,UINT32 row,UINT32 num_cols,UINT32 num_rows)
+static uint32_t armedf_scan(uint32_t col,uint32_t row,uint32_t num_cols,uint32_t num_rows)
 {
 	/* logical (col,row) -> memory offset */
 	return 32*col+row + 0x80;
@@ -33,7 +33,7 @@ static UINT32 armedf_scan(UINT32 col,UINT32 row,UINT32 num_cols,UINT32 num_rows)
 
 static void get_tx_tile_info(int tile_index)
 {
-	UINT16 *source = (UINT16 *)videoram;
+	uint16_t *source = (uint16_t *)videoram;
 	unsigned char attributes = source[tile_index+0x800]&0xff;
 	int tile_number = (source[tile_index]&0xff) + 256*(attributes&3);
 	int color = attributes>>4;
@@ -73,7 +73,7 @@ WRITE_HANDLER( terraf_text_videoram_w )
 	}
 }
 
-static UINT32 terraf_scan(UINT32 col,UINT32 row,UINT32 num_cols,UINT32 num_rows)
+static uint32_t terraf_scan(uint32_t col,uint32_t row,uint32_t num_cols,uint32_t num_rows)
 {
 	/* logical (col,row) -> memory offset */
 	int tile_index = 32*(31-row);
@@ -94,7 +94,7 @@ static UINT32 terraf_scan(UINT32 col,UINT32 row,UINT32 num_cols,UINT32 num_rows)
 
 static void terraf_get_tx_tile_info(int tile_index)
 {
-	UINT16 *source = (UINT16 *)videoram;
+	uint16_t *source = (uint16_t *)videoram;
 	unsigned char attributes = source[tile_index+0x400]&0xff;
 	int tile_number = source[tile_index]&0xff;
 
@@ -105,7 +105,7 @@ static void terraf_get_tx_tile_info(int tile_index)
 
 static void get_fg_tile_info( int tile_index )
 {
-	UINT16 data = ((UINT16 *)armedf_fg_videoram)[tile_index];
+	uint16_t data = ((uint16_t *)armedf_fg_videoram)[tile_index];
 	SET_TILE_INFO( 1, data&0x7ff, data>>11 );
 }
 
@@ -129,7 +129,7 @@ READ_HANDLER( armedf_fg_videoram_r )
 
 static void get_bg_tile_info( int tile_index )
 {
-	UINT16 data = ((UINT16 *)armedf_bg_videoram)[tile_index];
+	uint16_t data = ((uint16_t *)armedf_bg_videoram)[tile_index];
 	SET_TILE_INFO( 2, data&0x3ff, data>>11 );
 }
 
@@ -211,8 +211,8 @@ static void draw_sprites( struct osd_bitmap *bitmap, int priority )
 	const struct rectangle *clip = &Machine->visible_area;
 	const struct GfxElement *gfx = Machine->gfx[3];
 
-	UINT16 *source = (UINT16 *)spriteram;
-	UINT16 *finish = source+512;
+	uint16_t *source = (uint16_t *)spriteram;
+	uint16_t *finish = source+512;
 
 	while( source<finish )
 	{
@@ -238,8 +238,8 @@ static void draw_sprites( struct osd_bitmap *bitmap, int priority )
 
 static void mark_sprite_colors( void )
 {
-	UINT16 *source = (UINT16 *)spriteram;
-	UINT16 *finish = source+512;
+	uint16_t *source = (uint16_t *)spriteram;
+	uint16_t *finish = source+512;
 	int i;
 	char flag[32];
 
@@ -322,8 +322,8 @@ static void cclimbr2_draw_sprites( struct osd_bitmap *bitmap, int priority )
 	const struct rectangle *clip = &Machine->visible_area;
 	const struct GfxElement *gfx = Machine->gfx[3];
 
-	UINT16 *source = (UINT16 *)spriteram;
-	UINT16 *finish = source+1024;
+	uint16_t *source = (uint16_t *)spriteram;
+	uint16_t *finish = source+1024;
 
 	while( source<finish )
 	{

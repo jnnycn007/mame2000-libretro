@@ -54,39 +54,39 @@
 	PORT_BITX(    mask, mask & default, IPT_SERVICE1, DEF_STR( Service_Mode ), KEYCODE_F2, IP_JOY_NONE )
 
 
-static UINT8 leland_gfx_control;
-UINT8 leland_dac_control;
+static uint8_t leland_gfx_control;
+uint8_t leland_dac_control;
 
-static UINT8 wcol_enable;
+static uint8_t wcol_enable;
 
 static void *master_int_timer;
 
-static UINT8 *master_base;
-static UINT8 *slave_base;
-static UINT32 master_length;
-static UINT32 slave_length;
+static uint8_t *master_base;
+static uint8_t *slave_base;
+static uint32_t master_length;
+static uint32_t slave_length;
 
 static int dangerz_x, dangerz_y;
-static UINT8 analog_result;
-static UINT8 dial_last_input[4];
-static UINT8 dial_last_result[4];
+static uint8_t analog_result;
+static uint8_t dial_last_input[4];
+static uint8_t dial_last_result[4];
 
-static UINT8 keycard_shift;
-static UINT8 keycard_bit;
-static UINT8 keycard_state;
-static UINT8 keycard_clock;
-static UINT8 keycard_command[3];
+static uint8_t keycard_shift;
+static uint8_t keycard_bit;
+static uint8_t keycard_state;
+static uint8_t keycard_clock;
+static uint8_t keycard_command[3];
 
-static UINT8 top_board_bank;
-static UINT8 sound_port_bank;
-static UINT8 alternate_bank;
+static uint8_t top_board_bank;
+static uint8_t sound_port_bank;
+static uint8_t alternate_bank;
 static void (*update_master_bank)(void);
 
 #define battery_ram_size 0x4000
-static UINT8 battery_ram_enable;
-static UINT8 *battery_ram;
+static uint8_t battery_ram_enable;
+static uint8_t *battery_ram;
 
-static UINT8 eeprom_data[64*2];
+static uint8_t eeprom_data[64*2];
 static struct EEPROM_interface eeprom_interface =
 {
 	6,
@@ -147,7 +147,7 @@ static void interrupt_callback(int scanline);
 static int dial_compute_value(int new_val, int indx)
 {
 	int delta = new_val - (int)dial_last_input[indx];
-	UINT8 result = dial_last_result[indx] & 0x80;
+	uint8_t result = dial_last_result[indx] & 0x80;
 
 	dial_last_input[indx] = new_val;
 
@@ -202,7 +202,7 @@ static READ_HANDLER( cerberus_dial_2_r )
  *
  *************************************/
 
-static UINT8 *alleymas_kludge_mem;
+static uint8_t *alleymas_kludge_mem;
 
 static WRITE_HANDLER( alleymas_joystick_kludge )
 {
@@ -234,8 +234,8 @@ static WRITE_HANDLER( alleymas_joystick_kludge )
 
 static void update_dangerz_xy(void)
 {
-	UINT8 newy = readinputport(4);
-	UINT8 newx = readinputport(5);
+	uint8_t newy = readinputport(4);
+	uint8_t newx = readinputport(5);
 	int deltay = newy - dial_last_input[0];
 	int deltax = newx - dial_last_input[1];
 
@@ -281,7 +281,7 @@ static READ_HANDLER( dangerz_input_upper_r )
  *
  *************************************/
 
-static const UINT8 redline_pedal_value[8] = { 0xf0, 0xe0, 0xc0, 0xd0, 0x90, 0xb0, 0x30, 0x70 };
+static const uint8_t redline_pedal_value[8] = { 0xf0, 0xe0, 0xc0, 0xd0, 0x90, 0xb0, 0x30, 0x70 };
 
 static READ_HANDLER( redline_pedal_1_r )
 {
@@ -390,7 +390,7 @@ static void init_machine(void)
 
 static void interrupt_callback(int scanline)
 {
-	extern UINT8 leland_last_scanline_int;
+	extern uint8_t leland_last_scanline_int;
 	leland_last_scanline_int = scanline;
 
 	/* interrupts generated on the VA10 line, which is every */
@@ -445,7 +445,7 @@ static void cerberus_bankswitch(void)
 /* bankswitching for Mayhem 2002, World Series Baseball, and Alley Master */
 static void mayhem_bankswitch(void)
 {
-	UINT8 *address;
+	uint8_t *address;
 
 	battery_ram_enable = ((sound_port_bank & 0x24) == 0);
 
@@ -460,7 +460,7 @@ static void mayhem_bankswitch(void)
 /* bankswitching for Danger Zone */
 static void dangerz_bankswitch(void)
 {
-	UINT8 *address;
+	uint8_t *address;
 
 	battery_ram_enable = ((top_board_bank & 0x80) != 0);
 
@@ -475,7 +475,7 @@ static void dangerz_bankswitch(void)
 /* bankswitching for Baseball the Season II, Super Baseball, and Strike Zone */
 static void basebal2_bankswitch(void)
 {
-	UINT8 *address;
+	uint8_t *address;
 
 	battery_ram_enable = (top_board_bank & 0x80);
 
@@ -493,8 +493,8 @@ static void basebal2_bankswitch(void)
 /* bankswitching for Red Line Racer */
 static void redline_bankswitch(void)
 {
-	static const UINT32 bank_list[] = { 0x10000, 0x18000, 0x02000, 0x02000 };
-	UINT8 *address;
+	static const uint32_t bank_list[] = { 0x10000, 0x18000, 0x02000, 0x02000 };
+	uint8_t *address;
 
 	battery_ram_enable = ((alternate_bank & 3) == 1);
 
@@ -509,8 +509,8 @@ static void redline_bankswitch(void)
 /* bankswitching for Viper, Quarterback, Team Quarterback, and All American Football */
 static void viper_bankswitch(void)
 {
-	static const UINT32 bank_list[] = { 0x02000, 0x10000, 0x18000, 0x02000 };
-	UINT8 *address;
+	static const uint32_t bank_list[] = { 0x02000, 0x10000, 0x18000, 0x02000 };
+	uint8_t *address;
 
 	battery_ram_enable = ((alternate_bank & 0x04) != 0);
 
@@ -530,8 +530,8 @@ static void viper_bankswitch(void)
 /* bankswitching for Super Offroad, Super Offroad Track Pack, and Pig Out */
 static void offroad_bankswitch(void)
 {
-	static const UINT32 bank_list[] = { 0x02000, 0x02000, 0x10000, 0x18000, 0x20000, 0x28000, 0x30000, 0x38000 };
-	UINT8 *address;
+	static const uint32_t bank_list[] = { 0x02000, 0x02000, 0x10000, 0x18000, 0x20000, 0x28000, 0x30000, 0x38000 };
+	uint8_t *address;
 
 	battery_ram_enable = ((alternate_bank & 7) == 1);
 
@@ -560,9 +560,9 @@ static void offroad_bankswitch(void)
 #define SERIAL_TYPE_ENCRYPT		2
 #define SERIAL_TYPE_ENCRYPT_XOR	3
 
-static void init_eeprom(UINT8 default_val, const UINT16 *data, UINT8 serial_offset, UINT8 serial_type)
+static void init_eeprom(uint8_t default_val, const uint16_t *data, uint8_t serial_offset, uint8_t serial_type)
 {
-	UINT32 serial;
+	uint32_t serial;
 
 	/* initialize everything to the default value */
 	memset(eeprom_data, default_val, sizeof(eeprom_data));
@@ -721,7 +721,7 @@ static void nvram_handler(void *file, int read_or_write)
 
 		for (i = 16, b = 0x70, r = 0x08; i < 128; i++, b--, r += 0x10)
 		{
-			UINT8 a = original_data[i] ^ 0xff;
+			uint8_t a = original_data[i] ^ 0xff;
 			a = (a >> 3) | (a << 5);
 			a = (((a ^ r) + 1 + b) ^ b) - b;
 			encrypted_data[i] = a;
@@ -2917,8 +2917,8 @@ void leland_rotate_memory(int cpunum)
 {
 	int startaddr = 0x10000;
 	int banks = (memory_region_length(REGION_CPU1 + cpunum) - startaddr) / 0x8000;
-	UINT8 *ram = memory_region(REGION_CPU1 + cpunum);
-	UINT8 temp[0x2000];
+	uint8_t *ram = memory_region(REGION_CPU1 + cpunum);
+	uint8_t temp[0x2000];
 	int i;
 
 	for (i = 0; i < banks; i++)
@@ -2930,7 +2930,7 @@ void leland_rotate_memory(int cpunum)
 	}
 }
 
-static void init_master_ports(UINT8 mvram_base, UINT8 io_base)
+static void init_master_ports(uint8_t mvram_base, uint8_t io_base)
 {
 	/* set up the master CPU VRAM I/O */
 	install_port_read_handler(0, mvram_base, mvram_base + 0x1f, leland_mvram_port_r);
@@ -2945,7 +2945,7 @@ static void init_master_ports(UINT8 mvram_base, UINT8 io_base)
 static void init_cerberus(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 cerberus_eeprom_data[] =
+	static const uint16_t cerberus_eeprom_data[] =
 	{
 		0x05,0x0001,
 		0x06,0x0001,
@@ -2977,7 +2977,7 @@ static void init_cerberus(void)
 static void init_mayhem(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 mayhem_eeprom_data[] =
+	static const uint16_t mayhem_eeprom_data[] =
 	{
 		0x05,0x0001,
 		0x06,0x0001,
@@ -3017,7 +3017,7 @@ static void init_mayhem(void)
 static void init_wseries(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 wseries_eeprom_data[] =
+	static const uint16_t wseries_eeprom_data[] =
 	{
 		0x19,0xfefe,
 		0x1a,0xfefe,
@@ -3037,7 +3037,7 @@ static void init_wseries(void)
 static void init_alleymas(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 alleymas_eeprom_data[] =
+	static const uint16_t alleymas_eeprom_data[] =
 	{
 		0x13,0xfefe,
 		0x14,0xfefe,
@@ -3058,13 +3058,13 @@ static void init_alleymas(void)
 	/* kludge warning: the game uses location E0CA to determine if the joysticks are available */
 	/* it gets cleared by the code, but there is no obvious way for the value to be set to a */
 	/* non-zero value. If the value is zero, the joystick is never read. */
-	alleymas_kludge_mem = (UINT8*)install_mem_write_handler(0, 0xe0ca, 0xe0ca, alleymas_joystick_kludge);
+	alleymas_kludge_mem = (uint8_t*)install_mem_write_handler(0, 0xe0ca, 0xe0ca, alleymas_joystick_kludge);
 }
 
 static void init_dangerz(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 dangerz_eeprom_data[] =
+	static const uint16_t dangerz_eeprom_data[] =
 	{
 		0x17,0xfefe,
 		0x18,0xfefe,
@@ -3093,7 +3093,7 @@ static void init_dangerz(void)
 static void init_basebal2(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 basebal2_eeprom_data[] =
+	static const uint16_t basebal2_eeprom_data[] =
 	{
 		0x19,0xfefe,
 		0x1a,0xfefe,
@@ -3113,7 +3113,7 @@ static void init_basebal2(void)
 static void init_dblplay(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 dblplay_eeprom_data[] =
+	static const uint16_t dblplay_eeprom_data[] =
 	{
 		0x18,0xfefe,
 		0x19,0xfefe,
@@ -3134,7 +3134,7 @@ static void init_dblplay(void)
 static void init_strkzone(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 strkzone_eeprom_data[] =
+	static const uint16_t strkzone_eeprom_data[] =
 	{
 		0x16,0xfefe,
 		0x17,0xfefe,
@@ -3155,7 +3155,7 @@ static void init_strkzone(void)
 static void init_redlin2p(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 redlin2p_eeprom_data[] =
+	static const uint16_t redlin2p_eeprom_data[] =
 	{
 		0x1f,0xfefe,
 		0x20,0xfffb,
@@ -3186,7 +3186,7 @@ static void init_redlin2p(void)
 static void init_quarterb(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 quarterb_eeprom_data[] =
+	static const uint16_t quarterb_eeprom_data[] =
 	{
 		0x34,0xfefe,
 		0x35,0xfefe,
@@ -3213,7 +3213,7 @@ static void init_quarterb(void)
 static void init_viper(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 viper_eeprom_data[] =
+	static const uint16_t viper_eeprom_data[] =
 	{
 		0x13,0xfefe,
 		0x14,0xfefe,
@@ -3247,7 +3247,7 @@ static void init_viper(void)
 static void init_teamqb(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 teamqb_eeprom_data[] =
+	static const uint16_t teamqb_eeprom_data[] =
 	{
 		0x36,0xfefe,
 		0x37,0xfefe,
@@ -3279,7 +3279,7 @@ static void init_teamqb(void)
 static void init_aafb(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 aafb_eeprom_data[] =
+	static const uint16_t aafb_eeprom_data[] =
 	{
 		0x36,0xfefe,
 		0x37,0xfefe,
@@ -3311,7 +3311,7 @@ static void init_aafb(void)
 static void init_aafbb(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 aafb_eeprom_data[] =
+	static const uint16_t aafb_eeprom_data[] =
 	{
 		0x36,0xfefe,
 		0x37,0xfefe,
@@ -3343,7 +3343,7 @@ static void init_aafbb(void)
 static void init_offroad(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 offroad_eeprom_data[] =
+	static const uint16_t offroad_eeprom_data[] =
 	{
 		0x09,0xfefe,
 		0x0a,0xfffb,
@@ -3382,7 +3382,7 @@ static void init_offroad(void)
 static void init_offroadt(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 offroadt_eeprom_data[] =
+	static const uint16_t offroadt_eeprom_data[] =
 	{
 		0x09,0xfefe,
 		0x0a,0xfffb,
@@ -3420,7 +3420,7 @@ static void init_offroadt(void)
 static void init_pigout(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 pigout_eeprom_data[] =
+	static const uint16_t pigout_eeprom_data[] =
 	{
 		0x09,0xfefe,
 		0x0a,0xfefb,

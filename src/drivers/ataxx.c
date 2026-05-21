@@ -49,34 +49,34 @@
 	PORT_DIPSETTING(    mask &~default, DEF_STR( On ) )
 
 
-static UINT8 wcol_enable;
+static uint8_t wcol_enable;
 
 static void *master_int_timer;
 
-static UINT8 *master_base;
-static UINT8 *slave_base;
-static UINT8 *xrom_base;
-static UINT32 master_length;
-static UINT32 slave_length;
-static UINT32 xrom_length;
+static uint8_t *master_base;
+static uint8_t *slave_base;
+static uint8_t *xrom_base;
+static uint32_t master_length;
+static uint32_t slave_length;
+static uint32_t xrom_length;
 
-static UINT8 analog_result;
-static UINT8 dial_last_input[4];
-static UINT8 dial_last_result[4];
+static uint8_t analog_result;
+static uint8_t dial_last_input[4];
+static uint8_t dial_last_result[4];
 
-static UINT8 master_bank;
+static uint8_t master_bank;
 
-static UINT32 xrom1_addr;
-static UINT32 xrom2_addr;
+static uint32_t xrom1_addr;
+static uint32_t xrom2_addr;
 
 #define battery_ram_size 0x4000
-static UINT8 battery_ram_enable;
-static UINT8 *battery_ram;
+static uint8_t battery_ram_enable;
+static uint8_t *battery_ram;
 
 #define extra_tram_size 0x800
-static UINT8 *extra_tram;
+static uint8_t *extra_tram;
 
-static UINT8 eeprom_data[128*2];
+static uint8_t eeprom_data[128*2];
 static struct EEPROM_interface eeprom_interface =
 {
 	7,
@@ -108,7 +108,7 @@ extern struct IOWritePort ataxx_i86_writeport[];
 
 
 /* Video routines */
-extern UINT8 *ataxx_qram;
+extern uint8_t *ataxx_qram;
 
 READ_HANDLER( ataxx_mvram_port_r );
 READ_HANDLER( ataxx_svram_port_r );
@@ -140,7 +140,7 @@ static void master_bankswitch(void);
 static int dial_compute_value(int new_val, int indx)
 {
 	int delta = new_val - (int)dial_last_input[indx];
-	UINT8 result = dial_last_result[indx] & 0x80;
+	uint8_t result = dial_last_result[indx] & 0x80;
 
 	dial_last_input[indx] = new_val;
 
@@ -284,7 +284,7 @@ static void init_machine(void)
 
 static void interrupt_callback(int scanline)
 {
-	extern UINT8 leland_last_scanline_int;
+	extern uint8_t leland_last_scanline_int;
 	leland_last_scanline_int = scanline;
 
 	/* interrupts generated according to the interrupt control register */
@@ -304,12 +304,12 @@ static void interrupt_callback(int scanline)
 
 static void master_bankswitch(void)
 {
-	static const UINT32 bank_list[] =
+	static const uint32_t bank_list[] =
 	{
 		0x02000, 0x18000, 0x20000, 0x28000, 0x30000, 0x38000, 0x40000, 0x48000,
 		0x50000, 0x58000, 0x60000, 0x68000, 0x70000, 0x78000, 0x80000, 0x88000
 	};
-	UINT8 *address;
+	uint8_t *address;
 
 	battery_ram_enable = ((master_bank & 0x30) == 0x10);
 
@@ -340,9 +340,9 @@ static void master_bankswitch(void)
  *
  *************************************/
 
-static void init_eeprom(UINT8 default_val, const UINT16 *data, UINT8 serial_offset)
+static void init_eeprom(uint8_t default_val, const uint16_t *data, uint8_t serial_offset)
 {
-	UINT32 serial;
+	uint32_t serial;
 
 	/* initialize everything to the default value */
 	memset(eeprom_data, default_val, sizeof(eeprom_data));
@@ -1319,7 +1319,7 @@ extern void leland_rotate_memory(int cpunum);
 static void init_ataxx(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 ataxx_eeprom_data[] =
+	static const uint16_t ataxx_eeprom_data[] =
 	{
 		0x09,0x0101,
 		0x0a,0x0104,
@@ -1345,7 +1345,7 @@ static void init_ataxx(void)
 static void init_ataxxj(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 ataxxj_eeprom_data[] =
+	static const uint16_t ataxxj_eeprom_data[] =
 	{
 		0x09,0x0101,
 		0x0a,0x0104,
@@ -1370,7 +1370,7 @@ static void init_ataxxj(void)
 static void init_wsf(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 wsf_eeprom_data[] =
+	static const uint16_t wsf_eeprom_data[] =
 	{
 		0x04,0x0101,
 		0x0b,0x04ff,
@@ -1397,7 +1397,7 @@ static void init_wsf(void)
 static void init_indyheat(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 indyheat_eeprom_data[] =
+	static const uint16_t indyheat_eeprom_data[] =
 	{
 		0x2c,0x0100,
 		0x2d,0x0401,
@@ -1429,7 +1429,7 @@ static void init_indyheat(void)
 static void init_brutforc(void)
 {
 	/* initialize the default EEPROM state */
-	static const UINT16 brutforc_eeprom_data[] =
+	static const uint16_t brutforc_eeprom_data[] =
 	{
 		0x27,0x0303,
 		0x28,0x0003,

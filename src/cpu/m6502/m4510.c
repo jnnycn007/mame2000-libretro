@@ -126,17 +126,17 @@ typedef struct {
 	PAIR	zp; 			/* zero page address */
 	/* contains B register zp.b.h */
 	PAIR	ea; 			/* effective address */
-	UINT8	a;				/* Accumulator */
-	UINT8	x;				/* X index register */
-	UINT8	y;				/* Y index register */
-	UINT8	z;				/* Z index register */
-	UINT8	p;				/* Processor status */
-	UINT8	pending_irq;	/* nonzero if an IRQ is pending */
-	UINT8	after_cli;		/* pending IRQ and last insn cleared I */
-	UINT8	nmi_state;
-	UINT8	irq_state;
-	UINT16  low, high;
-	UINT32	mem[8];	
+	uint8_t	a;				/* Accumulator */
+	uint8_t	x;				/* X index register */
+	uint8_t	y;				/* Y index register */
+	uint8_t	z;				/* Z index register */
+	uint8_t	p;				/* Processor status */
+	uint8_t	pending_irq;	/* nonzero if an IRQ is pending */
+	uint8_t	after_cli;		/* pending IRQ and last insn cleared I */
+	uint8_t	nmi_state;
+	uint8_t	irq_state;
+	uint16_t  low, high;
+	uint32_t	mem[8];	
 	int 	(*irq_callback)(int irqline);	/* IRQ callback */
 }	m4510_Regs;
 
@@ -150,13 +150,13 @@ static m4510_Regs m4510;
 
 static INLINE int m4510_cpu_readop(void)
 {
-	register UINT16 t=m4510.pc.w.l++;
+	register uint16_t t=m4510.pc.w.l++;
 	return cpu_readop(M4510_MEM(t));
 }
 
 static INLINE int m4510_cpu_readop_arg(void)
 {
-	register UINT16 t=m4510.pc.w.l++;
+	register uint16_t t=m4510.pc.w.l++;
 	return cpu_readop_arg(M4510_MEM(t));
 }
 
@@ -334,7 +334,7 @@ int m4510_execute(int cycles)
 
 	do
 	{
-		UINT8 op;
+		uint8_t op;
 		PPC = PCD;
 
 		/* if an irq is pending, take it now */

@@ -28,7 +28,7 @@
 	wms_speedup_spin[0] = spin1; \
 	wms_speedup_spin[1] = offs1; \
 	wms_speedup_spin[2] = offs2; \
-	wms_speedup_base = (UINT8*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_16bit);
+	wms_speedup_base = (uint8_t*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_16bit);
 	
 #define INSTALL_SPEEDUP_3(addr, pc, spin1, spin2, spin3) \
 	wms_speedup_pc = (pc); \
@@ -36,30 +36,30 @@
 	wms_speedup_spin[0] = spin1; \
 	wms_speedup_spin[1] = spin2; \
 	wms_speedup_spin[2] = spin3; \
-	wms_speedup_base = (UINT8*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_3);
+	wms_speedup_base = (uint8_t*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_3);
 	
 
 /* code-related variables */
-extern UINT8 *	wms_code_rom;
+extern uint8_t *	wms_code_rom;
 
 /* CMOS-related variables */
-extern UINT8 *	wms_cmos_ram;
-static UINT8	cmos_write_enable;
+extern uint8_t *	wms_cmos_ram;
+static uint8_t	cmos_write_enable;
 
 /* graphics-related variables */
-extern UINT8 *	wms_gfx_rom;
+extern uint8_t *	wms_gfx_rom;
 extern size_t	wms_gfx_rom_size;
-extern UINT8	wms_gfx_rom_large;
+extern uint8_t	wms_gfx_rom_large;
 
 /* sound-related variables */
-static UINT8	sound_type;
-static UINT8	fake_sound_state;
+static uint8_t	sound_type;
+static uint8_t	fake_sound_state;
 
 /* speedup-related variables */
 extern offs_t 	wms_speedup_pc;
 extern offs_t 	wms_speedup_offset;
 extern offs_t 	wms_speedup_spin[3];
-extern UINT8 *	wms_speedup_base;
+extern uint8_t *	wms_speedup_base;
 
 
 /* speedup-related prototypes */
@@ -119,7 +119,7 @@ READ_HANDLER( wms_tunit_input_r )
  *
  *************************************/
 
-static const UINT8 mk_prot_values[] =
+static const uint8_t mk_prot_values[] =
 {
 	0x13, 0x27, 0x0f, 0x1f, 0x3e, 0x3d, 0x3b, 0x37,
 	0x2e, 0x1c, 0x38, 0x31, 0x22, 0x05, 0x0a, 0x15,
@@ -130,7 +130,7 @@ static const UINT8 mk_prot_values[] =
 	0x16, 0x2d, 0x1a, 0x34, 0x28, 0x10, 0x21, 0x03,
 	0xff
 };
-static UINT8 mk_prot_index;
+static uint8_t mk_prot_index;
 
 static READ_HANDLER( mk_prot_r )
 {
@@ -183,7 +183,7 @@ static READ_HANDLER( mk_mirror_r )
  *
  *************************************/
 
-static UINT16 mk2_prot_data;
+static uint16_t mk2_prot_data;
 
 static READ_HANDLER( mk2_prot_const_r )
 {
@@ -213,7 +213,7 @@ static WRITE_HANDLER( mk2_prot_w )
  *
  *************************************/
 
-static const UINT32 nbajam_prot_values[128] =
+static const uint32_t nbajam_prot_values[128] =
 {
 	0x21283b3b, 0x2439383b, 0x31283b3b, 0x302b3938, 0x31283b3b, 0x302b3938, 0x232f2f2f, 0x26383b3b,
 	0x21283b3b, 0x2439383b, 0x312a1224, 0x302b1120, 0x312a1224, 0x302b1120, 0x232d283b, 0x26383b3b,
@@ -233,7 +233,7 @@ static const UINT32 nbajam_prot_values[128] =
 	0x0b31283b, 0x0e26383b, 0x19322e06, 0x18312a12, 0x1b332f05, 0x1a302b11, 0x0b31283b,	0x0e26383b
 };
 
-static const UINT32 nbajamte_prot_values[128] =
+static const uint32_t nbajamte_prot_values[128] =
 {
 	0x00000000, 0x04081020, 0x08102000, 0x0c183122, 0x10200000, 0x14281020, 0x18312204, 0x1c393326,
 	0x20000001, 0x24081021, 0x28102000, 0x2c183122, 0x30200001, 0x34281021, 0x38312204, 0x3c393326,
@@ -253,9 +253,9 @@ static const UINT32 nbajamte_prot_values[128] =
 	0x381c2e17, 0x393c3e3f, 0x3a3d1e0f, 0x3b1d0e27, 0x3c3e1f2f, 0x3d1e0f07, 0x3e1f2f37, 0x3f3f3f1f
 };
 
-static const UINT32 *nbajam_prot_table;
-static UINT16 nbajam_prot_queue[5];
-static UINT8 nbajam_prot_index;
+static const uint32_t *nbajam_prot_table;
+static uint16_t nbajam_prot_queue[5];
+static uint8_t nbajam_prot_index;
 
 static READ_HANDLER( nbajam_prot_r )
 {
@@ -268,7 +268,7 @@ static READ_HANDLER( nbajam_prot_r )
 static WRITE_HANDLER( nbajam_prot_w )
 {
 	int table_index = (offset >> 7) & 0x7f;
-	UINT32 protval = nbajam_prot_table[table_index];
+	uint32_t protval = nbajam_prot_table[table_index];
 	
 	nbajam_prot_queue[0] = data;
 	nbajam_prot_queue[1] = ((protval >> 24) & 0xff) << 9;
@@ -289,7 +289,7 @@ static WRITE_HANDLER( nbajam_prot_w )
 static void init_tunit_generic(int sound)
 {
 	offs_t gfx_chunk = wms_gfx_rom_size / 4;
-	UINT8 *base;
+	uint8_t *base;
 	int i;
 	
 	/* set up code ROMs */

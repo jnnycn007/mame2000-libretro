@@ -22,22 +22,22 @@ static struct tilemap *text_layer,*foreground,*background;
 
 static void get_bg_tile_info(int tile_index)
 {
-	UINT16 *videoram1 = (UINT16 *)&gaiden_videoram3[0x1000];
-	UINT16 *videoram2 = (UINT16 *)gaiden_videoram3;
+	uint16_t *videoram1 = (uint16_t *)&gaiden_videoram3[0x1000];
+	uint16_t *videoram2 = (uint16_t *)gaiden_videoram3;
 	SET_TILE_INFO(1,videoram1[tile_index] & 0xfff,(videoram2[tile_index] & 0xf0) >> 4)
 }
 
 static void get_fg_tile_info(int tile_index)
 {
-	UINT16 *videoram1 = (UINT16 *)&gaiden_videoram2[0x1000];
-	UINT16 *videoram2 = (UINT16 *)gaiden_videoram2;
+	uint16_t *videoram1 = (uint16_t *)&gaiden_videoram2[0x1000];
+	uint16_t *videoram2 = (uint16_t *)gaiden_videoram2;
 	SET_TILE_INFO(2,videoram1[tile_index] & 0xfff,(videoram2[tile_index] & 0xf0) >> 4)
 }
 
 static void get_tx_tile_info(int tile_index)
 {
-	UINT16 *videoram1 = (UINT16 *)&gaiden_videoram[0x0800];
-	UINT16 *videoram2 = (UINT16 *)gaiden_videoram;
+	uint16_t *videoram1 = (uint16_t *)&gaiden_videoram[0x0800];
+	uint16_t *videoram2 = (uint16_t *)gaiden_videoram;
 	SET_TILE_INFO(0,videoram1[tile_index] & 0x7ff,(videoram2[tile_index] & 0xf0) >> 4)
 }
 
@@ -74,42 +74,42 @@ int gaiden_vh_start(void)
 
 WRITE_HANDLER( gaiden_txscrollx_w )
 {
-	static UINT16 oldword;
+	static uint16_t oldword;
 	oldword = COMBINE_WORD(oldword,data);
 	tilemap_set_scrollx(text_layer,0,oldword);
 }
 
 WRITE_HANDLER( gaiden_txscrolly_w )
 {
-	static UINT16 oldword;
+	static uint16_t oldword;
 	oldword = COMBINE_WORD(oldword,data);
 	tilemap_set_scrolly(text_layer,0,oldword);
 }
 
 WRITE_HANDLER( gaiden_fgscrollx_w )
 {
-	static UINT16 oldword;
+	static uint16_t oldword;
 	oldword = COMBINE_WORD(oldword,data);
 	tilemap_set_scrollx(foreground,0,oldword);
 }
 
 WRITE_HANDLER( gaiden_fgscrolly_w )
 {
-	static UINT16 oldword;
+	static uint16_t oldword;
 	oldword = COMBINE_WORD(oldword,data);
 	tilemap_set_scrolly(foreground,0,oldword);
 }
 
 WRITE_HANDLER( gaiden_bgscrollx_w )
 {
-	static UINT16 oldword;
+	static uint16_t oldword;
 	oldword = COMBINE_WORD(oldword,data);
 	tilemap_set_scrollx(background,0,oldword);
 }
 
 WRITE_HANDLER( gaiden_bgscrolly_w )
 {
-	static UINT16 oldword;
+	static uint16_t oldword;
 	oldword = COMBINE_WORD(oldword,data);
 	tilemap_set_scrolly(background,0,oldword);
 }
@@ -197,17 +197,17 @@ READ_HANDLER( gaiden_videoram_r )
 
 static void mark_sprite_colors(void)
 {
-	const UINT16 *source = (UINT16 *)spriteram;
+	const uint16_t *source = (uint16_t *)spriteram;
 	const struct GfxElement *gfx = Machine->gfx[3];
 	int i;
 	for (i = 0;i < NUM_SPRITES;i++)
 	{
-		UINT32 attributes = source[0];
+		uint32_t attributes = source[0];
 		if (attributes & 0x04)	/* visible */
 		{
-			UINT32 pen_usage = 0xfffe;
-			UINT32 color = (source[2] >> 4) & 0xf;
-			const UINT16 *pal_data = &gfx->colortable[gfx->color_granularity * color];
+			uint32_t pen_usage = 0xfffe;
+			uint32_t color = (source[2] >> 4) & 0xf;
+			const uint16_t *pal_data = &gfx->colortable[gfx->color_granularity * color];
 			int indx = pal_data - Machine->remapped_colortable;
 			while (pen_usage)
 			{
@@ -222,7 +222,7 @@ static void mark_sprite_colors(void)
 
 static void draw_sprites( struct osd_bitmap *bitmap )
 {
-	const UINT8 layout[8][8] =
+	const uint8_t layout[8][8] =
 	{
 		{0,1,4,5,16,17,20,21},
 		{2,3,6,7,18,19,22,23},
@@ -236,22 +236,22 @@ static void draw_sprites( struct osd_bitmap *bitmap )
 
 	const struct rectangle *clip = &Machine->visible_area;
 	const struct GfxElement *gfx = Machine->gfx[3];
-	const UINT16 *source = (NUM_SPRITES-1)*8 + (UINT16 *)spriteram;
+	const uint16_t *source = (NUM_SPRITES-1)*8 + (uint16_t *)spriteram;
 	int count = NUM_SPRITES;
 
 	/* draw all sprites from front to back */
 	while( count-- )
 	{
-		UINT32 attributes = source[0];
+		uint32_t attributes = source[0];
 		if ( (attributes&0x04) && ((attributes&0x20)==0 || (cpu_getcurrentframe() & 1)) )
 		{
-			UINT32 priority = (attributes>>6)&3;
-			UINT32 number = (source[1]&0x7fff);
-			UINT32 color = source[2];
-			UINT32 size = 1<<(color&0x3); // 1,2,4,8
-			UINT32 flipx = (attributes&1);
-			UINT32 flipy = (attributes&2);
-			UINT32 priority_mask;
+			uint32_t priority = (attributes>>6)&3;
+			uint32_t number = (source[1]&0x7fff);
+			uint32_t color = source[2];
+			uint32_t size = 1<<(color&0x3); // 1,2,4,8
+			uint32_t flipx = (attributes&1);
+			uint32_t flipy = (attributes&2);
+			uint32_t priority_mask;
 			int ypos = source[3] & 0x1ff;
 			int xpos = source[4] & 0x1ff;
 			int col,row;

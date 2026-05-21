@@ -171,66 +171,66 @@ static void counter_callback(int param);
 
 
 /* global data */
-UINT8 balsente_shooter;
-UINT8 balsente_shooter_x;
-UINT8 balsente_shooter_y;
+uint8_t balsente_shooter;
+uint8_t balsente_shooter_x;
+uint8_t balsente_shooter_y;
 
 
 /* 8253 counter state */
 struct counter_state
 {
 	void *timer;
-	INT32 initial;
-	INT32 count;
-	UINT8 gate;
-	UINT8 out;
-	UINT8 mode;
-	UINT8 readbyte;
-	UINT8 writebyte;
+	int32_t initial;
+	int32_t count;
+	uint8_t gate;
+	uint8_t out;
+	uint8_t mode;
+	uint8_t readbyte;
+	uint8_t writebyte;
 };
 
 static struct counter_state counter[3];
 
 /* manually clocked counter 0 states */
-static UINT8 counter_control;
-static UINT8 counter_0_ff;
+static uint8_t counter_control;
+static uint8_t counter_0_ff;
 static void *counter_0_timer;
 
 /* random number generator states */
-static UINT8 *poly17 = NULL;
-static UINT8 *rand17 = NULL;
+static uint8_t *poly17 = NULL;
+static uint8_t *rand17 = NULL;
 
 /* ADC I/O states */
-static INT8 analog_input_data[4];
-static UINT8 adc_value;
-static UINT8 adc_shift;
+static int8_t analog_input_data[4];
+static uint8_t adc_value;
+static uint8_t adc_shift;
 
 /* CEM3394 DAC control states */
-static UINT16 dac_value;
-static UINT8 dac_register;
-static UINT8 chip_select;
+static uint16_t dac_value;
+static uint8_t dac_register;
+static uint8_t chip_select;
 
 /* main CPU 6850 states */
-static UINT8 m6850_status;
-static UINT8 m6850_control;
-static UINT8 m6850_input;
-static UINT8 m6850_output;
-static UINT8 m6850_data_ready;
+static uint8_t m6850_status;
+static uint8_t m6850_control;
+static uint8_t m6850_input;
+static uint8_t m6850_output;
+static uint8_t m6850_data_ready;
 
 /* sound CPU 6850 states */
-static UINT8 m6850_sound_status;
-static UINT8 m6850_sound_control;
-static UINT8 m6850_sound_input;
-static UINT8 m6850_sound_output;
+static uint8_t m6850_sound_status;
+static uint8_t m6850_sound_control;
+static uint8_t m6850_sound_input;
+static uint8_t m6850_sound_output;
 
 /* noise generator states */
-static UINT32 noise_position[6];
+static uint32_t noise_position[6];
 
 /* game-specific states */
-static UINT8 nstocker_bits;
-static UINT8 spiker_expand_color;
-static UINT8 spiker_expand_bgcolor;
-static UINT8 spiker_expand_bits;
+static uint8_t nstocker_bits;
+static uint8_t spiker_expand_color;
+static uint8_t spiker_expand_bgcolor;
+static uint8_t spiker_expand_bits;
 
 
 
@@ -281,7 +281,7 @@ static void interrupt_timer(int param)
 	/* if we're a shooter, we do a little more work */
 	if (balsente_shooter)
 	{
-		UINT8 tempx, tempy;
+		uint8_t tempx, tempy;
 
 		/* we latch the beam values on the first interrupt after VBLANK */
 		if (param == 64 && balsente_shooter)
@@ -355,8 +355,8 @@ static void init_machine(void)
 
 static void poly17_init(void)
 {
-	UINT32 i, x = 0;
-	UINT8 *p, *r;
+	uint32_t i, x = 0;
+	uint8_t *p, *r;
 
 	/* free stale memory */
 	if (poly17)
@@ -364,7 +364,7 @@ static void poly17_init(void)
 	poly17 = rand17 = NULL;
 
 	/* allocate memory */
-	p = poly17 = (UINT8*)malloc(2 * (POLY17_SIZE + 1));
+	p = poly17 = (uint8_t*)malloc(2 * (POLY17_SIZE + 1));
 	if (!poly17)
 		return;
 	r = rand17 = poly17 + POLY17_SIZE + 1;
@@ -387,8 +387,8 @@ static void noise_gen(int chip, int count, short *buffer)
 	if (Machine->sample_rate)
 	{
 		/* noise generator runs at 100kHz */
-		UINT32 step = (100000 << 14) / Machine->sample_rate;
-		UINT32 noise_counter = noise_position[chip];
+		uint32_t step = (100000 << 14) / Machine->sample_rate;
+		uint32_t noise_counter = noise_position[chip];
 
 		/* try to use the poly17 if we can */
 		if (poly17)
@@ -518,7 +518,7 @@ static WRITE_HANDLER( misc_output_w )
 
 static void m6850_update_io(void)
 {
-	UINT8 new_state;
+	uint8_t new_state;
 
 	/* sound -> main CPU communications */
 	if (!(m6850_sound_status & 0x02))
@@ -1094,7 +1094,7 @@ static READ_HANDLER( counter_state_r )
 
 static WRITE_HANDLER( counter_control_w )
 {
-	UINT8 diff_counter_control = counter_control ^ data;
+	uint8_t diff_counter_control = counter_control ^ data;
 
 	/* set the new global value */
 	counter_control = data;
@@ -1168,7 +1168,7 @@ static WRITE_HANDLER( spiker_expand_w )
 
 static READ_HANDLER( spiker_expand_r )
 {
-	UINT8 left, right;
+	uint8_t left, right;
 
 	/* first rotate each nibble */
 	spiker_expand_bits = ((spiker_expand_bits << 1) & 0xee) | ((spiker_expand_bits >> 3) & 0x11);
@@ -1194,7 +1194,7 @@ static READ_HANDLER( spiker_expand_r )
 
 static WRITE_HANDLER( chip_select_w )
 {
-	static const UINT8 register_map[8] =
+	static const uint8_t register_map[8] =
 	{
 		CEM3394_VCO_FREQUENCY,
 		CEM3394_FINAL_GAIN,
@@ -1261,7 +1261,7 @@ static WRITE_HANDLER( dac_data_w )
 	/* if there are open channels, force the values in */
 	if ((chip_select & 0x3f) != 0x3f)
 	{
-		UINT8 temp = chip_select;
+		uint8_t temp = chip_select;
 		chip_select_w(0, 0x3f);
 		chip_select_w(0, temp);
 	}
@@ -2474,26 +2474,26 @@ static struct MachineDriver machine_driver_balsente =
 #define EXPAND_NONE		0x3f
 #define SWAP_HALVES		0x80
 
-static void expand_roms(UINT8 cd_rom_mask)
+static void expand_roms(uint8_t cd_rom_mask)
 {
 	/* load AB bank data from 0x10000-0x20000 */
 	/* load CD bank data from 0x20000-0x2e000 */
 	/* load EF           from 0x2e000-0x30000 */
 	/* ROM region must be 0x40000 total */
 
-	UINT8 *temp = (UINT8*)malloc(0x20000);
+	uint8_t *temp = (uint8_t*)malloc(0x20000);
 	if (temp)
 	{
-		UINT8 *rom = memory_region(REGION_CPU1);
-		UINT32 base;
+		uint8_t *rom = memory_region(REGION_CPU1);
+		uint32_t base;
 
 		for (base = 0x10000; base < memory_region_length(REGION_CPU1); base += 0x30000)
 		{
-			UINT8 *ab_base = &temp[0x00000];
-			UINT8 *cd_base = &temp[0x10000];
-			UINT8 *cd_common = &temp[0x1c000];
-			UINT8 *ef_common = &temp[0x1e000];
-			UINT32 dest;
+			uint8_t *ab_base = &temp[0x00000];
+			uint8_t *cd_base = &temp[0x10000];
+			uint8_t *cd_common = &temp[0x1c000];
+			uint8_t *ef_common = &temp[0x1e000];
+			uint32_t dest;
 
 			for (dest = 0x00000; dest < 0x20000; dest += 0x02000)
 			{

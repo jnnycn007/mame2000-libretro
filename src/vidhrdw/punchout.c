@@ -551,7 +551,7 @@ void punchout_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 		if (zoom)
 		{
 			int sx,sy;
-			UINT32 startx,starty;
+			uint32_t startx,starty;
 			int incxx,incyy;
 
 			sx = 4096 - (punchout_bigsprite1[2] + 256 * (punchout_bigsprite1[3] & 0x0f));
@@ -718,7 +718,7 @@ void armwrest_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 		if (zoom)
 		{
 			int sx,sy;
-			UINT32 startx,starty;
+			uint32_t startx,starty;
 			int incxx,incyy;
 
 			sx = 4096 - (punchout_bigsprite1[2] + 256 * (punchout_bigsprite1[3] & 0x0f));

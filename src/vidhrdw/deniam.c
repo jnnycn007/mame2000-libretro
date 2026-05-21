@@ -50,7 +50,7 @@ void init_karianx(void)
 
 ***************************************************************************/
 
-static UINT32 scan_pages(UINT32 col,UINT32 row,UINT32 num_cols,UINT32 num_rows)
+static uint32_t scan_pages(uint32_t col,uint32_t row,uint32_t num_cols,uint32_t num_rows)
 {
 	/* logical (col,row) -> memory offset */
 	return (col & 0x3f) + ((row & 0x1f) << 6) + ((col & 0x40) << 5) + ((row & 0x20) << 7);
@@ -59,20 +59,20 @@ static UINT32 scan_pages(UINT32 col,UINT32 row,UINT32 num_cols,UINT32 num_rows)
 static void get_bg_tile_info(int tile_index)
 {
 	int page = tile_index >> 11;
-	UINT16 attr = READ_WORD(&deniam_videoram[bg_page[page] * 0x1000 + 2 * (tile_index & 0x7ff)]);
+	uint16_t attr = READ_WORD(&deniam_videoram[bg_page[page] * 0x1000 + 2 * (tile_index & 0x7ff)]);
 	SET_TILE_INFO(0,attr,(attr & 0x1fc0) >> 6)
 }
 
 static void get_fg_tile_info(int tile_index)
 {
 	int page = tile_index >> 11;
-	UINT16 attr = READ_WORD(&deniam_videoram[fg_page[page] * 0x1000 + 2 * (tile_index & 0x7ff)]);
+	uint16_t attr = READ_WORD(&deniam_videoram[fg_page[page] * 0x1000 + 2 * (tile_index & 0x7ff)]);
 	SET_TILE_INFO(0,attr,(attr & 0x1fc0) >> 6)
 }
 
 static void get_tx_tile_info(int tile_index)
 {
-	UINT16 attr = READ_WORD(&deniam_textram[2*tile_index]);
+	uint16_t attr = READ_WORD(&deniam_textram[2*tile_index]);
 	SET_TILE_INFO(0,attr & 0xf1ff,(attr & 0x0e00) >> 9)
 }
 
@@ -174,7 +174,7 @@ WRITE_HANDLER( deniam_palette_w )
 }
 
 
-static UINT16 coinctrl;
+static uint16_t coinctrl;
 
 READ_HANDLER( deniam_coinctrl_r )
 {
@@ -233,7 +233,7 @@ static void draw_sprites(struct osd_bitmap *bitmap)
 	for (offs = spriteram_size-16;offs >= 0;offs -= 16)
 	{
 		int sx,starty,endy,x,y,start,color,width,flipx,primask;
-		UINT8 *rom = memory_region(REGION_GFX2);
+		uint8_t *rom = memory_region(REGION_GFX2);
 
 
 		sx = (READ_WORD(&spriteram[offs+2]) & 0x01ff) + 16*8 - 1;

@@ -80,8 +80,8 @@ struct mo_params
  *
  *************************************/
 
-UINT8 *cyberbal_playfieldram_1;
-UINT8 *cyberbal_playfieldram_2;
+uint8_t *cyberbal_playfieldram_1;
+uint8_t *cyberbal_playfieldram_2;
 
 
 
@@ -92,8 +92,8 @@ UINT8 *cyberbal_playfieldram_2;
  *************************************/
 
 static struct atarigen_pf_state pf_state;
-static UINT8 current_slip;
-static UINT8 *active_palette;
+static uint8_t current_slip;
+static uint8_t *active_palette;
 
 
 
@@ -103,13 +103,13 @@ static UINT8 *active_palette;
  *
  *************************************/
 
-static const UINT8 *update_palette(void);
+static const uint8_t *update_palette(void);
 
 static void pf_color_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 static void pf_render_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param);
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param);
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param);
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param);
 
 
 
@@ -177,7 +177,7 @@ void cyberbal_vh_stop(void)
  *
  *************************************/
 
-static INLINE void set_palette_entry(int entry, UINT16 value)
+static INLINE void set_palette_entry(int entry, uint16_t value)
 {
 	int r, g, b;
 
@@ -313,10 +313,10 @@ READ_HANDLER( cyberbal_paletteram_2_r )
 
 void cyberbal_scanline_update(int scanline)
 {
-	UINT16 *base = (UINT16 *)&atarigen_alpharam[((scanline / 8) * 64 + 47) * 2];
+	uint16_t *base = (uint16_t *)&atarigen_alpharam[((scanline / 8) * 64 + 47) * 2];
 
 	/* keep in range */
-	if ((UINT8 *)base >= &atarigen_alpharam[atarigen_alpharam_size])
+	if ((uint8_t *)base >= &atarigen_alpharam[atarigen_alpharam_size])
 		return;
 
 	/* update the playfield with the previous parameters */
@@ -395,9 +395,9 @@ void cyberbal_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
  *
  *************************************/
 
-static const UINT8 *update_palette(void)
+static const uint8_t *update_palette(void)
 {
-	UINT16 pf_map[16 * 8], mo_map[16], al_map[8];
+	uint16_t pf_map[16 * 8], mo_map[16], al_map[8];
 	const unsigned int *usage;
 	int i, j, x, y, offs;
 
@@ -427,7 +427,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the playfield palette */
 	for (i = 0; i < 16 * 8; i++)
 	{
-		UINT16 used = pf_map[i];
+		uint16_t used = pf_map[i];
 		if (used)
 			for (j = 0; j < 16; j++)
 				if (used & (1 << j))
@@ -437,7 +437,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the motion object palette */
 	for (i = 0; i < 16; i++)
 	{
-		UINT16 used = mo_map[i];
+		uint16_t used = mo_map[i];
 		if (used)
 		{
 			palette_used_colors[0x600 + i * 16 + 0] = PALETTE_COLOR_TRANSPARENT;
@@ -450,7 +450,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the alphanumerics palette */
 	for (i = 0; i < 8; i++)
 	{
-		UINT16 used = al_map[i];
+		uint16_t used = al_map[i];
 		if (used)
 		{
 			palette_used_colors[0x780 + i * 16 + 0] = PALETTE_COLOR_TRANSPARENT;
@@ -474,7 +474,7 @@ static const UINT8 *update_palette(void)
 
 static void pf_color_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *param)
 {
-	UINT16 *colormap = (UINT16 *)param + 16 * state->param[0];
+	uint16_t *colormap = (uint16_t *)param + 16 * state->param[0];
 	const unsigned int *usage = Machine->gfx[0]->pen_usage;
 	int x, y;
 
@@ -542,11 +542,11 @@ static void pf_render_callback(const struct rectangle *clip, const struct rectan
  *
  *************************************/
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
 	const unsigned int *usage = Machine->gfx[1]->pen_usage;
-	UINT16 *colormap = (UINT16 *)param;
-	UINT16 temp = 0;
+	uint16_t *colormap = (uint16_t *)param;
+	uint16_t temp = 0;
 	int y;
 
 	int code = data[0] & 0x7fff;
@@ -566,7 +566,7 @@ static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, 
  *
  *************************************/
 
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
 	const struct GfxElement *gfx = Machine->gfx[1];
 	struct mo_params *modata = (struct mo_params *)param;

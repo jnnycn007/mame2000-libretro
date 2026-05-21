@@ -15,7 +15,7 @@ static int cleared_value = 0x00;
 
 static int latch;
 
-static INT64 fps;
+static int64_t fps;
 
 static void soundlatch_callback(int param)
 {
@@ -836,7 +836,7 @@ logerror("Sound #%d wrong ID %d: check enum SOUND_... in src/sndintrf.h!\n",i,sn
 
 	/* samples will be read later if needed */
 	Machine->samples = 0;
-    fps = (INT64)Machine->drv->frames_per_second;
+    fps = (int64_t)Machine->drv->frames_per_second;
 	sound_update_timer = timer_set(TIME_NEVER,0,NULL);
 
 	if (mixer_sh_start() != 0)
@@ -959,7 +959,7 @@ int sound_clock(const struct MachineSound *msound)
 
 int sound_scalebufferpos(int value)
 {
-	int result = ( ((INT64)timer_timeelapsed(sound_update_timer)) * fps * ((INT64)value) ) / ((INT64)TIME_ONE_SEC);
+	int result = ( ((int64_t)timer_timeelapsed(sound_update_timer)) * fps * ((int64_t)value) ) / ((int64_t)TIME_ONE_SEC);
 	if (value >= 0) return (result < value) ? result : value;
 	else return (result > value) ? result : value;
 }

@@ -30,13 +30,13 @@
 extern int z80gb_ICount;
 
 typedef struct {
-	UINT16 AF;
-	UINT16 BC;
-	UINT16 DE;
-	UINT16 HL;
+	uint16_t AF;
+	uint16_t BC;
+	uint16_t DE;
+	uint16_t HL;
 
-	UINT16 SP;
-	UINT16 PC;
+	uint16_t SP;
+	uint16_t PC;
 	int enable;
 	int irq_state;
 	int (*irq_callback)(int irqline);
@@ -44,25 +44,25 @@ typedef struct {
 
 #ifdef MSB_FIRST
 typedef struct {
-   UINT8 A;
-   UINT8 F;
-   UINT8 B;
-   UINT8 C;
-   UINT8 D;
-   UINT8 E;
-   UINT8 H;
-   UINT8 L;
+   uint8_t A;
+   uint8_t F;
+   uint8_t B;
+   uint8_t C;
+   uint8_t D;
+   uint8_t E;
+   uint8_t H;
+   uint8_t L;
 } z80gb_8BitRegs;
 #else
 typedef struct {
-   UINT8 F;
-   UINT8 A;
-   UINT8 C;
-   UINT8 B;
-   UINT8 E;
-   UINT8 D;
-   UINT8 L;
-   UINT8 H;
+   uint8_t F;
+   uint8_t A;
+   uint8_t C;
+   uint8_t B;
+   uint8_t E;
+   uint8_t D;
+   uint8_t L;
+   uint8_t H;
 } z80gb_8BitRegs;
 #endif
 
@@ -74,8 +74,8 @@ typedef union {
 typedef int (*OpcodeEmulator) (void);
 
 static z80gb_regs Regs;
-static UINT8 ICycles;
-static UINT8 CheckInterrupts;
+static uint8_t ICycles;
+static uint8_t CheckInterrupts;
 
 #define IME     0x01
 #define HALTED	0x02
@@ -150,7 +150,7 @@ static INLINE void z80gb_ProcessInterrupts (void)
 {
 	if (CheckInterrupts && (Regs.w.enable & IME))
 	{
-		UINT8 irq;
+		uint8_t irq;
 
 		CheckInterrupts = 0;
 
@@ -192,7 +192,7 @@ static INLINE void z80gb_ProcessInterrupts (void)
 /**********************************************************/
 int z80gb_execute (int cycles)
 {
-	UINT8 x;
+	uint8_t x;
 
 	z80gb_ICount = cycles;
 

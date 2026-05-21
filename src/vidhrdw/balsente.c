@@ -17,9 +17,9 @@
  *
  *************************************/
 
-extern UINT8 balsente_shooter;
-extern UINT8 balsente_shooter_x;
-extern UINT8 balsente_shooter_y;
+extern uint8_t balsente_shooter;
+extern uint8_t balsente_shooter_x;
+extern uint8_t balsente_shooter_y;
 
 
 
@@ -29,13 +29,13 @@ extern UINT8 balsente_shooter_y;
  *
  *************************************/
 
-static UINT8 *local_videoram;
-static UINT8 *scanline_dirty;
-static UINT8 *scanline_palette;
+static uint8_t *local_videoram;
+static uint8_t *scanline_dirty;
+static uint8_t *scanline_palette;
 
-static UINT8 last_scanline_palette;
-static UINT8 screen_refresh_counter;
-static UINT8 palettebank_vis;
+static uint8_t last_scanline_palette;
+static uint8_t screen_refresh_counter;
+static uint8_t palettebank_vis;
 
 
 
@@ -63,7 +63,7 @@ int balsente_vh_start(void)
 	palettebank_vis = 0;
 
 	/* allocate a local copy of video RAM */
-	local_videoram = (UINT8*)malloc(256 * 256);
+	local_videoram = (uint8_t*)malloc(256 * 256);
 	if (!local_videoram)
 	{
 		balsente_vh_stop();
@@ -71,7 +71,7 @@ int balsente_vh_start(void)
 	}
 
 	/* allocate a scanline dirty array */
-	scanline_dirty = (UINT8*)malloc(256);
+	scanline_dirty = (uint8_t*)malloc(256);
 	if (!scanline_dirty)
 	{
 		balsente_vh_stop();
@@ -79,7 +79,7 @@ int balsente_vh_start(void)
 	}
 
 	/* allocate a scanline palette array */
-	scanline_palette = (UINT8*)malloc(256);
+	scanline_palette = (uint8_t*)malloc(256);
 	if (!scanline_palette)
 	{
 		balsente_vh_stop();
@@ -230,7 +230,7 @@ WRITE_HANDLER( balsente_paletteram_w )
 
 void balsente_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 {
-	UINT8 palette_used[4];
+	uint8_t palette_used[4];
 	int x, y, i;
 
 	/* update the remaining scanlines */
@@ -319,13 +319,13 @@ void balsente_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 #define INCLUDE_DRAW_CORE
 
 #define DRAW_FUNC update_screen_8
-#define TYPE UINT8
+#define TYPE uint8_t
 #include "balsente.c"
 #undef TYPE
 #undef DRAW_FUNC
 
 #define DRAW_FUNC update_screen_16
-#define TYPE UINT16
+#define TYPE uint16_t
 #include "balsente.c"
 #undef TYPE
 #undef DRAW_FUNC
@@ -348,10 +348,10 @@ void DRAW_FUNC(struct osd_bitmap *bitmap, int full_refresh)
 	/* draw any dirty scanlines from the VRAM directly */
 	for (y = 0; y < 240; y++)
 	{
-		UINT16 *pens = &Machine->pens[scanline_palette[y] * 256];
+		uint16_t *pens = &Machine->pens[scanline_palette[y] * 256];
 		if (scanline_dirty[y] || full_refresh)
 		{
-			UINT8 *src = &local_videoram[y * 256];
+			uint8_t *src = &local_videoram[y * 256];
 			TYPE *dst = (TYPE *)bitmap->line[y];
 			int xadv = 1;
 
@@ -368,8 +368,8 @@ void DRAW_FUNC(struct osd_bitmap *bitmap, int full_refresh)
 	/* draw the sprite images */
 	for (i = 0; i < 40; i++)
 	{
-		UINT8 *sprite = spriteram + ((0xe0 + i * 4) & 0xff);
-		UINT8 *src;
+		uint8_t *sprite = spriteram + ((0xe0 + i * 4) & 0xff);
+		uint8_t *src;
 		int flags = sprite[0];
 		int image = sprite[1] | ((flags & 3) << 8);
 		int ypos = sprite[2] + 17;
@@ -384,8 +384,8 @@ void DRAW_FUNC(struct osd_bitmap *bitmap, int full_refresh)
 		{
 			if (ypos >= 16 && ypos < 240)
 			{
-				UINT16 *pens = &Machine->pens[scanline_palette[y] * 256];
-				UINT8 *old = &local_videoram[ypos * 256 + xpos];
+				uint16_t *pens = &Machine->pens[scanline_palette[y] * 256];
+				uint8_t *old = &local_videoram[ypos * 256 + xpos];
 				TYPE *dst = &((TYPE *)bitmap->line[ypos])[xpos];
 				int currx = xpos, xadv = 1;
 

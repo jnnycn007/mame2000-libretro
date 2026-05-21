@@ -110,7 +110,7 @@ Write sound processor   360030          W    D0-D7
 #include "vidhrdw/generic.h"
 
 
-extern UINT8 *eprom_playfieldpalram;
+extern uint8_t *eprom_playfieldpalram;
 extern size_t eprom_playfieldpalram_size;
 
 WRITE_HANDLER( eprom_latch_w );
@@ -124,7 +124,7 @@ void eprom_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
 void eprom_scanline_update(int scanline);
 
 
-static UINT8 *sync_data;
+static uint8_t *sync_data;
 
 
 /*************************************

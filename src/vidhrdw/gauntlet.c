@@ -23,7 +23,7 @@
  *
  *************************************/
 
-UINT8 vindctr2_screen_refresh;
+uint8_t vindctr2_screen_refresh;
 
 
 
@@ -36,12 +36,12 @@ UINT8 vindctr2_screen_refresh;
 struct mo_data
 {
 	struct osd_bitmap *bitmap;
-	UINT8 color_xor;
+	uint8_t color_xor;
 };
 
 static struct atarigen_pf_state pf_state;
 
-static UINT8 playfield_color_base;
+static uint8_t playfield_color_base;
 
 
 
@@ -51,14 +51,14 @@ static UINT8 playfield_color_base;
  *
  *************************************/
 
-static const UINT8 *update_palette(void);
+static const uint8_t *update_palette(void);
 
 static void pf_color_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 static void pf_render_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 static void pf_overrender_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *param);
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param);
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param);
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param);
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param);
 
 
 
@@ -244,9 +244,9 @@ void gauntlet_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
  *
  *************************************/
 
-static const UINT8 *update_palette(void)
+static const uint8_t *update_palette(void)
 {
-	UINT16 pf_map[32], al_map[64], mo_map[16];
+	uint16_t pf_map[32], al_map[64], mo_map[16];
 	int i, j;
 
 	/* reset color tracking */
@@ -279,7 +279,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the playfield palette */
 	for (i = 0; i < 16; i++)
 	{
-		UINT16 used = pf_map[i + 16];
+		uint16_t used = pf_map[i + 16];
 		if (used)
 			for (j = 0; j < 16; j++)
 				if (used & (1 << j))
@@ -289,7 +289,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the motion object palette */
 	for (i = 0; i < 16; i++)
 	{
-		UINT16 used = mo_map[i];
+		uint16_t used = mo_map[i];
 		if (used)
 		{
 			palette_used_colors[0x100 + i * 16 + 0] = PALETTE_COLOR_TRANSPARENT;
@@ -303,7 +303,7 @@ static const UINT8 *update_palette(void)
 	/* rebuild the alphanumerics palette */
 	for (i = 0; i < 64; i++)
 	{
-		UINT16 used = al_map[i];
+		uint16_t used = al_map[i];
 		if (used)
 			for (j = 0; j < 4; j++)
 				if (used & (1 << j))
@@ -325,7 +325,7 @@ static const UINT8 *update_palette(void)
 static void pf_color_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *param)
 {
 	const unsigned int *usage = &Machine->gfx[0]->pen_usage[state->param[0] * 0x1000];
-	UINT16 *colormap = (UINT16 *)param;
+	uint16_t *colormap = (uint16_t *)param;
 	int x, y;
 
 	for (y = tiles->min_y; y != tiles->max_y; y = (y + 1) & 63)
@@ -431,16 +431,16 @@ static void pf_overrender_callback(const struct rectangle *clip, const struct re
  *
  *************************************/
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
 	const unsigned int *usage = Machine->gfx[0]->pen_usage;
-	UINT16 *colormap = (UINT16 *)param;
+	uint16_t *colormap = (uint16_t *)param;
 	int code = (data[0] & 0x7fff) ^ 0x800;
 	int hsize = ((data[2] >> 3) & 7) + 1;
 	int vsize = (data[2] & 7) + 1;
 	int color = data[1] & 0x000f;
 	int tiles = hsize * vsize;
-	UINT16 temp = 0;
+	uint16_t temp = 0;
 	int i;
 
 	for (i = 0; i < tiles; i++)
@@ -456,7 +456,7 @@ static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, 
  *
  *************************************/
 
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
 	const struct GfxElement *gfx = Machine->gfx[0];
 	const unsigned int *usage = gfx->pen_usage;

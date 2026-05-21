@@ -8,7 +8,7 @@ static int use_profiler;
 
 struct profile_data
 {
-	UINT64 count[MEMORY][PROFILER_TOTAL];
+	uint64_t count[MEMORY][PROFILER_TOTAL];
 	unsigned int cpu_context_switches[MEMORY];
 };
 

@@ -10,7 +10,7 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
-typedef INT32 timer_tm;
+typedef int32_t timer_tm;
 
 extern timer_tm cycles_to_sec[];
 extern timer_tm sec_to_cycles[];
@@ -36,9 +36,9 @@ extern timer_tm sec_to_cycles[];
 #define TIME_IN_SEC(s)        ((timer_tm)((s) * (TIME_ONE_SEC)))
 #define TIME_IN_MSEC(ms)      ((timer_tm)(((float)(ms)*(float)(TIME_ONE_SEC))/(float)1000))
 #define TIME_IN_USEC(us)      ((timer_tm)(((float)(us)*(float)(TIME_ONE_SEC))/(float)1000000))
-#define TIME_IN_NSEC(ns)      (((INT64)(ns)*(INT64)(TIME_ONE_SEC))/(INT64)1000000000)
+#define TIME_IN_NSEC(ns)      (((int64_t)(ns)*(int64_t)(TIME_ONE_SEC))/(int64_t)1000000000)
 
-#define CYCLES_CALC(t,cycles) ((((INT64)(t))*((INT64)(cycles)))/((INT64)TIME_ONE_SEC))
+#define CYCLES_CALC(t,cycles) ((((int64_t)(t))*((int64_t)(cycles)))/((int64_t)TIME_ONE_SEC))
 #define TIME_TO_CYCLES(cpu,t) CYCLES_CALC((t),sec_to_cycles[(cpu)])
 
 #define SUSPEND_REASON_HALT		0x0001
@@ -46,7 +46,7 @@ extern timer_tm sec_to_cycles[];
 #define SUSPEND_REASON_SPIN		0x0004
 #define SUSPEND_REASON_TRIGGER	0x0008
 #define SUSPEND_REASON_DISABLE	0x0010
-#define SUSPEND_ANY_REASON		((UINT32)-1)
+#define SUSPEND_ANY_REASON		((uint32_t)-1)
 
 void timer_init(void);
 void *timer_pulse(timer_tm period, int param, void(*callback)(int));

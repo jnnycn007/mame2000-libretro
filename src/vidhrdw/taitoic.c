@@ -184,8 +184,8 @@ WRITE_HANDLER( taitof2_scrbank_w )   /* Mjnquest banks its 2 sets of scr tiles *
 #define TC0100SCN_TOTAL_CHARS 256
 #define TC0100SCN_MAX_CHIPS 2
 static int TC0100SCN_chips;
-static UINT8 TC0100SCN_ctrl[TC0100SCN_MAX_CHIPS][16];
-static UINT8 *TC0100SCN_ram[TC0100SCN_MAX_CHIPS],*TC0100SCN_bg_ram[TC0100SCN_MAX_CHIPS],
+static uint8_t TC0100SCN_ctrl[TC0100SCN_MAX_CHIPS][16];
+static uint8_t *TC0100SCN_ram[TC0100SCN_MAX_CHIPS],*TC0100SCN_bg_ram[TC0100SCN_MAX_CHIPS],
 		*TC0100SCN_fg_ram[TC0100SCN_MAX_CHIPS],*TC0100SCN_tx_ram[TC0100SCN_MAX_CHIPS],
 		*TC0100SCN_char_ram[TC0100SCN_MAX_CHIPS],
 		*TC0100SCN_bgscroll_ram[TC0100SCN_MAX_CHIPS],*TC0100SCN_fgscroll_ram[TC0100SCN_MAX_CHIPS];
@@ -199,7 +199,7 @@ static int TC0100SCN_bg_gfx[TC0100SCN_MAX_CHIPS],TC0100SCN_tx_gfx[TC0100SCN_MAX_
 
 
 
-static INLINE void common_get_bg_tile_info(UINT8 *ram,int gfxnum,int tile_index)
+static INLINE void common_get_bg_tile_info(uint8_t *ram,int gfxnum,int tile_index)
 {
 	int code = (READ_WORD(&ram[4*tile_index + 2]) & 0x7fff) + (taitof2_scrbank << 15);
 	int attr = READ_WORD(&ram[4*tile_index]);
@@ -207,7 +207,7 @@ static INLINE void common_get_bg_tile_info(UINT8 *ram,int gfxnum,int tile_index)
 	tile_info.flags = TILE_FLIPYX((attr & 0xc000) >> 14);
 }
 
-static INLINE void common_get_tx_tile_info(UINT8 *ram,int gfxnum,int tile_index)
+static INLINE void common_get_tx_tile_info(uint8_t *ram,int gfxnum,int tile_index)
 {
 	int attr = READ_WORD(&ram[2*tile_index]);
 	SET_TILE_INFO(gfxnum,attr & 0xff,(attr & 0x3f00) >> 6);
@@ -281,7 +281,7 @@ int TC0100SCN_vh_start(int chips,int gfxnum,int x_offset)
 		TC0100SCN_tilemap[i][1] = tilemap_create(get_tile_info[i][1],tilemap_scan_rows,TILEMAP_TRANSPARENT,8,8,64,64);
 		TC0100SCN_tilemap[i][2] = tilemap_create(get_tile_info[i][2],tilemap_scan_rows,TILEMAP_TRANSPARENT,8,8,64,64);
 
-		TC0100SCN_ram[i] = (UINT8*)malloc(TC0100SCN_RAM_SIZE);
+		TC0100SCN_ram[i] = (uint8_t*)malloc(TC0100SCN_RAM_SIZE);
 		TC0100SCN_char_dirty[i] = (char*)malloc(TC0100SCN_TOTAL_CHARS);
 
 		if (!TC0100SCN_ram[i] || !TC0100SCN_tilemap[i][0] ||
@@ -578,8 +578,8 @@ int TC0100SCN_bottomlayer(int chip)
 /***************************************************************************/
 
 #define TC0280GRD_RAM_SIZE 0x2000
-static UINT8 TC0280GRD_ctrl[16];
-static UINT8 *TC0280GRD_ram;
+static uint8_t TC0280GRD_ctrl[16];
+static uint8_t *TC0280GRD_ram;
 static struct tilemap *TC0280GRD_tilemap;
 static int TC0280GRD_gfxnum,TC0280GRD_base_color;
 
@@ -593,7 +593,7 @@ static void TC0280GRD_get_tile_info(int tile_index)
 
 int TC0280GRD_vh_start(int gfxnum)
 {
-	TC0280GRD_ram = (UINT8*)malloc(TC0280GRD_RAM_SIZE);
+	TC0280GRD_ram = (uint8_t*)malloc(TC0280GRD_RAM_SIZE);
 	TC0280GRD_tilemap = tilemap_create(TC0280GRD_get_tile_info,tilemap_scan_rows,TILEMAP_OPAQUE,8,8,64,64);
 
 	if (!TC0280GRD_ram || !TC0280GRD_tilemap)
@@ -678,24 +678,24 @@ void TC0430GRW_tilemap_update(int base_color)
 	TC0280GRD_tilemap_update(base_color);
 }
 
-static void zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,UINT32 priority,int xmultiply)
+static void zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,uint32_t priority,int xmultiply)
 {
-	UINT32 startx,starty;
+	uint32_t startx,starty;
 	int incxx,incxy,incyx,incyy;
 	struct osd_bitmap *srcbitmap = TC0280GRD_tilemap->pixmap;
 
 	/* 24-bit signed */
 	startx = ((READ_WORD(&TC0280GRD_ctrl[0]) & 0xff) << 16) + READ_WORD(&TC0280GRD_ctrl[2]);
 	if (startx & 0x800000) startx -= 0x1000000;
-	incxx = (INT16)READ_WORD(&TC0280GRD_ctrl[4]);
+	incxx = (int16_t)READ_WORD(&TC0280GRD_ctrl[4]);
 	incxx *= xmultiply;
-	incyx = (INT16)READ_WORD(&TC0280GRD_ctrl[6]);
+	incyx = (int16_t)READ_WORD(&TC0280GRD_ctrl[6]);
 	/* 24-bit signed */
 	starty = ((READ_WORD(&TC0280GRD_ctrl[8]) & 0xff) << 16) + READ_WORD(&TC0280GRD_ctrl[10]);
 	if (starty & 0x800000) starty -= 0x1000000;
-	incxy = (INT16)READ_WORD(&TC0280GRD_ctrl[12]);
+	incxy = (int16_t)READ_WORD(&TC0280GRD_ctrl[12]);
 	incxy *= xmultiply;
-	incyy = (INT16)READ_WORD(&TC0280GRD_ctrl[14]);
+	incyy = (int16_t)READ_WORD(&TC0280GRD_ctrl[14]);
 
 	startx -= xoffset * incxx + yoffset * incyx;
 	starty -= xoffset * incxy + yoffset * incyy;
@@ -706,12 +706,12 @@ static void zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,UINT32 p
 			&Machine->visible_area,TRANSPARENCY_PEN,palette_transparent_pen,priority);
 }
 
-void TC0280GRD_zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,UINT32 priority)
+void TC0280GRD_zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,uint32_t priority)
 {
 	zoom_draw(bitmap,xoffset,yoffset,priority,2);
 }
 
-void TC0430GRW_zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,UINT32 priority)
+void TC0430GRW_zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,uint32_t priority)
 {
 	zoom_draw(bitmap,xoffset,yoffset,priority,1);
 }
@@ -722,8 +722,8 @@ void TC0430GRW_zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,UINT3
 
 #define TC0480SCP_RAM_SIZE 0x10000
 #define TC0480SCP_TOTAL_CHARS 256
-static UINT8 TC0480SCP_ctrl[48];
-static UINT8 *TC0480SCP_ram,
+static uint8_t TC0480SCP_ctrl[48];
+static uint8_t *TC0480SCP_ram,
 		*TC0480SCP_bg_ram[4],
 		*TC0480SCP_tx_ram,
 		*TC0480SCP_char_ram,
@@ -741,7 +741,7 @@ static int TC0480SCP_y_offs;
 int TC0480SCP_pri_reg;   // read externally in vidhrdw\taito_f2.c
 
 
-static INLINE void common_get_tc0480bg_tile_info(UINT8 *ram,int gfxnum,int tile_index)
+static INLINE void common_get_tc0480bg_tile_info(uint8_t *ram,int gfxnum,int tile_index)
 {
 	int code = (READ_WORD(&ram[4*tile_index + 2]) & 0x7fff);
 	int attr = READ_WORD(&ram[4*tile_index]);
@@ -749,7 +749,7 @@ static INLINE void common_get_tc0480bg_tile_info(UINT8 *ram,int gfxnum,int tile_
 	tile_info.flags = TILE_FLIPYX((attr & 0xc000) >> 14);
 }
 
-static INLINE void common_get_tc0480tx_tile_info(UINT8 *ram,int gfxnum,int tile_index)
+static INLINE void common_get_tc0480tx_tile_info(uint8_t *ram,int gfxnum,int tile_index)
 {
 	int attr = READ_WORD(&ram[2*tile_index]);
 	SET_TILE_INFO(gfxnum,attr & 0xff,((attr & 0x3f00) >> 8) + TC0480SCP_tile_colbase);   // >> 8 not 6 as 4bpp
@@ -812,7 +812,7 @@ int TC0480SCP_vh_start(int gfxnum,int pixels,int x_offset,int y_offset,int col_b
 		TC0480SCP_tilemap[3] = tilemap_create(tc480_get_tile_info[3],tilemap_scan_rows,TILEMAP_TRANSPARENT,16,16,32,32);
 		TC0480SCP_tilemap[4] = tilemap_create(tc480_get_tile_info[4],tilemap_scan_rows,TILEMAP_TRANSPARENT,8,8,64,64);
 
-		TC0480SCP_ram = (UINT8*)malloc(TC0480SCP_RAM_SIZE);
+		TC0480SCP_ram = (uint8_t*)malloc(TC0480SCP_RAM_SIZE);
 		TC0480SCP_char_dirty = (char*)malloc(TC0480SCP_TOTAL_CHARS);
 
 		if (!TC0480SCP_ram || !TC0480SCP_tilemap[0] || !TC0480SCP_tilemap[1] ||
@@ -1170,7 +1170,7 @@ static void zoomtilemap_draw(struct osd_bitmap *bitmap,int layer,int flags)
 	}
 	else	/* zoom */
 	{
-		UINT32 startx,starty;
+		uint32_t startx,starty;
 		int incxx,incxy,incyx,incyy;
 		struct osd_bitmap *srcbitmap = TC0480SCP_tilemap[layer]->pixmap;
 		int priority = flags >> 16;
@@ -1254,12 +1254,12 @@ void TC0480SCP_tilemap_draw(struct osd_bitmap *bitmap,int layer,int flags)
 
 
 static int TC0110PCR_addr;
-static UINT16 *TC0110PCR_ram;
+static uint16_t *TC0110PCR_ram;
 #define TC0110PCR_RAM_SIZE 0x2000
 
 int TC0110PCR_vh_start(void)
 {
-	TC0110PCR_ram = (UINT16*)malloc(TC0110PCR_RAM_SIZE * sizeof(*TC0110PCR_ram));
+	TC0110PCR_ram = (uint16_t*)malloc(TC0110PCR_RAM_SIZE * sizeof(*TC0110PCR_ram));
 
 	if (!TC0110PCR_ram) return 1;
 

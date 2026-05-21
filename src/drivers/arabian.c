@@ -84,8 +84,8 @@ WRITE_HANDLER( arabian_blitter_w );
 WRITE_HANDLER( arabian_videoram_w );
 
 
-static UINT8 arabian_clock=0;
-static UINT8 portB=0;
+static uint8_t arabian_clock=0;
+static uint8_t portB=0;
 
 
 static int arabian_interrupt(void)

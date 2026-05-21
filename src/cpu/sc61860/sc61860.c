@@ -44,10 +44,10 @@ typedef int bool;
 typedef struct
 {
 	SC61860_CONFIG *config;
-	UINT8 ram[0x60]; // internal special ram
-	UINT8 p, q, r; //6 bits only?
+	uint8_t ram[0x60]; // internal special ram
+	uint8_t p, q, r; //6 bits only?
 
-	UINT16 oldpc, pc, dp;
+	uint16_t oldpc, pc, dp;
 	
 	bool carry, zero;
 
@@ -58,7 +58,7 @@ int sc61860_icount = 0;
 
 static SC61860_Regs sc61860;
 
-UINT8 *sc61860_internal_ram(void) { return sc61860.ram; }
+uint8_t *sc61860_internal_ram(void) { return sc61860.ram; }
 
 void sc61860_2ms_tick(int param)
 {

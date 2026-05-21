@@ -17,8 +17,8 @@
 
 
 /* defined in vidhrdw/williams.c */
-extern UINT8 *williams_videoram;
-extern UINT8 *williams2_paletteram;
+extern uint8_t *williams_videoram;
+extern uint8_t *williams2_paletteram;
 
 void williams_vh_update(int counter);
 WRITE_HANDLER( williams_videoram_w );
@@ -27,22 +27,22 @@ void williams2_vh_update(int counter);
 
 
 /* banking addresses set by the drivers */
-UINT8 *williams_bank_base;
-UINT8 *defender_bank_base;
-const UINT32 *defender_bank_list;
-UINT8 *mayday_protection;
+uint8_t *williams_bank_base;
+uint8_t *defender_bank_base;
+const uint32_t *defender_bank_list;
+uint8_t *mayday_protection;
 
 /* internal bank switching tracking */
-static UINT8 blaster_bank;
-static UINT8 vram_bank;
-UINT8 williams2_bank;
+static uint8_t blaster_bank;
+static uint8_t vram_bank;
+uint8_t williams2_bank;
 
 /* switches controlled by $c900 */
-UINT16 sinistar_clip;
-UINT8 williams_cocktail;
+uint16_t sinistar_clip;
+uint8_t williams_cocktail;
 
 /* other stuff */
-static UINT16 joust2_current_sound_data;
+static uint16_t joust2_current_sound_data;
 
 /* older-Williams routines */
 static void williams_main_irq(int state);
@@ -51,7 +51,7 @@ static void williams_snd_irq(int state);
 static WRITE_HANDLER( williams_snd_cmd_w );
 
 /* input port mapping */
-static UINT8 port_select;
+static uint8_t port_select;
 static WRITE_HANDLER( williams_port_select_w );
 static READ_HANDLER( williams_input_port_0_3_r );
 static READ_HANDLER( williams_input_port_1_4_r );
@@ -513,7 +513,7 @@ void williams2_init_machine(void)
 
 WRITE_HANDLER( williams2_bank_select_w )
 {
-	static const UINT32 bank[8] = { 0, 0x10000, 0x20000, 0x10000, 0, 0x30000, 0x40000, 0x30000 };
+	static const uint32_t bank[8] = { 0, 0x10000, 0x20000, 0x10000, 0, 0x30000, 0x40000, 0x30000 };
 
 	/* select bank index (only lower 3 bits used by IC56) */
 	williams2_bank = data & 0x07;
@@ -633,7 +633,7 @@ void defender_init_machine(void)
 
 WRITE_HANDLER( defender_bank_select_w )
 {
-	UINT32 bank_offset = defender_bank_list[data & 7];
+	uint32_t bank_offset = defender_bank_list[data & 7];
 
 	/* set bank address */
 	cpu_setbank(2, &memory_region(REGION_CPU1)[bank_offset]);
@@ -774,7 +774,7 @@ READ_HANDLER( stargate_input_port_0_r )
  *
  *************************************/
 
-static const UINT32 blaster_bank_offset[16] =
+static const uint32_t blaster_bank_offset[16] =
 {
 	0x00000, 0x10000, 0x14000, 0x18000, 0x1c000, 0x20000, 0x24000, 0x28000,
 	0x2c000, 0x30000, 0x34000, 0x38000, 0x2c000, 0x30000, 0x34000, 0x38000

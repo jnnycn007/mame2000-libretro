@@ -89,7 +89,7 @@ static void setvector_callback(int param)
 		cpu_set_irq_line(1,0,ASSERT_LINE);
 }
 
-static UINT8 *m72_region=NULL;
+static uint8_t *m72_region=NULL;
 static int m72_region_length=0;
 
 void m72_init_sound(void)

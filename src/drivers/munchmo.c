@@ -21,11 +21,11 @@
 #include "vidhrdw/generic.h"
 
 
-extern UINT8 *mnchmobl_vreg;
-extern UINT8 *mnchmobl_status_vram;
-extern UINT8 *mnchmobl_sprite_xpos;
-extern UINT8 *mnchmobl_sprite_attr;
-extern UINT8 *mnchmobl_sprite_tile;
+extern uint8_t *mnchmobl_vreg;
+extern uint8_t *mnchmobl_status_vram;
+extern uint8_t *mnchmobl_sprite_xpos;
+extern uint8_t *mnchmobl_sprite_attr;
+extern uint8_t *mnchmobl_sprite_tile;
 
 void mnchmobl_convert_color_prom(unsigned char *palette, unsigned short *colortable,const unsigned char *color_prom);
 int mnchmobl_vh_start( void );

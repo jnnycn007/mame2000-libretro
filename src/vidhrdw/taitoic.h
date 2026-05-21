@@ -31,7 +31,7 @@ READ_HANDLER( TC0280GRD_word_r );
 WRITE_HANDLER( TC0280GRD_word_w );
 WRITE_HANDLER( TC0280GRD_ctrl_word_w );
 void TC0280GRD_tilemap_update(int base_color);
-void TC0280GRD_zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,UINT32 priority);
+void TC0280GRD_zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,uint32_t priority);
 
 int TC0430GRW_vh_start(int gfxnum);
 void TC0430GRW_vh_stop(void);
@@ -39,7 +39,7 @@ READ_HANDLER( TC0430GRW_word_r );
 WRITE_HANDLER( TC0430GRW_word_w );
 WRITE_HANDLER( TC0430GRW_ctrl_word_w );
 void TC0430GRW_tilemap_update(int base_color);
-void TC0430GRW_zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,UINT32 priority);
+void TC0430GRW_zoom_draw(struct osd_bitmap *bitmap,int xoffset,int yoffset,uint32_t priority);
 
 
 int TC0110PCR_vh_start(void);

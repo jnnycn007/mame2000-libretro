@@ -53,8 +53,8 @@ extern int mips_ICount;
 #define MIPS_INT7	( 64 )
 #define MIPS_INT8	( 128 )
 
-#define MIPS_BYTE_EXTEND( a ) ( (INT32)(INT8)a )
-#define MIPS_WORD_EXTEND( a ) ( (INT32)(INT16)a )
+#define MIPS_BYTE_EXTEND( a ) ( (int32_t)(int8_t)a )
+#define MIPS_WORD_EXTEND( a ) ( (int32_t)(int16_t)a )
 
 #define INS_OP( op ) ( ( op >> 26 ) & 63 )
 #define INS_RS( op ) ( ( op >> 21 ) & 31 )
@@ -165,7 +165,7 @@ extern int mips_ICount;
 #ifdef MSB_FIRST
 #define READ_LONG(a)		  (READ_WORD(a+2)<<16)|READ_WORD(a)
 #else
-#define READ_LONG(a)          (*(UINT32 *)(a))
+#define READ_LONG(a)          (*(uint32_t *)(a))
 #endif
 
 #define cpu_readop32(A)     READ_LONG(&OP_ROM[A])

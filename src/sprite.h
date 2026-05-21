@@ -21,11 +21,11 @@ __declspec(align(32))
 struct sprite {
 	int priority, flags;
 
-	const UINT8 *pen_data;	/* points to top left corner of tile data */
+	const uint8_t *pen_data;	/* points to top left corner of tile data */
 	int line_offset;
 
-	const UINT16 *pal_data;
-	UINT32 pen_usage;
+	const uint16_t *pal_data;
+	uint32_t pen_usage;
 
 	int x_offset, y_offset;
 	int tile_width, tile_height;
@@ -68,6 +68,6 @@ struct sprite_list *sprite_list_create( int num_sprites, int flags );
 void sprite_update( void );
 void sprite_draw( struct sprite_list *sprite_list, int priority );
 
-void sprite_set_shade_table(UINT16 *table);
+void sprite_set_shade_table(uint16_t *table);
 
 #endif

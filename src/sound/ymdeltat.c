@@ -36,17 +36,17 @@
 #define LOG(n,x) if( (n)>=LOG_LEVEL ) logerror x
 #endif
 
-UINT8 *ym_deltat_memory;      /* memory pointer */
+uint8_t *ym_deltat_memory;      /* memory pointer */
 
 /* Forecast to next Forecast (rate = *8) */
 /* 1/8 , 3/8 , 5/8 , 7/8 , 9/8 , 11/8 , 13/8 , 15/8 */
-const INT32 ym_deltat_decode_tableB1[16] = {
+const int32_t ym_deltat_decode_tableB1[16] = {
   1,   3,   5,   7,   9,  11,  13,  15,
   -1,  -3,  -5,  -7,  -9, -11, -13, -15,
 };
 /* delta to next delta (rate= *64) */
 /* 0.9 , 0.9 , 0.9 , 0.9 , 1.2 , 1.6 , 2.0 , 2.4 */
-const INT32 ym_deltat_decode_tableB2[16] = {
+const int32_t ym_deltat_decode_tableB2[16] = {
   57,  57,  57,  57, 77, 102, 128, 153,
   57,  57,  57,  57, 77, 102, 128, 153
 };
@@ -127,12 +127,12 @@ void YM_DELTAT_ADPCM_Write(YM_DELTAT *DELTAT,int r,int v)
 	case 0x09:	/* DELTA-N L (ADPCM Playback Prescaler) */
 	case 0x0a:	/* DELTA-N H */
 		DELTAT->delta  = (DELTAT->reg[0xa]*0x0100 | DELTAT->reg[0x9]);
-		DELTAT->step     = (UINT32)((float)(DELTAT->delta*(1<<(YM_DELTAT_SHIFT-16)))*(DELTAT->freqbase));
+		DELTAT->step     = (uint32_t)((float)(DELTAT->delta*(1<<(YM_DELTAT_SHIFT-16)))*(DELTAT->freqbase));
 		DELTAT->volume_w_step = (float)DELTAT->volume * DELTAT->step / (1<<YM_DELTAT_SHIFT);
 		break;
 	case 0x0b:	/* Level control (volume , voltage flat) */
 		{
-			INT32 oldvol = DELTAT->volume;
+			int32_t oldvol = DELTAT->volume;
 			DELTAT->volume = (v&0xff)*(DELTAT->output_range/256) / YM_DELTAT_DECODE_RANGE;
 			if( oldvol != 0 )
 			{
@@ -181,8 +181,8 @@ void YM_DELTAT_ADPCM_Reset(YM_DELTAT *DELTAT,int pan)
 #define YM_DELTAT_DECODE_MIN (-(YM_DELTAT_DECODE_RANGE))
 #define YM_DELTAT_DECODE_MAX ((YM_DELTAT_DECODE_RANGE)-1)
 
-extern const INT32 ym_deltat_decode_tableB1[];
-extern const INT32 ym_deltat_decode_tableB2[];
+extern const int32_t ym_deltat_decode_tableB1[];
+extern const int32_t ym_deltat_decode_tableB2[];
 
 #define YM_DELTAT_Limit(val,max,min)	\
 {										\
@@ -193,11 +193,11 @@ extern const INT32 ym_deltat_decode_tableB2[];
 /**** ADPCM B (Delta-T control type) ****/
 static INLINE void YM_DELTAT_ADPCM_CALC(YM_DELTAT *DELTAT)
 {
-	UINT32 step;
+	uint32_t step;
 	int data;
-	INT32 old_m;
-	INT32 now_leveling;
-	INT32 delta_next;
+	int32_t old_m;
+	int32_t now_leveling;
+	int32_t delta_next;
 
 	DELTAT->now_step += DELTAT->step;
 	if ( DELTAT->now_step >= (1<<YM_DELTAT_SHIFT) )

@@ -25,7 +25,7 @@
 	wms_speedup_spin[0] = spin1; \
 	wms_speedup_spin[1] = offs1; \
 	wms_speedup_spin[2] = offs2; \
-	wms_speedup_base = (UINT8*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_16bit);
+	wms_speedup_base = (uint8_t*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_16bit);
 	
 #define INSTALL_SPEEDUP_3(addr, pc, spin1, spin2, spin3) \
 	wms_speedup_pc = (pc); \
@@ -33,44 +33,44 @@
 	wms_speedup_spin[0] = spin1; \
 	wms_speedup_spin[1] = spin2; \
 	wms_speedup_spin[2] = spin3; \
-	wms_speedup_base = (UINT8*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_3);
+	wms_speedup_base = (uint8_t*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_3);
 
 #define INSTALL_SPEEDUP_1_ADDRESS( addr, pc ) \
 	wms_speedup_pc = (pc); \
 	wms_speedup_offset = ((addr) & 0x10) >> 3; \
-	wms_speedup_base = (UINT8*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_address);
+	wms_speedup_base = (uint8_t*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_address);
 
 
 
 /* code-related variables */
-extern UINT8 *	wms_code_rom;
-       UINT8 *	wms_wolfu_decode_memory;
+extern uint8_t *	wms_code_rom;
+       uint8_t *	wms_wolfu_decode_memory;
 
 /* CMOS-related variables */
-extern UINT8 *	wms_cmos_ram;
-static UINT8	cmos_write_enable;
+extern uint8_t *	wms_cmos_ram;
+static uint8_t	cmos_write_enable;
 
 /* graphics-related variables */
-extern UINT8 *	wms_gfx_rom;
+extern uint8_t *	wms_gfx_rom;
 extern size_t	wms_gfx_rom_size;
 
 /* I/O-related variables */
-static UINT16	iodata[8];
+static uint16_t	iodata[8];
 
 /* sound-related variables */
-static UINT8	sound_type;
+static uint8_t	sound_type;
 
 /* protection-related variables */
-static UINT8	security_data[16];
-static UINT8	security_buffer;
-static UINT8	security_index;
-static UINT8	security_status;
+static uint8_t	security_data[16];
+static uint8_t	security_buffer;
+static uint8_t	security_index;
+static uint8_t	security_status;
 
 /* speedup-related variables */
 extern offs_t 	wms_speedup_pc;
 extern offs_t 	wms_speedup_offset;
 extern offs_t 	wms_speedup_spin[3];
-extern UINT8 *	wms_speedup_base;
+extern uint8_t *	wms_speedup_base;
 
 
 /* prototype */
@@ -196,8 +196,8 @@ static READ_HANDLER( wms_wolfu_io_r )
 static void generate_serial(int upper)
 {
 	int year = atoi(Machine->gamedrv->year), month = 12, day = 11;
-	UINT32 serial_number, temp;
-	UINT8 serial_digit[9];
+	uint32_t serial_number, temp;
+	uint8_t serial_digit[9];
 	
 	serial_number = 123456;
 	serial_number += upper * 1000000;
@@ -252,7 +252,7 @@ static void generate_serial(int upper)
 
 static void init_wolfu_generic(int sound)
 {
-	UINT8 *base;
+	uint8_t *base;
 	int i, j;
 	
 	/* set up code ROMs */
@@ -376,7 +376,7 @@ void init_nbamaxht(void)
 
 static READ_HANDLER( wms_generic_speedup_1_address )
 {
-	UINT16 value = READ_WORD(&wms_speedup_base[offset]);
+	uint16_t value = READ_WORD(&wms_speedup_base[offset]);
 
 	/* just return if this isn't the offset we're looking for */
 	if (offset != wms_speedup_offset)

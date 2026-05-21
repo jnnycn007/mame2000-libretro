@@ -23,9 +23,9 @@ static void illegal( void )
 #endif
 
 /* $00/$02/$04/$06/$08/$0A/$0C/$0E BRSET direct,relative ---- */
-static INLINE void brset (UINT8 bit)
+static INLINE void brset (uint8_t bit)
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	DIRBYTE(r);
 	IMMBYTE(t);
 	if (r&bit)
@@ -40,9 +40,9 @@ static INLINE void brset (UINT8 bit)
 }
 
 /* $01/$03/$05/$07/$09/$0B/$0D/$0F BRCLR direct,relative ---- */
-static INLINE void brclr (UINT8 bit)
+static INLINE void brclr (uint8_t bit)
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	DIRBYTE(r);
 	IMMBYTE(t);
 	if (!(r&bit))
@@ -61,17 +61,17 @@ static INLINE void brclr (UINT8 bit)
 #endif
 
 /* $10/$12/$14/$16/$18/$1A/$1C/$1E BSET direct ---- */
-static INLINE void bset (UINT8 bit)
+static INLINE void bset (uint8_t bit)
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	DIRBYTE(t); r=t|bit;
 	WM(EAD,r);
 }
 
 /* $11/$13/$15/$17/$19/$1B/$1D/$1F BCLR direct ---- */
-static INLINE void bclr (UINT8 bit)
+static INLINE void bclr (uint8_t bit)
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	DIRBYTE(t); r=t&(~bit);
 	WM(EAD,r);
 }
@@ -84,7 +84,7 @@ static INLINE void bclr (UINT8 bit)
 /* $20 BRA relative ---- */
 static INLINE void bra( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IMMBYTE(t);PC+=SIGNED(t);
 	if (t==0xfe)
 	{
@@ -97,7 +97,7 @@ static INLINE void bra( void )
 /* $21 BRN relative ---- */
 static INLINE void brn( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IMMBYTE(t);
 }
 
@@ -207,8 +207,8 @@ static INLINE void bih( void )
 /* $30 NEG direct -*** */
 static INLINE void neg_di( void )
 {
-	UINT8 t;
-	UINT16 r;
+	uint8_t t;
+	uint16_t r;
 	DIRBYTE(t); r=-t;
 	CLR_NZC; SET_FLAGS8(0,t,r);
 	WM(EAD,r);
@@ -221,7 +221,7 @@ static INLINE void neg_di( void )
 /* $33 COM direct -**1 */
 static INLINE void com_di( void )
 {
-	UINT8 t;
+	uint8_t t;
 	DIRBYTE(t); t = ~t;
 	CLR_NZ; SET_NZ8(t); SEC;
 	WM(EAD,t);
@@ -230,7 +230,7 @@ static INLINE void com_di( void )
 /* $34 LSR direct -0** */
 static INLINE void lsr_di( void )
 {
-	UINT8 t;
+	uint8_t t;
 	DIRBYTE(t);
 	CLR_NZC;
 	CC |= (t&0x01);
@@ -244,7 +244,7 @@ static INLINE void lsr_di( void )
 /* $36 ROR direct -*** */
 static INLINE void ror_di( void )
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	DIRBYTE(t);
 	r = (CC & 0x01) << 7;
 	CLR_NZC;
@@ -257,7 +257,7 @@ static INLINE void ror_di( void )
 /* $37 ASR direct ?*** */
 static INLINE void asr_di( void )
 {
-	UINT8 t;
+	uint8_t t;
 	DIRBYTE(t);
 	CLR_NZC; CC|=(t&0x01);
 	t>>=1; t|=((t&0x40)<<1);
@@ -268,8 +268,8 @@ static INLINE void asr_di( void )
 /* $38 LSL direct ?*** */
 static INLINE void lsl_di( void )
 {
-	UINT8 t;
-	UINT16 r;
+	uint8_t t;
+	uint16_t r;
 	DIRBYTE(t);
 	r = t << 1;
 	CLR_NZC;
@@ -280,7 +280,7 @@ static INLINE void lsl_di( void )
 /* $39 ROL direct -*** */
 static INLINE void rol_di( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	DIRBYTE(t);
 	r = CC & 0x01;
 	r |= t << 1;
@@ -292,7 +292,7 @@ static INLINE void rol_di( void )
 /* $3a DEC direct -**- */
 static INLINE void dec_di( void )
 {
-	UINT8 t;
+	uint8_t t;
 	DIRBYTE(t);
 	--t;
 	CLR_NZ; SET_FLAGS8D(t);
@@ -304,7 +304,7 @@ static INLINE void dec_di( void )
 /* $3c INC direct -**- */
 static INLINE void inc_di( void )
 {
-	UINT8 t;
+	uint8_t t;
 	DIRBYTE(t);
 	++t;
 	CLR_NZ; SET_FLAGS8I(t);
@@ -314,7 +314,7 @@ static INLINE void inc_di( void )
 /* $3d TST direct -**- */
 static INLINE void tst_di( void )
 {
-	UINT8 t;
+	uint8_t t;
 	DIRBYTE(t);
 	CLR_NZ; SET_NZ8(t);
 }
@@ -337,7 +337,7 @@ static INLINE void clr_di( void )
 /* $40 NEGA inherent ?*** */
 static INLINE void nega( void )
 {
-	UINT16 r;
+	uint16_t r;
 	r = -A;
 	CLR_NZC; SET_FLAGS8(0,A,r);
 	A = r;
@@ -370,7 +370,7 @@ static INLINE void lsra( void )
 /* $46 RORA inherent -*** */
 static INLINE void rora( void )
 {
-	UINT8 r;
+	uint8_t r;
 	r = (CC & 0x01) << 7;
 	CLR_NZC;
 	CC |= (A & 0x01);
@@ -391,7 +391,7 @@ static INLINE void asra( void )
 /* $48 LSLA inherent ?*** */
 static INLINE void lsla( void )
 {
-	UINT16 r;
+	uint16_t r;
 	r = A << 1;
 	CLR_NZC;
 	SET_FLAGS8(A,A,r);
@@ -401,7 +401,7 @@ static INLINE void lsla( void )
 /* $49 ROLA inherent -*** */
 static INLINE void rola( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	t = A;
 	r = CC & 0x01;
 	r |= t << 1;
@@ -453,7 +453,7 @@ static INLINE void clra( void )
 /* $50 NEGX inherent ?*** */
 static INLINE void negx( void )
 {
-	UINT16 r;
+	uint16_t r;
 	r = -X;
 	CLR_NZC;
 	SET_FLAGS8(0,X,r);
@@ -487,7 +487,7 @@ static INLINE void lsrx( void )
 /* $56 RORX inherent -*** */
 static INLINE void rorx( void )
 {
-	UINT8 r;
+	uint8_t r;
 	r = (CC & 0x01) << 7;
 	CLR_NZC;
 	CC |= (X & 0x01);
@@ -508,7 +508,7 @@ static INLINE void asrx( void )
 /* $58 ASLX inherent ?*** */
 static INLINE void aslx( void )
 {
-	UINT16 r;
+	uint16_t r;
 	r = X << 1;
 	CLR_NZC;
 	SET_FLAGS8(X,X,r);
@@ -518,7 +518,7 @@ static INLINE void aslx( void )
 /* $59 ROLX inherent -*** */
 static INLINE void rolx( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	t = X;
 	r = CC & 0x01;
 	r |= t<<1;
@@ -570,8 +570,8 @@ static INLINE void clrx( void )
 /* $60 NEG indexed, 1 byte offset -*** */
 static INLINE void neg_ix1( void )
 {
-	UINT8 t;
-	UINT16 r;
+	uint8_t t;
+	uint16_t r;
 	IDX1BYTE(t); r=-t;
 	CLR_NZC; SET_FLAGS8(0,t,r);
 	WM(EAD,r);
@@ -584,7 +584,7 @@ static INLINE void neg_ix1( void )
 /* $63 COM indexed, 1 byte offset -**1 */
 static INLINE void com_ix1( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX1BYTE(t); t = ~t;
 	CLR_NZ; SET_NZ8(t); SEC;
 	WM(EAD,t);
@@ -593,7 +593,7 @@ static INLINE void com_ix1( void )
 /* $64 LSR indexed, 1 byte offset -0** */
 static INLINE void lsr_ix1( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX1BYTE(t);
 	CLR_NZC;
 	CC |= (t & 0x01);
@@ -607,7 +607,7 @@ static INLINE void lsr_ix1( void )
 /* $66 ROR indexed, 1 byte offset -*** */
 static INLINE void ror_ix1( void )
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	IDX1BYTE(t);
 	r = (CC & 0x01) << 7;
 	CLR_NZC;
@@ -620,7 +620,7 @@ static INLINE void ror_ix1( void )
 /* $67 ASR indexed, 1 byte offset ?*** */
 static INLINE void asr_ix1( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX1BYTE(t);
 	CLR_NZC; CC|=(t&0x01);
 	t>>=1; t|=((t&0x40)<<1);
@@ -631,8 +631,8 @@ static INLINE void asr_ix1( void )
 /* $68 LSL indexed, 1 byte offset ?*** */
 static INLINE void lsl_ix1( void )
 {
-	UINT8 t;
-	UINT16 r;
+	uint8_t t;
+	uint16_t r;
 	IDX1BYTE(t);
 	r = t << 1;
 	CLR_NZC;
@@ -643,7 +643,7 @@ static INLINE void lsl_ix1( void )
 /* $69 ROL indexed, 1 byte offset -*** */
 static INLINE void rol_ix1( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	IDX1BYTE(t);
 	r = CC & 0x01;
 	r |= t << 1;
@@ -655,7 +655,7 @@ static INLINE void rol_ix1( void )
 /* $6a DEC indexed, 1 byte offset -**- */
 static INLINE void dec_ix1( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX1BYTE(t);
 	--t;
 	CLR_NZ; SET_FLAGS8D(t);
@@ -667,7 +667,7 @@ static INLINE void dec_ix1( void )
 /* $6c INC indexed, 1 byte offset -**- */
 static INLINE void inc_ix1( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX1BYTE(t);
 	++t;
 	CLR_NZ; SET_FLAGS8I(t);
@@ -677,7 +677,7 @@ static INLINE void inc_ix1( void )
 /* $6d TST indexed, 1 byte offset -**- */
 static INLINE void tst_ix1( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX1BYTE(t);
 	CLR_NZ; SET_NZ8(t);
 }
@@ -700,8 +700,8 @@ static INLINE void clr_ix1( void )
 /* $70 NEG indexed -*** */
 static INLINE void neg_ix( void )
 {
-	UINT8 t;
-	UINT16 r;
+	uint8_t t;
+	uint16_t r;
 	IDXBYTE(t); r=-t;
 	CLR_NZC; SET_FLAGS8(0,t,r);
 	WM(EAD,r);
@@ -714,7 +714,7 @@ static INLINE void neg_ix( void )
 /* $73 COM indexed -**1 */
 static INLINE void com_ix( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDXBYTE(t); t = ~t;
 	CLR_NZ; SET_NZ8(t); SEC;
 	WM(EAD,t);
@@ -723,7 +723,7 @@ static INLINE void com_ix( void )
 /* $74 LSR indexed -0** */
 static INLINE void lsr_ix( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDXBYTE(t);
 	CLR_NZC;
 	CC |= (t & 0x01);
@@ -737,7 +737,7 @@ static INLINE void lsr_ix( void )
 /* $76 ROR indexed -*** */
 static INLINE void ror_ix( void )
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	IDXBYTE(t);
 	r = (CC & 0x01) << 7;
 	CLR_NZC;
@@ -750,7 +750,7 @@ static INLINE void ror_ix( void )
 /* $77 ASR indexed ?*** */
 static INLINE void asr_ix( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDXBYTE(t);
 	CLR_NZC;
 	CC |= (t & 0x01);
@@ -762,8 +762,8 @@ static INLINE void asr_ix( void )
 /* $78 LSL indexed ?*** */
 static INLINE void lsl_ix( void )
 {
-	UINT8 t;
-	UINT16 r;
+	uint8_t t;
+	uint16_t r;
 	IDXBYTE(t); r=t<<1;
 	CLR_NZC; SET_FLAGS8(t,t,r);
 	WM(EAD,r);
@@ -772,7 +772,7 @@ static INLINE void lsl_ix( void )
 /* $79 ROL indexed -*** */
 static INLINE void rol_ix( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	IDXBYTE(t);
 	r = CC & 0x01;
 	r |= t << 1;
@@ -784,7 +784,7 @@ static INLINE void rol_ix( void )
 /* $7a DEC indexed -**- */
 static INLINE void dec_ix( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDXBYTE(t);
 	--t;
 	CLR_NZ; SET_FLAGS8D(t);
@@ -796,7 +796,7 @@ static INLINE void dec_ix( void )
 /* $7c INC indexed -**- */
 static INLINE void inc_ix( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDXBYTE(t);
 	++t;
 	CLR_NZ; SET_FLAGS8I(t);
@@ -806,7 +806,7 @@ static INLINE void inc_ix( void )
 /* $7d TST indexed -**- */
 static INLINE void tst_ix( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDXBYTE(t);
 	CLR_NZ; SET_NZ8(t);
 }
@@ -944,7 +944,7 @@ static INLINE void txa (void)
 /* $a0 SUBA immediate ?*** */
 static INLINE void suba_im( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IMMBYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -955,7 +955,7 @@ static INLINE void suba_im( void )
 /* $a1 CMPA immediate ?*** */
 static INLINE void cmpa_im( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IMMBYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -965,7 +965,7 @@ static INLINE void cmpa_im( void )
 /* $a2 SBCA immediate ?*** */
 static INLINE void sbca_im( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IMMBYTE(t);
 	r = A - t - (CC & 0x01);
 	CLR_NZC;
@@ -976,7 +976,7 @@ static INLINE void sbca_im( void )
 /* $a3 CPX immediate -*** */
 static INLINE void cpx_im( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IMMBYTE(t);
 	r = X - t;
 	CLR_NZC;
@@ -986,7 +986,7 @@ static INLINE void cpx_im( void )
 /* $a4 ANDA immediate -**- */
 static INLINE void anda_im( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IMMBYTE(t);
 	A &= t;
 	CLR_NZ;
@@ -996,7 +996,7 @@ static INLINE void anda_im( void )
 /* $a5 BITA immediate -**- */
 static INLINE void bita_im( void )
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	IMMBYTE(t);
 	r = A & t;
 	CLR_NZ;
@@ -1016,7 +1016,7 @@ static INLINE void lda_im( void )
 /* $a8 EORA immediate -**- */
 static INLINE void eora_im( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IMMBYTE(t);
 	A ^= t;
 	CLR_NZ;
@@ -1026,7 +1026,7 @@ static INLINE void eora_im( void )
 /* $a9 ADCA immediate **** */
 static INLINE void adca_im( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	IMMBYTE(t);
 	r = A + t + (CC & 0x01);
 	CLR_HNZC;
@@ -1038,7 +1038,7 @@ static INLINE void adca_im( void )
 /* $aa ORA immediate -**- */
 static INLINE void ora_im( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IMMBYTE(t);
 	A |= t;
 	CLR_NZ;
@@ -1048,7 +1048,7 @@ static INLINE void ora_im( void )
 /* $ab ADDA immediate **** */
 static INLINE void adda_im( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	IMMBYTE(t);
 	r = A + t;
 	CLR_HNZC;
@@ -1062,7 +1062,7 @@ static INLINE void adda_im( void )
 /* $ad BSR ---- */
 static INLINE void bsr( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IMMBYTE(t);
 	PUSHWORD(m6805.pc);
 	PC += SIGNED(t);
@@ -1086,7 +1086,7 @@ static INLINE void ldx_im( void )
 /* $b0 SUBA direct ?*** */
 static INLINE void suba_di( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	DIRBYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -1097,7 +1097,7 @@ static INLINE void suba_di( void )
 /* $b1 CMPA direct ?*** */
 static INLINE void cmpa_di( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	DIRBYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -1107,7 +1107,7 @@ static INLINE void cmpa_di( void )
 /* $b2 SBCA direct ?*** */
 static INLINE void sbca_di( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	DIRBYTE(t);
 	r = A - t - (CC & 0x01);
 	CLR_NZC;
@@ -1118,7 +1118,7 @@ static INLINE void sbca_di( void )
 /* $b3 CPX direct -*** */
 static INLINE void cpx_di( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	DIRBYTE(t);
 	r = X - t;
 	CLR_NZC;
@@ -1128,7 +1128,7 @@ static INLINE void cpx_di( void )
 /* $b4 ANDA direct -**- */
 static INLINE void anda_di( void )
 {
-	UINT8 t;
+	uint8_t t;
 	DIRBYTE(t);
 	A &= t;
 	CLR_NZ;
@@ -1138,7 +1138,7 @@ static INLINE void anda_di( void )
 /* $b5 BITA direct -**- */
 static INLINE void bita_di( void )
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	DIRBYTE(t);
 	r = A & t;
 	CLR_NZ;
@@ -1165,7 +1165,7 @@ static INLINE void sta_di( void )
 /* $b8 EORA direct -**- */
 static INLINE void eora_di( void )
 {
-	UINT8 t;
+	uint8_t t;
 	DIRBYTE(t);
 	A ^= t;
 	CLR_NZ;
@@ -1175,7 +1175,7 @@ static INLINE void eora_di( void )
 /* $b9 ADCA direct **** */
 static INLINE void adca_di( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	DIRBYTE(t);
 	r = A + t + (CC & 0x01);
 	CLR_HNZC;
@@ -1187,7 +1187,7 @@ static INLINE void adca_di( void )
 /* $ba ORA direct -**- */
 static INLINE void ora_di( void )
 {
-	UINT8 t;
+	uint8_t t;
 	DIRBYTE(t);
 	A |= t;
 	CLR_NZ;
@@ -1197,7 +1197,7 @@ static INLINE void ora_di( void )
 /* $bb ADDA direct **** */
 static INLINE void adda_di( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	DIRBYTE(t);
 	r = A + t;
 	CLR_HNZC;
@@ -1246,7 +1246,7 @@ static INLINE void stx_di( void )
 /* $c0 SUBA extended ?*** */
 static INLINE void suba_ex( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	EXTBYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -1257,7 +1257,7 @@ static INLINE void suba_ex( void )
 /* $c1 CMPA extended ?*** */
 static INLINE void cmpa_ex( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	EXTBYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -1267,7 +1267,7 @@ static INLINE void cmpa_ex( void )
 /* $c2 SBCA extended ?*** */
 static INLINE void sbca_ex( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	EXTBYTE(t);
 	r = A - t - (CC & 0x01);
 	CLR_NZC;
@@ -1278,7 +1278,7 @@ static INLINE void sbca_ex( void )
 /* $c3 CPX extended -*** */
 static INLINE void cpx_ex( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	EXTBYTE(t);
 	r = X - t;
 	CLR_NZC;
@@ -1288,7 +1288,7 @@ static INLINE void cpx_ex( void )
 /* $c4 ANDA extended -**- */
 static INLINE void anda_ex( void )
 {
-	UINT8 t;
+	uint8_t t;
 	EXTBYTE(t);
 	A &= t;
 	CLR_NZ;
@@ -1298,7 +1298,7 @@ static INLINE void anda_ex( void )
 /* $c5 BITA extended -**- */
 static INLINE void bita_ex( void )
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	EXTBYTE(t);
 	r = A & t;
 	CLR_NZ;
@@ -1325,7 +1325,7 @@ static INLINE void sta_ex( void )
 /* $c8 EORA extended -**- */
 static INLINE void eora_ex( void )
 {
-	UINT8 t;
+	uint8_t t;
 	EXTBYTE(t);
 	A ^= t;
 	CLR_NZ;
@@ -1335,7 +1335,7 @@ static INLINE void eora_ex( void )
 /* $c9 ADCA extended **** */
 static INLINE void adca_ex( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	EXTBYTE(t);
 	r = A + t + (CC & 0x01);
 	CLR_HNZC;
@@ -1347,7 +1347,7 @@ static INLINE void adca_ex( void )
 /* $ca ORA extended -**- */
 static INLINE void ora_ex( void )
 {
-	UINT8 t;
+	uint8_t t;
 	EXTBYTE(t);
 	A |= t;
 	CLR_NZ;
@@ -1357,7 +1357,7 @@ static INLINE void ora_ex( void )
 /* $cb ADDA extended **** */
 static INLINE void adda_ex( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	EXTBYTE(t);
 	r = A + t;
 	CLR_HNZC;
@@ -1406,7 +1406,7 @@ static INLINE void stx_ex( void )
 /* $d0 SUBA indexed, 2 byte offset ?*** */
 static INLINE void suba_ix2( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDX2BYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -1417,7 +1417,7 @@ static INLINE void suba_ix2( void )
 /* $d1 CMPA indexed, 2 byte offset ?*** */
 static INLINE void cmpa_ix2( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDX2BYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -1427,7 +1427,7 @@ static INLINE void cmpa_ix2( void )
 /* $d2 SBCA indexed, 2 byte offset ?*** */
 static INLINE void sbca_ix2( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDX2BYTE(t);
 	r = A - t - (CC & 0x01);
 	CLR_NZC;
@@ -1438,7 +1438,7 @@ static INLINE void sbca_ix2( void )
 /* $d3 CPX indexed, 2 byte offset -*** */
 static INLINE void cpx_ix2( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDX2BYTE(t);
 	r = X - t;
 	CLR_NZC;
@@ -1448,7 +1448,7 @@ static INLINE void cpx_ix2( void )
 /* $d4 ANDA indexed, 2 byte offset -**- */
 static INLINE void anda_ix2( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX2BYTE(t);
 	A &= t;
 	CLR_NZ;
@@ -1458,7 +1458,7 @@ static INLINE void anda_ix2( void )
 /* $d5 BITA indexed, 2 byte offset -**- */
 static INLINE void bita_ix2( void )
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	IDX2BYTE(t);
 	r = A & t;
 	CLR_NZ;
@@ -1485,7 +1485,7 @@ static INLINE void sta_ix2( void )
 /* $d8 EORA indexed, 2 byte offset -**- */
 static INLINE void eora_ix2( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX2BYTE(t);
 	A ^= t;
 	CLR_NZ;
@@ -1495,7 +1495,7 @@ static INLINE void eora_ix2( void )
 /* $d9 ADCA indexed, 2 byte offset **** */
 static INLINE void adca_ix2( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	IDX2BYTE(t);
 	r = A + t + (CC & 0x01);
 	CLR_HNZC;
@@ -1507,7 +1507,7 @@ static INLINE void adca_ix2( void )
 /* $da ORA indexed, 2 byte offset -**- */
 static INLINE void ora_ix2( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX2BYTE(t);
 	A |= t;
 	CLR_NZ;
@@ -1517,7 +1517,7 @@ static INLINE void ora_ix2( void )
 /* $db ADDA indexed, 2 byte offset **** */
 static INLINE void adda_ix2( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	IDX2BYTE(t);
 	r = A + t;
 	CLR_HNZC;
@@ -1566,7 +1566,7 @@ static INLINE void stx_ix2( void )
 /* $e0 SUBA indexed, 1 byte offset ?*** */
 static INLINE void suba_ix1( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDX1BYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -1577,7 +1577,7 @@ static INLINE void suba_ix1( void )
 /* $e1 CMPA indexed, 1 byte offset ?*** */
 static INLINE void cmpa_ix1( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDX1BYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -1587,7 +1587,7 @@ static INLINE void cmpa_ix1( void )
 /* $e2 SBCA indexed, 1 byte offset ?*** */
 static INLINE void sbca_ix1( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDX1BYTE(t);
 	r = A - t - (CC & 0x01);
 	CLR_NZC;
@@ -1598,7 +1598,7 @@ static INLINE void sbca_ix1( void )
 /* $e3 CPX indexed, 1 byte offset -*** */
 static INLINE void cpx_ix1( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDX1BYTE(t);
 	r = X - t;
 	CLR_NZC;
@@ -1608,7 +1608,7 @@ static INLINE void cpx_ix1( void )
 /* $e4 ANDA indexed, 1 byte offset -**- */
 static INLINE void anda_ix1( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX1BYTE(t);
 	A &= t;
 	CLR_NZ;
@@ -1618,7 +1618,7 @@ static INLINE void anda_ix1( void )
 /* $e5 BITA indexed, 1 byte offset -**- */
 static INLINE void bita_ix1( void )
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	IDX1BYTE(t);
 	r = A & t;
 	CLR_NZ;
@@ -1645,7 +1645,7 @@ static INLINE void sta_ix1( void )
 /* $e8 EORA indexed, 1 byte offset -**- */
 static INLINE void eora_ix1( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX1BYTE(t);
 	A ^= t;
 	CLR_NZ;
@@ -1655,7 +1655,7 @@ static INLINE void eora_ix1( void )
 /* $e9 ADCA indexed, 1 byte offset **** */
 static INLINE void adca_ix1( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	IDX1BYTE(t);
 	r = A + t + (CC & 0x01);
 	CLR_HNZC;
@@ -1667,7 +1667,7 @@ static INLINE void adca_ix1( void )
 /* $ea ORA indexed, 1 byte offset -**- */
 static INLINE void ora_ix1( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDX1BYTE(t);
 	A |= t;
 	CLR_NZ;
@@ -1677,7 +1677,7 @@ static INLINE void ora_ix1( void )
 /* $eb ADDA indexed, 1 byte offset **** */
 static INLINE void adda_ix1( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	IDX1BYTE(t);
 	r = A + t;
 	CLR_HNZC;
@@ -1726,7 +1726,7 @@ static INLINE void stx_ix1( void )
 /* $f0 SUBA indexed ?*** */
 static INLINE void suba_ix( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDXBYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -1737,7 +1737,7 @@ static INLINE void suba_ix( void )
 /* $f1 CMPA indexed ?*** */
 static INLINE void cmpa_ix( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDXBYTE(t);
 	r = A - t;
 	CLR_NZC;
@@ -1747,7 +1747,7 @@ static INLINE void cmpa_ix( void )
 /* $f2 SBCA indexed ?*** */
 static INLINE void sbca_ix( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDXBYTE(t);
 	r = A - t - (CC & 0x01);
 	CLR_NZC;
@@ -1758,7 +1758,7 @@ static INLINE void sbca_ix( void )
 /* $f3 CPX indexed -*** */
 static INLINE void cpx_ix( void )
 {
-	UINT16	  t,r;
+	uint16_t	  t,r;
 	IDXBYTE(t);
 	r = X - t;
 	CLR_NZC;
@@ -1768,7 +1768,7 @@ static INLINE void cpx_ix( void )
 /* $f4 ANDA indexed -**- */
 static INLINE void anda_ix( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDXBYTE(t);
 	A &= t;
 	CLR_NZ;
@@ -1778,7 +1778,7 @@ static INLINE void anda_ix( void )
 /* $f5 BITA indexed -**- */
 static INLINE void bita_ix( void )
 {
-	UINT8 t,r;
+	uint8_t t,r;
 	IDXBYTE(t);
 	r = A & t;
 	CLR_NZ;
@@ -1805,7 +1805,7 @@ static INLINE void sta_ix( void )
 /* $f8 EORA indexed -**- */
 static INLINE void eora_ix( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDXBYTE(t);
 	A ^= t;
 	CLR_NZ;
@@ -1815,7 +1815,7 @@ static INLINE void eora_ix( void )
 /* $f9 ADCA indexed **** */
 static INLINE void adca_ix( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	IDXBYTE(t);
 	r = A + t + (CC & 0x01);
 	CLR_HNZC;
@@ -1827,7 +1827,7 @@ static INLINE void adca_ix( void )
 /* $fa ORA indexed -**- */
 static INLINE void ora_ix( void )
 {
-	UINT8 t;
+	uint8_t t;
 	IDXBYTE(t);
 	A |= t;
 	CLR_NZ;
@@ -1837,7 +1837,7 @@ static INLINE void ora_ix( void )
 /* $fb ADDA indexed **** */
 static INLINE void adda_ix( void )
 {
-	UINT16 t,r;
+	uint16_t t,r;
 	IDXBYTE(t);
 	r = A + t;
 	CLR_HNZC;

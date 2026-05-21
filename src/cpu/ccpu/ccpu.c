@@ -11,17 +11,17 @@ architecture.  Really, it's not so bad!
 /* the MAME version of the CCPU registers */
 typedef struct ccpuRegs
 {
-    UINT16  accVal;
-    UINT16  cmpVal;
-    UINT8   pa0;
-    UINT8   cFlag;
-    UINT16  eRegPC;
-    UINT16  eRegA;
-    UINT16  eRegB;
-    UINT16  eRegI;
-    UINT16  eRegJ;
-    UINT8   eRegP;
-    UINT8   eCState;
+    uint16_t  accVal;
+    uint16_t  cmpVal;
+    uint8_t   pa0;
+    uint8_t   cFlag;
+    uint16_t  eRegPC;
+    uint16_t  eRegA;
+    uint16_t  eRegB;
+    uint16_t  eRegI;
+    uint16_t  eRegJ;
+    uint8_t   eRegP;
+    uint8_t   eCState;
 } ccpuRegs;
 
 #define CCPU_FETCH(a) ((unsigned)cpu_readop(a))
@@ -40,8 +40,8 @@ extern void CinemaVectorData (int fromx, int fromy, int tox, int toy, int color)
 int ccpu_ICount = 1000;
 
 
-extern UINT16 ioSwitches;
-extern UINT16 ioInputs;
+extern uint16_t ioSwitches;
+extern uint16_t ioInputs;
 
 
 void ccpu_reset(void *param)

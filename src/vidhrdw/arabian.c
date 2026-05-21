@@ -180,11 +180,11 @@ void arabian_vh_stop(void)
 	bitmap_free(tmpbitmap);
 }
 
-static INLINE void blit_byte(UINT8 x, UINT8 y, int val, int val2, UINT8 plane)
+static INLINE void blit_byte(uint8_t x, uint8_t y, int val, int val2, uint8_t plane)
 {
 	int p1,p2,p3,p4;
 
-	INT8 dx=1,dy=0;
+	int8_t dx=1,dy=0;
 
 
 	p4 =  val        & 0x0f;
@@ -239,7 +239,7 @@ static INLINE void blit_byte(UINT8 x, UINT8 y, int val, int val2, UINT8 plane)
 }
 
 
-void arabian_blit_area(UINT8 plane, UINT16 src, UINT8 x, UINT8 y, UINT8 sx, UINT8 sy)
+void arabian_blit_area(uint8_t plane, uint16_t src, uint8_t x, uint8_t y, uint8_t sx, uint8_t sy)
 {
 	int i,j;
 
@@ -260,8 +260,8 @@ WRITE_HANDLER( arabian_blitter_w )
 
 	if ((offset & 0x07) == 6)
 	{
-		UINT8 plane,x,y,sx,sy;
-		UINT16 src;
+		uint8_t plane,x,y,sx,sy;
+		uint16_t src;
 
 		plane = spriteram[offset-6];
 		src   = spriteram[offset-5] | (spriteram[offset-4] << 8);
@@ -281,8 +281,8 @@ WRITE_HANDLER( arabian_videoram_w )
 	int plane1,plane2,plane3,plane4;
 	unsigned char *bm;
 
-	UINT8 x,y;
-	INT8 dx=1, dy=0;
+	uint8_t x,y;
+	int8_t dx=1, dy=0;
 
 
 	plane1 = spriteram[0] & 0x01;

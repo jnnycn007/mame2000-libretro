@@ -15,7 +15,7 @@ WRITE_HANDLER( K007121_ctrl_0_w );
 WRITE_HANDLER( K007121_ctrl_1_w );
 void K007121_sprites_draw(int chip,struct osd_bitmap *bitmap,
 		const unsigned char *source,int base_color,int global_x_offset,int bank_base,
-		UINT32 pri_mask);
+		uint32_t pri_mask);
 void K007121_mark_sprites_colors(int chip,
 		const unsigned char *source,int base_color,int bank_base);
 
@@ -179,9 +179,9 @@ WRITE_HANDLER( K051316_ctrl_2_w );
 void K051316_tilemap_update_0(void);
 void K051316_tilemap_update_1(void);
 void K051316_tilemap_update_2(void);
-void K051316_zoom_draw_0(struct osd_bitmap *bitmap,UINT32 priority);
-void K051316_zoom_draw_1(struct osd_bitmap *bitmap,UINT32 priority);
-void K051316_zoom_draw_2(struct osd_bitmap *bitmap,UINT32 priority);
+void K051316_zoom_draw_0(struct osd_bitmap *bitmap,uint32_t priority);
+void K051316_zoom_draw_1(struct osd_bitmap *bitmap,uint32_t priority);
+void K051316_zoom_draw_2(struct osd_bitmap *bitmap,uint32_t priority);
 void K051316_wraparound_enable(int chip, int status);
 void K051316_set_offset(int chip, int xoffs, int yoffs);
 

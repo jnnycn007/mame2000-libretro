@@ -84,8 +84,8 @@ struct pf_overrender_data
  *
  *************************************/
 
-UINT8 *atarisys1_bankselect;
-UINT8 *atarisys1_prioritycolor;
+uint8_t *atarisys1_bankselect;
+uint8_t *atarisys1_prioritycolor;
 
 
 
@@ -97,18 +97,18 @@ UINT8 *atarisys1_prioritycolor;
 
 /* playfield parameters */
 static struct atarigen_pf_state pf_state;
-static UINT16 priority_pens;
+static uint16_t priority_pens;
 
 /* indirection tables */
-static UINT32 pf_lookup[256];
-static UINT32 mo_lookup[256];
+static uint32_t pf_lookup[256];
+static uint32_t mo_lookup[256];
 
 /* INT3 tracking */
 static void *int3_timer[YDIM];
 static void *int3off_timer;
 
 /* graphics bank tracking */
-static UINT8 bank_gfx[3][8];
+static uint8_t bank_gfx[3][8];
 static unsigned int *pen_usage[MAX_GFX_ELEMENTS];
 
 /* basic form of a graphics bank */
@@ -131,17 +131,17 @@ static struct GfxLayout objlayout =
  *
  *************************************/
 
-static const UINT8 *update_palette(void);
+static const uint8_t *update_palette(void);
 
 static void pf_color_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 static void pf_render_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 static void pf_overrender_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *data);
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param);
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param);
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param);
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param);
 
 static int decode_gfx(void);
-static int get_bank(UINT8 prom1, UINT8 prom2, int bpp);
+static int get_bank(uint8_t prom1, uint8_t prom2, int bpp);
 
 void atarisys1_scanline_update(int scanline);
 
@@ -203,7 +203,7 @@ int atarisys1_vh_start(void)
 					memset(pen_usage[e], 0, gfx->total_elements * 2 * sizeof(int));
 					for (i = 0, entry = pen_usage[e]; i < gfx->total_elements; i++, entry += 2)
 					{
-						UINT8 *dp = gfx->gfxdata + i * gfx->char_modulo;
+						uint8_t *dp = gfx->gfxdata + i * gfx->char_modulo;
 						for (y = 0; y < gfx->height; y++)
 						{
 							for (x = 0; x < gfx->width; x++)
@@ -441,9 +441,9 @@ READ_HANDLER( atarisys1_int3state_r )
 void atarisys1_scanline_update(int scanline)
 {
 	int bank = ((READ_WORD(&atarisys1_bankselect[0]) >> 3) & 7) * 0x200;
-	UINT8 *base = &atarigen_spriteram[bank];
-	UINT8 spritevisit[64];
-	UINT8 timer[YDIM];
+	uint8_t *base = &atarigen_spriteram[bank];
+	uint8_t spritevisit[64];
+	uint8_t timer[YDIM];
 	int link = 0;
 	int i;
 
@@ -555,9 +555,9 @@ void atarisys1_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
  *
  *************************************/
 
-static const UINT8 *update_palette(void)
+static const uint8_t *update_palette(void)
 {
-	UINT16 al_map[8], pfmo_map[32];
+	uint16_t al_map[8], pfmo_map[32];
 	int i, j;
 
 	/* reset color tracking */
@@ -592,7 +592,7 @@ static const UINT8 *update_palette(void)
 	/* determine the final playfield palette */
 	for (i = 16; i < 32; i++)
 	{
-		UINT16 used = pfmo_map[i];
+		uint16_t used = pfmo_map[i];
 		if (used)
 			for (j = 0; j < 16; j++)
 				if (used & (1 << j))
@@ -602,7 +602,7 @@ static const UINT8 *update_palette(void)
 	/* determine the final motion object palette */
 	for (i = 0; i < 16; i++)
 	{
-		UINT16 used = pfmo_map[i];
+		uint16_t used = pfmo_map[i];
 		if (used)
 		{
 			palette_used_colors[0x100 + i * 16] = PALETTE_COLOR_TRANSPARENT;
@@ -615,7 +615,7 @@ static const UINT8 *update_palette(void)
 	/* determine the final alpha palette */
 	for (i = 0; i < 8; i++)
 	{
-		UINT16 used = al_map[i];
+		uint16_t used = al_map[i];
 		if (used)
 			for (j = 0; j < 4; j++)
 				if (used & (1 << j))
@@ -636,8 +636,8 @@ static const UINT8 *update_palette(void)
 
 static void pf_color_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *param)
 {
-	const UINT32 *lookup_table = &pf_lookup[state->param[0]];
-	UINT16 *colormap = (UINT16*)param;
+	const uint32_t *lookup_table = &pf_lookup[state->param[0]];
+	uint16_t *colormap = (uint16_t*)param;
 	int x, y;
 
 	/* standard loop over tiles */
@@ -688,7 +688,7 @@ static void pf_color_callback(const struct rectangle *clip, const struct rectang
 static void pf_render_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *param)
 {
 	int bank = state->param[0];
-	const UINT32 *lookup_table = &pf_lookup[bank];
+	const uint32_t *lookup_table = &pf_lookup[bank];
 	struct osd_bitmap *bitmap = (struct osd_bitmap*)param;
 	int x, y;
 
@@ -732,7 +732,7 @@ static void pf_render_callback(const struct rectangle *clip, const struct rectan
 
 static void pf_overrender_callback(const struct rectangle *clip, const struct rectangle *tiles, const struct atarigen_pf_state *state, void *param)
 {
-	const UINT32 *lookup_table = &pf_lookup[state->param[0]];
+	const uint32_t *lookup_table = &pf_lookup[state->param[0]];
 	const struct pf_overrender_data *overrender_data = (const struct pf_overrender_data *)param;
 	struct osd_bitmap *bitmap = overrender_data->bitmap;
 	int type = overrender_data->type;
@@ -778,13 +778,13 @@ static void pf_overrender_callback(const struct rectangle *clip, const struct re
  *
  *************************************/
 
-static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_color_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
-	UINT16 *colormap = (UINT16*)param;
-	UINT16 temp = 0;
+	uint16_t *colormap = (uint16_t*)param;
+	uint16_t temp = 0;
 	int i;
 
-	UINT32 lookup = mo_lookup[data[1] >> 8];
+	uint32_t lookup = mo_lookup[data[1] >> 8];
 	const unsigned int *usage = pen_usage[LOOKUP_GFX(lookup)];
 	int code = LOOKUP_CODE(lookup) | (data[1] & 0xff);
 	int color = LOOKUP_COLOR(lookup);
@@ -809,14 +809,14 @@ static void mo_color_callback(const UINT16 *data, const struct rectangle *clip, 
  *
  *************************************/
 
-static void mo_render_callback(const UINT16 *data, const struct rectangle *clip, void *param)
+static void mo_render_callback(const uint16_t *data, const struct rectangle *clip, void *param)
 {
 	struct osd_bitmap *bitmap = (struct osd_bitmap *)param;
 	struct pf_overrender_data overrender_data;
 	struct rectangle pf_clip;
 
 	/* extract data from the various words */
-	UINT32 lookup = mo_lookup[data[1] >> 8];
+	uint32_t lookup = mo_lookup[data[1] >> 8];
 	struct GfxElement *gfx = Machine->gfx[LOOKUP_GFX(lookup)];
 	int code = LOOKUP_CODE(lookup) | (data[1] & 0xff);
 	int color = LOOKUP_COLOR(lookup);
@@ -888,8 +888,8 @@ static void mo_render_callback(const UINT16 *data, const struct rectangle *clip,
 
 static int decode_gfx(void)
 {
-	UINT8 *prom1 = &memory_region(REGION_PROMS)[0x000];
-	UINT8 *prom2 = &memory_region(REGION_PROMS)[0x200];
+	uint8_t *prom1 = &memory_region(REGION_PROMS)[0x000];
+	uint8_t *prom2 = &memory_region(REGION_PROMS)[0x200];
 	int obj, i;
 
 	/* reset the globals */
@@ -898,7 +898,7 @@ static int decode_gfx(void)
 	/* loop for two sets of objects */
 	for (obj = 0; obj < 2; obj++)
 	{
-		UINT32 *table = (obj == 0) ? pf_lookup : mo_lookup;
+		uint32_t *table = (obj == 0) ? pf_lookup : mo_lookup;
 
 		/* loop for 256 objects in the set */
 		for (i = 0; i < 256; i++, prom1++, prom2++)
@@ -946,7 +946,7 @@ static int decode_gfx(void)
  *
  *************************************/
 
-static int get_bank(UINT8 prom1, UINT8 prom2, int bpp)
+static int get_bank(uint8_t prom1, uint8_t prom2, int bpp)
 {
 	int bank_offset[8] = { 0, 0x00000, 0x30000, 0x60000, 0x90000, 0xc0000, 0xe0000, 0x100000 };
 	int bank_index, i, gfx_index;

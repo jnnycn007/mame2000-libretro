@@ -182,7 +182,7 @@ WRITE_HANDLER( gottlieb_cause_dac_nmi_w );
 
 static void init_machine(void)
 {
-	UINT8 *ram = memory_region(REGION_CPU1);
+	uint8_t *ram = memory_region(REGION_CPU1);
 	cpu_setbank(1, &ram[0x8000]);
 	cpu_setbank(2, &ram[0x0000]);
 }

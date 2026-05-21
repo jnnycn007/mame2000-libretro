@@ -1,26 +1,26 @@
-static INLINE UINT8 READ_OP(void) 
+static INLINE uint8_t READ_OP(void) 
 {
 	return cpu_readop(sc61860.pc++);
 }
 
-static INLINE UINT8 READ_OP_ARG(void) 
+static INLINE uint8_t READ_OP_ARG(void) 
 {
 	return cpu_readop_arg(sc61860.pc++);
 }
 
-static INLINE UINT16 READ_OP_ARG_WORD(void)
+static INLINE uint16_t READ_OP_ARG_WORD(void)
 {
-	UINT16 t=cpu_readop(sc61860.pc++)<<8;
+	uint16_t t=cpu_readop(sc61860.pc++)<<8;
 	t|=cpu_readop(sc61860.pc++);
 	return t;
 }
 
-static INLINE UINT8 READ_BYTE(UINT16 adr) 
+static INLINE uint8_t READ_BYTE(uint16_t adr) 
 {
 	return cpu_readmem16(adr);
 }
 
-static INLINE void WRITE_BYTE(UINT16 a,UINT8 v) 
+static INLINE void WRITE_BYTE(uint16_t a,uint8_t v) 
 {
 	cpu_writemem16(a,v);
 }
@@ -28,7 +28,7 @@ static INLINE void WRITE_BYTE(UINT16 a,UINT8 v)
 #define PUSH(v) sc61860.ram[--sc61860.r]=v
 #define POP() sc61860.ram[sc61860.r++]
 
-static INLINE void sc61860_load_imm(int r, UINT8 v)
+static INLINE void sc61860_load_imm(int r, uint8_t v)
 {
 	sc61860.ram[r]=v;
 }
@@ -38,12 +38,12 @@ static INLINE void sc61860_load(void)
 	sc61860.ram[A]=sc61860.ram[sc61860.p];
 }
 
-static INLINE void sc61860_load_imm_p(UINT8 v)
+static INLINE void sc61860_load_imm_p(uint8_t v)
 {
 	sc61860.p=v;
 }
 
-static INLINE void sc61860_load_imm_q(UINT8 v)
+static INLINE void sc61860_load_imm_q(uint8_t v)
 {
 	sc61860.q=v;
 }
@@ -90,12 +90,12 @@ static INLINE void sc61860_store_ext(int r)
 
 static INLINE void sc61860_exam(int a, int b)
 {
-	UINT8 t=sc61860.ram[a];
+	uint8_t t=sc61860.ram[a];
 	sc61860.ram[a]=sc61860.ram[b];
 	sc61860.ram[b]=t;
 }
 
-static INLINE void sc61860_test(int reg, UINT8 value)
+static INLINE void sc61860_test(int reg, uint8_t value)
 {
 	sc61860.zero=(sc61860.ram[reg]&value)==0;
 }
@@ -105,26 +105,26 @@ static INLINE void sc61860_test_ext(void)
 	sc61860.zero=(READ_BYTE(sc61860.dp)&READ_OP_ARG())==0;
 }
 
-static INLINE void sc61860_and(int reg, UINT8 value)
+static INLINE void sc61860_and(int reg, uint8_t value)
 {
 	sc61860.zero=(sc61860.ram[reg]&=value)==0;
 }
 
 static INLINE void sc61860_and_ext(void)
 {
-	UINT8 t=READ_BYTE(sc61860.dp)&READ_OP_ARG();
+	uint8_t t=READ_BYTE(sc61860.dp)&READ_OP_ARG();
 	sc61860.zero=t==0;
     WRITE_BYTE(sc61860.dp,t);
 }
 
-static INLINE void sc61860_or(int reg, UINT8 value)
+static INLINE void sc61860_or(int reg, uint8_t value)
 {
 	sc61860.zero=(sc61860.ram[reg]|=value)==0;
 }
 
 static INLINE void sc61860_or_ext(void)
 {
-	UINT8 t=READ_BYTE(sc61860.dp)|READ_OP_ARG();
+	uint8_t t=READ_BYTE(sc61860.dp)|READ_OP_ARG();
 	sc61860.zero=t==0;
     WRITE_BYTE(sc61860.dp,t);
 }
@@ -176,7 +176,7 @@ static INLINE void sc61860_dec_p(void)
 	sc61860.p--;
 }
 
-static INLINE void sc61860_add(int reg, UINT8 value)
+static INLINE void sc61860_add(int reg, uint8_t value)
 {
 	int t=sc61860.ram[reg]+value;
 	sc61860.zero=(sc61860.ram[reg]=t)==0;
@@ -203,7 +203,7 @@ static INLINE void sc61860_add_word(void)
 }
 
 
-static INLINE void sc61860_sub(int reg, UINT8 value)
+static INLINE void sc61860_sub(int reg, uint8_t value)
 {
 	int t=sc61860.ram[reg]-value;
 	sc61860.zero=(sc61860.ram[reg]=t)==0;
@@ -230,7 +230,7 @@ static INLINE void sc61860_sub_word(void)
 	sc61860.carry=t2<0;
 }
 
-static INLINE void sc61860_cmp(int reg, UINT8 value)
+static INLINE void sc61860_cmp(int reg, uint8_t value)
 {
 	int t=sc61860.ram[reg]-value;
 	sc61860.zero=t==0;
@@ -274,7 +274,7 @@ static INLINE void sc61860_execute_table_call(void)
 }
 
 
-static INLINE void sc61860_call(UINT16 adr)
+static INLINE void sc61860_call(uint16_t adr)
 {
 	PUSH(sc61860.pc>>8);
 	PUSH(sc61860.pc&0xff);
@@ -284,7 +284,7 @@ static INLINE void sc61860_call(UINT16 adr)
 
 static INLINE void sc61860_return(void)
 {
-	UINT16 t=POP();
+	uint16_t t=POP();
 	t|=POP()<<8;
 	sc61860.pc=t;
 	change_pc(sc61860.pc);
@@ -292,7 +292,7 @@ static INLINE void sc61860_return(void)
 
 static INLINE void sc61860_jump(bool yes)
 {
-	UINT16 adr=READ_OP_ARG_WORD();
+	uint16_t adr=READ_OP_ARG_WORD();
 	if (yes) {
 		sc61860.pc=adr;
 		change_pc(sc61860.pc);
@@ -301,7 +301,7 @@ static INLINE void sc61860_jump(bool yes)
 
 static INLINE void sc61860_jump_rel_plus(bool yes)
 {
-	UINT16 adr=sc61860.pc;
+	uint16_t adr=sc61860.pc;
 	adr+=READ_OP_ARG();
 	if (yes) {
 		sc61860.pc=adr;
@@ -312,7 +312,7 @@ static INLINE void sc61860_jump_rel_plus(bool yes)
 
 static INLINE void sc61860_jump_rel_minus(bool yes)
 {
-	UINT16 adr=sc61860.pc;
+	uint16_t adr=sc61860.pc;
 	adr-=READ_OP_ARG();
 	if (yes) {
 		sc61860.pc=adr;
@@ -323,7 +323,7 @@ static INLINE void sc61860_jump_rel_minus(bool yes)
 
 static INLINE void sc61860_loop(void)
 {
-	UINT16 adr=sc61860.pc;
+	uint16_t adr=sc61860.pc;
 	adr-=READ_OP_ARG();
 	sc61860.ram[sc61860.r]--;
 	sc61860.zero=sc61860.ram[sc61860.r]==0;
@@ -614,7 +614,7 @@ static INLINE void sc61860_copy_int(int count)
 static INLINE void sc61860_exchange(int count)
 {
 	int i;
-	UINT8 t;
+	uint8_t t;
 	for (i=0; i<=count; i++) {
 		t=sc61860.ram[sc61860.p];
 		sc61860.ram[sc61860.p++]=sc61860.ram[sc61860.q];
@@ -626,7 +626,7 @@ static INLINE void sc61860_exchange(int count)
 static INLINE void sc61860_exchange_ext(int count)
 {
 	int i;
-	UINT8 t;
+	uint8_t t;
 	for (i=0; i<=count; i++) {
 		t=sc61860.ram[sc61860.p];
 		sc61860.ram[sc61860.p++]=READ_BYTE(sc61860.dp);

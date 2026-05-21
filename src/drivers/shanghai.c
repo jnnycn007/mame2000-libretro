@@ -18,12 +18,12 @@ Also, the game locks up after you win a round.
 /* doesn't reach that length. */
 #define FIFO_LENGTH 50
 static int fifo_counter;
-static UINT16 fifo[FIFO_LENGTH];
-static UINT8 *HD63484_ram;
-static UINT16 HD63484_reg[256/2];
+static uint16_t fifo[FIFO_LENGTH];
+static uint8_t *HD63484_ram;
+static uint16_t HD63484_reg[256/2];
 static int org,rwp;
-static UINT16 cl0,cl1,ccmp;
-static INT16 cpx,cpy;
+static uint16_t cl0,cl1,ccmp;
+static int16_t cpx,cpy;
 
 
 static int instruction_length[64] =
@@ -49,7 +49,7 @@ static int instruction_length[64] =
 int HD63484_start(void)
 {
 	fifo_counter = 0;
-	HD63484_ram = (UINT8*)malloc(0x200000);
+	HD63484_ram = (uint8_t*)malloc(0x200000);
 	if (!HD63484_ram) return 1;
 	memset(HD63484_ram,0,0x200000);
 	return 0;
@@ -61,9 +61,9 @@ void HD63484_stop(void)
 	HD63484_ram = 0;
 }
 
-static void doclr(int opcode,UINT16 fill,int *dst,INT16 _ax,INT16 _ay)
+static void doclr(int opcode,uint16_t fill,int *dst,int16_t _ax,int16_t _ay)
 {
-	INT16 ax,ay;
+	int16_t ax,ay;
 
 	ax = _ax;
 	ay = _ay;
@@ -112,7 +112,7 @@ static void doclr(int opcode,UINT16 fill,int *dst,INT16 _ax,INT16 _ay)
 	}
 }
 
-static void docpy(int opcode,int src,int *dst,INT16 _ax,INT16 _ay)
+static void docpy(int opcode,int src,int *dst,int16_t _ax,int16_t _ay)
 {
 	int dstep1,dstep2;
 	int ax = _ax;
@@ -238,7 +238,7 @@ static void docpy(int opcode,int src,int *dst,INT16 _ax,INT16 _ay)
 }
 
 
-void HD63484_command_w(UINT16 cmd)
+void HD63484_command_w(uint16_t cmd)
 {
 	int len;
 
@@ -321,8 +321,8 @@ rwp /= 2;
 //		else if ((fifo[0] & 0xff00) == 0xc000)	/* AFRCT */
 		else if ((fifo[0] & 0xfff8) == 0xc000)	/* AFRCT */
 		{
-			INT16 pcx,pcy;
-			INT16 ax,ay;
+			int16_t pcx,pcy;
+			int16_t ax,ay;
 			int dst;
 
 			pcx = fifo[1];
@@ -394,7 +394,7 @@ rwp /= 2;
 //		else if ((fifo[0] & 0xf000) == 0xe000)	/* AGCPY */
 		else if ((fifo[0] & 0xf0f8) == 0xe000)	/* AGCPY */
 		{
-			INT16 pcx,pcy;
+			int16_t pcx,pcy;
 			int src,dst;
 
 			pcx = fifo[1];

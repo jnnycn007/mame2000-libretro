@@ -175,7 +175,7 @@ static int index_shift[INDEX_SHIFT_MAX] = {
 /* lookup table for the precomputed difference */
 static int diff_lookup[(STEP_MAX+1)*16];
 
-static void UPD7759_update (int chip, INT16 *buffer, int left);
+static void UPD7759_update (int chip, int16_t *buffer, int left);
 
 /*
  *   Compute the difference table
@@ -355,7 +355,7 @@ void UPD7759_sh_stop (void)
 /*
  *   Update emulation of an uPD7759 output stream
  */
-static void UPD7759_update (int chip, INT16 *buffer, int left)
+static void UPD7759_update (int chip, int16_t *buffer, int left)
 {
 	struct UPD7759voice *voice = &updadpcm[chip];
 	int i;

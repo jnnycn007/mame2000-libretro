@@ -28,7 +28,7 @@ static long multiplier;
 static int sample_pos;
 static int channel;
 static int lfsr_index;
-static INT16 *sample_buffer;
+static int16_t *sample_buffer;
 static unsigned short *lfsr_buffer;
 
 static int volume;
@@ -94,8 +94,8 @@ int llander_sh_start(const struct MachineSound *msound)
 
 	channel = mixer_allocate_channel(25);
 
-	if ((sample_buffer = (INT16*)malloc(sizeof(INT16)*buffer_len)) == 0) return 1;
-	memset(sample_buffer,0,sizeof(INT16)*buffer_len);
+	if ((sample_buffer = (int16_t*)malloc(sizeof(int16_t)*buffer_len)) == 0) return 1;
+	memset(sample_buffer,0,sizeof(int16_t)*buffer_len);
 
 	return 0;
 }
@@ -175,7 +175,7 @@ void llander_sh_stop(void)
 
 ***************************************************************************/
 
-void llander_process(INT16 *buffer,int start, int n)
+void llander_process(int16_t *buffer,int start, int n)
 {
 	static int sampnum=0;
 	static long noisetarg=0,noisecurrent=0;

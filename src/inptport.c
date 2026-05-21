@@ -326,12 +326,12 @@ struct ipd inputport_defaults_backup[sizeof(inputport_defaults)/sizeof(struct ip
 /***************************************************************************/
 /* Generic IO */
 
-static int readint(void *f,UINT32 *num)
+static int readint(void *f,uint32_t *num)
 {
 	unsigned i;
 
 	*num = 0;
-	for (i = 0;i < sizeof(UINT32);i++)
+	for (i = 0;i < sizeof(uint32_t);i++)
 	{
 		unsigned char c;
 
@@ -345,28 +345,28 @@ static int readint(void *f,UINT32 *num)
 	return 0;
 }
 
-static void writeint(void *f,UINT32 num)
+static void writeint(void *f,uint32_t num)
 {
 	unsigned i;
 
-	for (i = 0;i < sizeof(UINT32);i++)
+	for (i = 0;i < sizeof(uint32_t);i++)
 	{
 		unsigned char c;
 
 
-		c = (num >> 8 * (sizeof(UINT32)-1)) & 0xff;
+		c = (num >> 8 * (sizeof(uint32_t)-1)) & 0xff;
 		osd_fwrite(f,&c,1);
 		num <<= 8;
 	}
 }
 
-static int readword(void *f,UINT16 *num)
+static int readword(void *f,uint16_t *num)
 {
 	unsigned i;
 	int res;
 
 	res = 0;
-	for (i = 0;i < sizeof(UINT16);i++)
+	for (i = 0;i < sizeof(uint16_t);i++)
 	{
 		unsigned char c;
 
@@ -381,16 +381,16 @@ static int readword(void *f,UINT16 *num)
 	return 0;
 }
 
-static void writeword(void *f,UINT16 num)
+static void writeword(void *f,uint16_t num)
 {
 	unsigned i;
 
-	for (i = 0;i < sizeof(UINT16);i++)
+	for (i = 0;i < sizeof(uint16_t);i++)
 	{
 		unsigned char c;
 
 
-		c = (num >> 8 * (sizeof(UINT16)-1)) & 0xff;
+		c = (num >> 8 * (sizeof(uint16_t)-1)) & 0xff;
 		osd_fwrite(f,&c,1);
 		num <<= 8;
 	}
@@ -403,8 +403,8 @@ static void writeword(void *f,UINT16 num)
 static int seq_read_ver_8(void* f, InputSeq* seq)
 {
 	int j,len;
-	UINT32 i;
-	UINT16 w;
+	uint32_t i;
+	uint16_t w;
 
 	if (readword(f,&w) != 0)
 		return -1;
@@ -481,7 +481,7 @@ static void load_default_keys(void)
 
 		for (;;)
 		{
-			UINT32 type;
+			uint32_t type;
 			InputSeq def_seq;
 			InputSeq seq;
 			int i;
@@ -544,8 +544,8 @@ static void save_default_keys(void)
 
 static int input_port_read_ver_8(void *f,struct InputPort *in)
 {
-	UINT32 i;
-	UINT16 w;
+	uint32_t i;
+	uint16_t w;
 	if (readint(f,&i) != 0)
 		return -1;
 	in->type = i;

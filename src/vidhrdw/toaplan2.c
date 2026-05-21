@@ -198,7 +198,7 @@ static struct tilemap *text_tilemap;	 /* Tilemap for extra-text-layer */
 static void get_top0_tile_info(int tile_index)
 {
 	int color, tile_number, attrib;
-	UINT16 *source = (UINT16 *)(topvideoram[0]);
+	uint16_t *source = (uint16_t *)(topvideoram[0]);
 
 	attrib = source[2*tile_index];
 	tile_number = source[2*tile_index+1];
@@ -210,7 +210,7 @@ static void get_top0_tile_info(int tile_index)
 static void get_fg0_tile_info(int tile_index)
 {
 	int color, tile_number, attrib;
-	UINT16 *source = (UINT16 *)(fgvideoram[0]);
+	uint16_t *source = (uint16_t *)(fgvideoram[0]);
 
 	attrib = source[2*tile_index];
 	tile_number = source[2*tile_index+1];
@@ -222,7 +222,7 @@ static void get_fg0_tile_info(int tile_index)
 static void get_bg0_tile_info(int tile_index)
 {
 	int color, tile_number, attrib;
-	UINT16 *source = (UINT16 *)(bgvideoram[0]);
+	uint16_t *source = (uint16_t *)(bgvideoram[0]);
 
 	attrib = source[2*tile_index];
 	tile_number = source[2*tile_index+1];
@@ -234,7 +234,7 @@ static void get_bg0_tile_info(int tile_index)
 static void get_top1_tile_info(int tile_index)
 {
 	int color, tile_number, attrib;
-	UINT16 *source = (UINT16 *)(topvideoram[1]);
+	uint16_t *source = (uint16_t *)(topvideoram[1]);
 
 	attrib = source[2*tile_index];
 	tile_number = source[2*tile_index+1];
@@ -246,7 +246,7 @@ static void get_top1_tile_info(int tile_index)
 static void get_fg1_tile_info(int tile_index)
 {
 	int color, tile_number, attrib;
-	UINT16 *source = (UINT16 *)(fgvideoram[1]);
+	uint16_t *source = (uint16_t *)(fgvideoram[1]);
 
 	attrib = source[2*tile_index];
 	tile_number = source[2*tile_index+1];
@@ -258,7 +258,7 @@ static void get_fg1_tile_info(int tile_index)
 static void get_bg1_tile_info(int tile_index)
 {
 	int color, tile_number, attrib;
-	UINT16 *source = (UINT16 *)(bgvideoram[1]);
+	uint16_t *source = (uint16_t *)(bgvideoram[1]);
 
 	attrib = source[2*tile_index];
 	tile_number = source[2*tile_index+1];
@@ -271,7 +271,7 @@ static void get_bg1_tile_info(int tile_index)
 static void get_text_tile_info(int tile_index)
 {
 	int color, tile_number, attrib;
-	UINT16 *source = (UINT16 *)textvideoram;
+	uint16_t *source = (uint16_t *)textvideoram;
 
 	attrib = source[tile_index];
 	tile_number = attrib & 0x3ff;
@@ -845,7 +845,7 @@ static void mark_sprite_colors(int controller)
 	int sprite_sizex, sprite_sizey, temp_x, temp_y;
 	int colmask[64];
 
-	UINT16 *source = (UINT16 *)(spriteram_now[controller]);
+	uint16_t *source = (uint16_t *)(spriteram_now[controller]);
 
 	pal_base = Machine->drv->gfxdecodeinfo[ ((controller*2)+1) ].color_codes_start;
 
@@ -895,7 +895,7 @@ static void draw_sprites( struct osd_bitmap *bitmap, int controller, int priorit
 	const struct GfxElement *gfx = Machine->gfx[ ((controller*2)+1) ];
 	const struct rectangle *clip = &Machine->visible_area;
 
-	UINT16 *source = (UINT16 *)(spriteram_now[controller]);
+	uint16_t *source = (uint16_t *)(spriteram_now[controller]);
 
 	int offs;
 	for (offs = 0; offs < (TOAPLAN2_SPRITERAM_SIZE/2); offs += 4)

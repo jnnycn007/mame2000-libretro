@@ -78,8 +78,8 @@
 
 
 /* video driver data & functions */
-extern INT8 mcr12_sprite_xoffs;
-extern INT8 mcr12_sprite_xoffs_flip;
+extern int8_t mcr12_sprite_xoffs;
+extern int8_t mcr12_sprite_xoffs_flip;
 
 int mcr12_vh_start(void);
 void mcr12_vh_stop(void);
@@ -88,7 +88,7 @@ void mcr1_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh);
 WRITE_HANDLER( mcr1_videoram_w );
 
 
-static const UINT8 *nvram_init;
+static const uint8_t *nvram_init;
 
 
 /*************************************
@@ -406,7 +406,7 @@ static struct MachineDriver machine_driver_mcr1 =
 
 static void init_solarfox(void)
 {
-	static const UINT8 hiscore_init[] = { 0,0,1,1,1,1,1,3,3,3,7 };
+	static const uint8_t hiscore_init[] = { 0,0,1,1,1,1,1,3,3,3,7 };
 	nvram_init = hiscore_init;
 
 	MCR_CONFIGURE_SOUND(MCR_SSIO);

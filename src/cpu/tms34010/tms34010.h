@@ -70,11 +70,11 @@ enum
 /* Configuration structure */
 struct tms34010_config
 {
-	UINT8	halt_on_reset;						/* /HCS pin, which determines HALT state after reset */
+	uint8_t	halt_on_reset;						/* /HCS pin, which determines HALT state after reset */
 	void	(*output_int)(int state);			/* output interrupt callback */
-	void	(*to_shiftreg)(UINT32, UINT16 *);	/* shift register write */
-	void	(*from_shiftreg)(UINT32, UINT16 *);	/* shift register read */
-	void	(*display_addr_changed)(UINT32 offs, int rowbytes, int scanline);/* display address changed */
+	void	(*to_shiftreg)(uint32_t, uint16_t *);	/* shift register write */
+	void	(*from_shiftreg)(uint32_t, uint16_t *);	/* shift register read */
+	void	(*display_addr_changed)(uint32_t offs, int rowbytes, int scanline);/* display address changed */
 	void	(*display_int_callback)(int scanline);/* display interrupt callback */
 };
 

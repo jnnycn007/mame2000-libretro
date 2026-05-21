@@ -83,9 +83,9 @@ if (offs >= mexico86_objectram_size && offs < mexico86_objectram_size+0x180) con
 if (offs >= mexico86_objectram_size+0x1c0) continue;
 
 		/* skip empty sprites */
-		/* this is dword aligned so the UINT32 * cast shouldn't give problems */
+		/* this is dword aligned so the uint32_t * cast shouldn't give problems */
 		/* on any architecture */
-		if (*(UINT32 *)(&mexico86_objectram[offs]) == 0)
+		if (*(uint32_t *)(&mexico86_objectram[offs]) == 0)
 			continue;
 
 		gfx_num = mexico86_objectram[offs + 1];
@@ -162,9 +162,9 @@ if (offs >= mexico86_objectram_size && offs < mexico86_objectram_size+0x180) con
 if (offs >= mexico86_objectram_size+0x1c0) continue;
 
 		/* skip empty sprites */
-		/* this is dword aligned so the UINT32 * cast shouldn't give problems */
+		/* this is dword aligned so the uint32_t * cast shouldn't give problems */
 		/* on any architecture */
-		if (*(UINT32 *)(&mexico86_objectram[offs]) == 0)
+		if (*(uint32_t *)(&mexico86_objectram[offs]) == 0)
 			continue;
 
 		gfx_num = mexico86_objectram[offs + 1];

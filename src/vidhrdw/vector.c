@@ -77,13 +77,13 @@ static int old_index;
 static unsigned int *pixel;
 static int p_index=0;
 
-static UINT32 *pTcosin;            /* adjust line width */
-static UINT8  *pTinten;            /* intensity         */
-static UINT16 *pTmerge;            /* mergeing pixels   */
-static UINT16 *invpens;            /* maps OS colors to pens */
+static uint32_t *pTcosin;            /* adjust line width */
+static uint8_t  *pTinten;            /* intensity         */
+static uint16_t *pTmerge;            /* mergeing pixels   */
+static uint16_t *invpens;            /* maps OS colors to pens */
 
-static UINT16 *pens;
-static UINT16 total_colors;
+static uint16_t *pens;
+static uint16_t total_colors;
 
 #define Tcosin(x)   pTcosin[(x)]          /* adjust line width */
 #define Tinten(x,y) pTinten[(x)*total_colors+(y)]  /* intensity         */
@@ -92,8 +92,8 @@ static UINT16 total_colors;
 #define ANTIALIAS_GUNBIT  6             /* 6 bits per gun in vga (1-8 valid) */
 #define ANTIALIAS_GUNNUM  (1<<ANTIALIAS_GUNBIT)
 
-static UINT8 Tgamma[256];         /* quick gamma anti-alias table  */
-static UINT8 Tgammar[256];        /* same as above, reversed order */
+static uint8_t Tgamma[256];         /* quick gamma anti-alias table  */
+static uint8_t Tgammar[256];        /* same as above, reversed order */
 
 static struct osd_bitmap *vecbitmap;
 static int vecwidth, vecheight;
@@ -155,7 +155,7 @@ static int vector_rp_16(struct osd_bitmap *b,int x,int y)  { return ((unsigned s
  * finds closest color and returns the index (for 256 color)
  */
 
-static UINT16 find_pen(unsigned char r,unsigned char g,unsigned char b)
+static uint16_t find_pen(unsigned char r,unsigned char g,unsigned char b)
 {
 	int i,bi,ii;
 	long x,y,z,bc;
@@ -256,11 +256,11 @@ int vector_vh_start (void)
 	vector_runs = 0;
 
 	/* allocate memory for tables */
-	pTcosin = (UINT32*)malloc( (2048+1) * sizeof(INT32));   /* yes! 2049 is correct */
-	pTinten = (UINT8*)malloc( total_colors * 256 * sizeof(UINT8));
-	pTmerge = (UINT16*)malloc(total_colors * total_colors * sizeof(UINT32));
-	invpens = (UINT16*)malloc(65536 * sizeof(UINT16));
-	pixel = (unsigned int*)malloc(MAX_PIXELS * sizeof (UINT32));
+	pTcosin = (uint32_t*)malloc( (2048+1) * sizeof(int32_t));   /* yes! 2049 is correct */
+	pTinten = (uint8_t*)malloc( total_colors * 256 * sizeof(uint8_t));
+	pTmerge = (uint16_t*)malloc(total_colors * total_colors * sizeof(uint32_t));
+	invpens = (uint16_t*)malloc(65536 * sizeof(uint16_t));
+	pixel = (unsigned int*)malloc(MAX_PIXELS * sizeof (uint32_t));
 	old_list = (point*)malloc(MAX_POINTS * sizeof (point));
 	new_list = (point*)malloc(MAX_POINTS * sizeof (point));
 
@@ -289,7 +289,7 @@ int vector_vh_start (void)
 	{
 		for (j = 0; j < total_colors; j++)               /* color */
 		{
-			UINT8 r1,g1,b1,pen,n;
+			uint8_t r1,g1,b1,pen,n;
 			osd_get_pen(pens[j],&r1,&g1,&b1);
 			pen = find_pen( (r1*(i+1))>>8, (g1*(i+1))>>8, (b1*(i+1))>>8 );
 			for (n = 0; n < h; n++ )
@@ -920,12 +920,12 @@ static void vector_vh_update_backdrop(struct osd_bitmap *bitmap, struct artwork 
 	int i, x, y;
 	unsigned int coords;
 	int newcol, bdcol;
-	UINT8 r, g, b, rb, gb, bb;
+	uint8_t r, g, b, rb, gb, bb;
 	struct osd_bitmap *vb = a->vector_bitmap;
 	struct osd_bitmap *ob = a->orig_artwork;
 	struct osd_bitmap *ab = a->artwork;
-	UINT8 *tab = a->pTable;
-	UINT8 *brightness = a->brightness;
+	uint8_t *tab = a->pTable;
+	uint8_t *brightness = a->brightness;
 	vector_restore_artwork(bitmap, a, full_refresh);
 	vector_vh_update(vb, full_refresh);
 

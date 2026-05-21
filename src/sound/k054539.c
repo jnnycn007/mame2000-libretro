@@ -40,10 +40,10 @@
 #define MAX_K054539 2
 
 struct K054539_channel {
-	UINT32 pos;
-	UINT32 pfrac;
-	INT32 val;
-	INT32 pval;
+	uint32_t pos;
+	uint32_t pfrac;
+	int32_t val;
+	int32_t pval;
 };
 
 struct K054539_chip {
@@ -54,8 +54,8 @@ struct K054539_chip {
         unsigned char *cur_zone;
         void *timer;
         unsigned char *rom;
-        UINT32 rom_size;
-        UINT32 rom_mask;
+        uint32_t rom_size;
+        uint32_t rom_mask;
         int stream;
 
         struct K054539_channel channels[8];
@@ -88,16 +88,16 @@ static void K054539_keyoff(int chip, int channel)
 		K054539_chips.chip[chip].regs[0x22c] &= ~(1 << channel);
 }
 
-static void K054539_update(int chip, INT16 **buffer, int length)
+static void K054539_update(int chip, int16_t **buffer, int length)
 {
-	static INT16 dpcm[16] = {
+	static int16_t dpcm[16] = {
 		0<<8, 1<<8, 4<<8, 9<<8, 16<<8, 25<<8, 36<<8, 49<<8,
 		-64<<8, -49<<8, -36<<8, -25<<8, -16<<8, -9<<8, -4<<8, -1<<8
 	};
 
 	int ch;
 	unsigned char *samples;
-	UINT32 rom_mask;
+	uint32_t rom_mask;
 
 	if(!Machine->sample_rate)
 		return;
@@ -117,15 +117,15 @@ static void K054539_update(int chip, INT16 **buffer, int length)
 			unsigned char *base2 = K054539_chips.chip[chip].regs + 0x200 + 0x2*ch;
 			struct K054539_channel *chan = (struct K054539_channel*)K054539_chips.chip[chip].channels + ch;
 
-			INT16 *bufl = buffer[0];
-			INT16 *bufr = buffer[1];
+			int16_t *bufl = buffer[0];
+			int16_t *bufr = buffer[1];
 
-			UINT32 cur_pos = (base1[0x0c] | (base1[0x0d] << 8) | (base1[0x0e] << 16)) & rom_mask;
-			INT32 cur_pfrac;
-			INT32 cur_val, cur_pval, rval;
+			uint32_t cur_pos = (base1[0x0c] | (base1[0x0d] << 8) | (base1[0x0e] << 16)) & rom_mask;
+			int32_t cur_pfrac;
+			int32_t cur_val, cur_pval, rval;
 
-			INT32 delta = (base1[0x00] | (base1[0x01] << 8) | (base1[0x02] << 16)) * K054539_chips.freq_ratio;
-			INT32 fdelta;
+			int32_t delta = (base1[0x00] | (base1[0x01] << 8) | (base1[0x02] << 16)) * K054539_chips.freq_ratio;
+			int32_t fdelta;
 			int pdelta;
 
 			int pan = base1[0x05] >= 0x11 && base1[0x05] <= 0x1f ? base1[0x05] - 0x11 : 0x18 - 0x11;
@@ -156,8 +156,8 @@ static void K054539_update(int chip, INT16 **buffer, int length)
 #define UPDATE_CHANNELS																	\
 			do {																		\
 				rval = (cur_pval*cur_pfrac + cur_val*(0x10000 - cur_pfrac)) >> 16;		\
-				*bufl++ += (INT16)(rval*lvol);											\
-				*bufr++ += (INT16)(rval*rvol);											\
+				*bufl++ += (int16_t)(rval*lvol);											\
+				*bufr++ += (int16_t)(rval*rvol);											\
 			} while(0)
 
 			switch(base2[0] & 0xc) {
@@ -170,12 +170,12 @@ static void K054539_update(int chip, INT16 **buffer, int length)
 						cur_pos += pdelta;
 
 						cur_pval = cur_val;
-						cur_val = (INT16)(samples[cur_pos] << 8);
-						if(cur_val == (INT16)0x8000) {
+						cur_val = (int16_t)(samples[cur_pos] << 8);
+						if(cur_val == (int16_t)0x8000) {
 							if(base2[1] & 1) {
 								cur_pos = (base1[0x08] | (base1[0x09] << 8) | (base1[0x0a] << 16)) & rom_mask;
-								cur_val = (INT16)(samples[cur_pos] << 8);
-								if(cur_val != (INT16)0x8000)
+								cur_val = (int16_t)(samples[cur_pos] << 8);
+								if(cur_val != (int16_t)0x8000)
 									continue;
 							}
 							K054539_keyoff(chip, ch);
@@ -199,12 +199,12 @@ static void K054539_update(int chip, INT16 **buffer, int length)
 						cur_pos += pdelta;
 
 						cur_pval = cur_val;
-						cur_val = (INT16)(samples[cur_pos<<1] | samples[(cur_pos<<1)|1]<<8);
-						if(cur_val == (INT16)0x8000) {
+						cur_val = (int16_t)(samples[cur_pos<<1] | samples[(cur_pos<<1)|1]<<8);
+						if(cur_val == (int16_t)0x8000) {
 							if(base2[1] & 1) {
 								cur_pos = ((base1[0x08] | (base1[0x09] << 8) | (base1[0x0a] << 16)) & rom_mask) >> 1;
-								cur_val = (INT16)(samples[cur_pos<<1] | samples[(cur_pos<<1)|1]<<8);
-								if(cur_val != (INT16)0x8000)
+								cur_val = (int16_t)(samples[cur_pos<<1] | samples[(cur_pos<<1)|1]<<8);
+								if(cur_val != (int16_t)0x8000)
 									continue;
 							}
 							K054539_keyoff(chip, ch);

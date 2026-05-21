@@ -63,7 +63,7 @@ void milliped_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
  * read the dipswitches.
  */
 
-static UINT8 dsw_select;
+static uint8_t dsw_select;
 
 static WRITE_HANDLER( milliped_input_select_w )
 {

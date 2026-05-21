@@ -85,8 +85,8 @@ void cyberbal_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh);
 
 void cyberbal_scanline_update(int param);
 
-extern UINT8 *cyberbal_playfieldram_1;
-extern UINT8 *cyberbal_playfieldram_2;
+extern uint8_t *cyberbal_playfieldram_1;
+extern uint8_t *cyberbal_playfieldram_2;
 
 
 
@@ -94,10 +94,10 @@ extern UINT8 *cyberbal_playfieldram_2;
 //static void update_sound_68k_interrupts(void);
 static void handle_68k_sound_command(int data);
 
-static UINT8 *bank_base;
-static UINT8 fast_68k_int, io_68k_int;
-static UINT8 sound_data_from_68k, sound_data_from_6502;
-static UINT8 sound_data_from_68k_ready, sound_data_from_6502_ready;
+static uint8_t *bank_base;
+static uint8_t fast_68k_int, io_68k_int;
+static uint8_t sound_data_from_68k, sound_data_from_6502;
+static uint8_t sound_data_from_68k_ready, sound_data_from_6502_ready;
 
 
 
@@ -369,7 +369,7 @@ static WRITE_HANDLER( sound_68k_w )
 
 /*static WRITE_HANDLER( sound_68k_dac_w )
 {
-	DAC_signed_data_w((offset >> 4) & 1, (INT16)data >> 8);
+	DAC_signed_data_w((offset >> 4) & 1, (int16_t)data >> 8);
 
 	if (fast_68k_int)
 	{
@@ -389,47 +389,47 @@ static WRITE_HANDLER( sound_68k_w )
 
 struct sound_descriptor
 {
-	/*00*/UINT16 start_address_h;
-	/*02*/UINT16 start_address_l;
-	/*04*/UINT16 end_address_h;
-	/*06*/UINT16 end_address_l;
-	/*08*/UINT16 reps;
-	/*0a*/INT16 volume;
-	/*0c*/INT16 delta_volume;
-	/*0e*/INT16 target_volume;
-	/*10*/UINT16 voice_priority;	/* voice high, priority low */
-	/*12*/UINT16 buffer_number;		/* buffer high, number low */
-	/*14*/UINT16 continue_unused;	/* continue high, unused low */
+	/*00*/uint16_t start_address_h;
+	/*02*/uint16_t start_address_l;
+	/*04*/uint16_t end_address_h;
+	/*06*/uint16_t end_address_l;
+	/*08*/uint16_t reps;
+	/*0a*/int16_t volume;
+	/*0c*/int16_t delta_volume;
+	/*0e*/int16_t target_volume;
+	/*10*/uint16_t voice_priority;	/* voice high, priority low */
+	/*12*/uint16_t buffer_number;		/* buffer high, number low */
+	/*14*/uint16_t continue_unused;	/* continue high, unused low */
 };
 
 struct voice_descriptor
 {
-	UINT8 playing;
-	UINT8 *start;
-	UINT8 *current;
-	UINT8 *end;
-	UINT16 reps;
-	INT16 volume;
-	INT16 delta_volume;
-	INT16 target_volume;
-	UINT8 priority;
-	UINT8 number;
-	UINT8 buffer;
-	UINT8 cont;
-	INT16 chunk[48];
-	UINT8 chunk_remaining;
+	uint8_t playing;
+	uint8_t *start;
+	uint8_t *current;
+	uint8_t *end;
+	uint16_t reps;
+	int16_t volume;
+	int16_t delta_volume;
+	int16_t target_volume;
+	uint8_t priority;
+	uint8_t number;
+	uint8_t buffer;
+	uint8_t cont;
+	int16_t chunk[48];
+	uint8_t chunk_remaining;
 };
 
 
-static INT16 *volume_table;
+static int16_t *volume_table;
 static struct voice_descriptor voices[6];
-static UINT8 sound_enabled;
+static uint8_t sound_enabled;
 static int stream_channel;
 
 
-static void decode_chunk(UINT8 *memory, INT16 *output, int overall)
+static void decode_chunk(uint8_t *memory, int16_t *output, int overall)
 {
-	UINT16 volume_bits = READ_WORD(memory);
+	uint16_t volume_bits = READ_WORD(memory);
 	int volume, i, j;
 
 	memory += 2;
@@ -441,7 +441,7 @@ static void decode_chunk(UINT8 *memory, INT16 *output, int overall)
 
 		for (j = 0; j < 4; j++)
 		{
-			UINT16 data = READ_WORD(memory);
+			uint16_t data = READ_WORD(memory);
 			memory += 2;
 			*output++ = volume_table[volume | ((data >>  0) & 0x000f)];
 			*output++ = volume_table[volume | ((data >>  4) & 0x000f)];
@@ -452,24 +452,24 @@ static void decode_chunk(UINT8 *memory, INT16 *output, int overall)
 }
 
 
-static void sample_stream_update(int param, INT16 **buffer, int length)
+static void sample_stream_update(int param, int16_t **buffer, int length)
 {
-	INT16 *buf_left = buffer[0];
-	INT16 *buf_right = buffer[1];
+	int16_t *buf_left = buffer[0];
+	int16_t *buf_right = buffer[1];
 	int i;
 
 	(void)param;
 
 	/* reset the buffers so we can add into them */
-	memset(buf_left, 0, length * sizeof(INT16));
-	memset(buf_right, 0, length * sizeof(INT16));
+	memset(buf_left, 0, length * sizeof(int16_t));
+	memset(buf_right, 0, length * sizeof(int16_t));
 
 	/* loop over voices */
 	for (i = 0; i < 6; i++)
 	{
 		struct voice_descriptor *voice = &voices[i];
 		int left = length;
-		INT16 *output;
+		int16_t *output;
 
 		/* bail if not playing */
 		if (!voice->playing || !voice->buffer)
@@ -481,7 +481,7 @@ static void sample_stream_update(int param, INT16 **buffer, int length)
 		/* loop until we're done */
 		while (left)
 		{
-			INT16 *source;
+			int16_t *source;
 			int this_batch;
 
 			if (!voice->chunk_remaining)
@@ -533,7 +533,7 @@ static int samples_start(const struct MachineSound *msound)
 	(void)msound;
 
 	/* allocate volume table */
-	volume_table = (INT16*)malloc(sizeof(INT16) * 64 * 16);
+	volume_table = (int16_t*)malloc(sizeof(int16_t) * 64 * 16);
 	if (!volume_table)
 		return 1;
 
@@ -542,7 +542,7 @@ static int samples_start(const struct MachineSound *msound)
 	{
 		float factor = pow(0.5, (float)j * 0.25);
 		for (i = 0; i < 16; i++)
-			volume_table[j * 16 + i] = (INT16)(factor * (float)((INT16)(i << 12)));
+			volume_table[j * 16 + i] = (int16_t)(factor * (float)((int16_t)(i << 12)));
 	}
 
 	/* get stream channels */
@@ -575,7 +575,7 @@ static void handle_68k_sound_command(int command)
 {
 	struct sound_descriptor *sound;
 	struct voice_descriptor *voice;
-	UINT16 offset;
+	uint16_t offset;
 	int actual_delta, actual_volume;
 	int temp;
 
@@ -793,7 +793,7 @@ struct MemoryWriteAddress sound_writemem[] =
 
 #ifdef EMULATE_SOUND_68000
 
-static UINT8 *ram;
+static uint8_t *ram;
 static READ_HANDLER( ram_r ) { return READ_WORD(&ram[offset]); }
 static WRITE_HANDLER( ram_w ) { COMBINE_WORD_MEM(&ram[offset], data); }
 
@@ -1084,7 +1084,7 @@ static struct MachineDriver machine_driver_cyberbal =
 			ATARI_CLOCK_14MHz/8,
 			sound_readmem,sound_writemem,0,0,
 			0,0,
-			atarigen_6502_irq_gen,(UINT32)(1000000000.0/((float)ATARI_CLOCK_14MHz/4/4/16/16/14))
+			atarigen_6502_irq_gen,(uint32_t)(1000000000.0/((float)ATARI_CLOCK_14MHz/4/4/16/16/14))
 		},
 		{
 			CPU_M68000,		/* verified */
@@ -1403,7 +1403,7 @@ ROM_END
  *
  *************************************/
 
-static const UINT16 default_eeprom[] =
+static const uint16_t default_eeprom[] =
 {
 	0x0001,0x01FF,0x0F00,0x011A,0x014A,0x0100,0x01A1,0x0200,
 	0x010E,0x01AF,0x0300,0x01FF,0x0114,0x0144,0x01FF,0x0F00,

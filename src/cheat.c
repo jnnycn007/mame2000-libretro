@@ -136,12 +136,12 @@ struct subcheat_struct
 	data_t olddata;					/* old data for code patch when cheat is turned OFF */
 #endif
 	data_t backup;					/* The original value of the memory location, checked against the current */
-	UINT32 code;
-	UINT16 flags;
+	uint32_t code;
+	uint16_t flags;
 	data_t min;
 	data_t max;
-	UINT32 frames_til_trigger;			/* the number of frames until this cheat fires (does not change) */
-	UINT32 frame_count;				/* decrementing frame counter to determine if cheat should fire */
+	uint32_t frames_til_trigger;			/* the number of frames until this cheat fires (does not change) */
+	uint32_t frame_count;				/* decrementing frame counter to determine if cheat should fire */
 };
 
 #define CHEAT_FLAG_ACTIVE	0x01
@@ -156,7 +156,7 @@ struct cheat_struct
 #endif
 	char *name;
 	char *comment;
-	UINT8 flags;					/* bit 0 = active, 1 = watchpoint, 2 = comment */
+	uint8_t flags;					/* bit 0 = active, 1 = watchpoint, 2 = comment */
 	int num_sub;					/* number of cheat cpu/address/data/code combos for this one cheat */
 	struct subcheat_struct *subcheat;	/* a variable-number of subcheats are attached to each "master" cheat */
 };
@@ -269,12 +269,12 @@ static void reset_table (struct ExtMemory *table);
 struct watch_struct
 {
 	int cheat_num;		/* if this watchpoint is tied to a cheat, this is the index into the cheat array. -1 if none */
-	UINT32 address;
-	INT16 cpu;
-	UINT8 num_bytes;	/* number of consecutive bytes to display */
-	UINT8 label_type;	/* none, address, text */
+	uint32_t address;
+	int16_t cpu;
+	uint8_t num_bytes;	/* number of consecutive bytes to display */
+	uint8_t label_type;	/* none, address, text */
 	char label[255];	/* optional text label */
-	UINT16 x, y;		/* position of watchpoint on screen */
+	uint16_t x, y;		/* position of watchpoint on screen */
 };
 
 static struct watch_struct watches[MAX_WATCHES];
@@ -299,9 +299,9 @@ void computer_writemem_byte(int cpu, int addr, int value);
 #endif
 
 /* Local prototypes */
-static INT32 DisplayHelpFile (INT32 selected);
-static INT32 EditCheatMenu (struct osd_bitmap *bitmap, INT32 selected, UINT8 cheatnum);
-static INT32 CommentMenu (struct osd_bitmap *bitmap, INT32 selected, int cheat_index);
+static int32_t DisplayHelpFile (int32_t selected);
+static int32_t EditCheatMenu (struct osd_bitmap *bitmap, int32_t selected, uint8_t cheatnum);
+static int32_t CommentMenu (struct osd_bitmap *bitmap, int32_t selected, int cheat_index);
 static int SkipBank(int CpuToScan, int *BankToScanTable, mem_write_handler handler);	/* Steph */
 
 /* Local variables */
@@ -648,7 +648,7 @@ void LoadCheatFile (int merge, char *filename)
 #ifdef MESS
 		data_t temp_olddata;
 #endif
-		INT32 temp_code;
+		int32_t temp_code;
 
 
 		/* Take a few easy-out cases to speed things up */
@@ -919,10 +919,10 @@ void InitCheat(void)
 #pragma mark -
 #endif
 
-INT32 EnableDisableCheatMenu (struct osd_bitmap *bitmap, INT32 selected)
+int32_t EnableDisableCheatMenu (struct osd_bitmap *bitmap, int32_t selected)
 {
 	int sel;
-	static INT8 submenu_choice;
+	static int8_t submenu_choice;
 	const char *menu_item[MAX_LOADEDCHEATS + 2];
 	const char *menu_subitem[MAX_LOADEDCHEATS];
 	char buf[MAX_LOADEDCHEATS][80];
@@ -1038,7 +1038,7 @@ INT32 EnableDisableCheatMenu (struct osd_bitmap *bitmap, INT32 selected)
 	return sel + 1;
 }
 
-static INT32 CommentMenu (struct osd_bitmap *bitmap, INT32 selected, int cheat_index)
+static int32_t CommentMenu (struct osd_bitmap *bitmap, int32_t selected, int cheat_index)
 {
 	char buf[2048];
 	char buf2[256];
@@ -1089,10 +1089,10 @@ static INT32 CommentMenu (struct osd_bitmap *bitmap, INT32 selected, int cheat_i
 	return sel + 1;
 }
 
-INT32 AddEditCheatMenu (struct osd_bitmap *bitmap, INT32 selected)
+int32_t AddEditCheatMenu (struct osd_bitmap *bitmap, int32_t selected)
 {
 	int sel;
-	static INT8 submenu_choice;
+	static int8_t submenu_choice;
 	const char *menu_item[MAX_LOADEDCHEATS + 4];
 //	char buf[MAX_LOADEDCHEATS][80];
 //	char buf2[MAX_LOADEDCHEATS][10];
@@ -1201,13 +1201,13 @@ INT32 AddEditCheatMenu (struct osd_bitmap *bitmap, INT32 selected)
 	return sel + 1;
 }
 
-static INT32 EditCheatMenu (struct osd_bitmap *bitmap, INT32 selected, UINT8 cheat_num)
+static int32_t EditCheatMenu (struct osd_bitmap *bitmap, int32_t selected, uint8_t cheat_num)
 {
 	int sel;
 	int total, total2;
 	struct subcheat_struct *subcheat;
-	static INT8 submenu_choice;
-	static UINT8 textedit_active;
+	static int8_t submenu_choice;
+	static uint8_t textedit_active;
 	const char *menu_item[40];
 	const char *menu_subitem[40];
 	char setting[40][30];
@@ -1460,7 +1460,7 @@ static INT32 EditCheatMenu (struct osd_bitmap *bitmap, INT32 selected, UINT8 che
 		/* is this the address field? */
 		if (sel == 1)
 		{
-			INT8 hex_val;
+			int8_t hex_val;
 
 			/* see if a hex digit was typed */
 			hex_val = code_read_hex_async();
@@ -1805,7 +1805,7 @@ static int SkipBank(int CpuToScan, int *BankToScanTable, mem_write_handler handl
 	return(res);
 }
 
-INT32 PerformSearch (struct osd_bitmap *bitmap, INT32 selected)
+int32_t PerformSearch (struct osd_bitmap *bitmap, int32_t selected)
 {
 	return -1;
 }
@@ -1830,7 +1830,7 @@ INT32 PerformSearch (struct osd_bitmap *bitmap, INT32 selected)
  * If you think of other way to search for codes, let me know.
  */
 
-INT32 StartSearch (struct osd_bitmap *bitmap, INT32 selected)
+int32_t StartSearch (struct osd_bitmap *bitmap, int32_t selected)
 {
 	enum
 	{
@@ -1848,9 +1848,9 @@ INT32 StartSearch (struct osd_bitmap *bitmap, INT32 selected)
 	const char *menu_item[Menu_Total];
 	const char *menu_subitem[Menu_Total];
 	char setting[Menu_Total][30];
-	INT32 sel;
-	UINT8 total = 0;
-	static INT8 submenu_choice;
+	int32_t sel;
+	uint8_t total = 0;
+	static int8_t submenu_choice;
 	int i;
 //	char flag[Menu_Total];
 
@@ -2038,15 +2038,15 @@ INT32 StartSearch (struct osd_bitmap *bitmap, INT32 selected)
 	return sel + 1;
 }
 
-INT32 ContinueSearch (INT32 selected)
+int32_t ContinueSearch (int32_t selected)
 {
 	return -1;
 }
 
-INT32 ViewSearchResults (struct osd_bitmap *bitmap, INT32 selected)
+int32_t ViewSearchResults (struct osd_bitmap *bitmap, int32_t selected)
 {
 	int sel;
-	static INT8 submenu_choice;
+	static int8_t submenu_choice;
 	const char *menu_item[MAX_SEARCHES + 2];
 	char buf[MAX_SEARCHES][20];
 	int i, total = 0;
@@ -2227,7 +2227,7 @@ static void DisplayWatches (struct osd_bitmap *bitmap)
 	}
 }
 
-static INT32 ConfigureWatch (struct osd_bitmap *bitmap, INT32 selected, UINT8 watchnum)
+static int32_t ConfigureWatch (struct osd_bitmap *bitmap, int32_t selected, uint8_t watchnum)
 {
 #ifdef NUM_ENTRIES
 #undef NUM_ENTRIES
@@ -2236,8 +2236,8 @@ static INT32 ConfigureWatch (struct osd_bitmap *bitmap, INT32 selected, UINT8 wa
 
 	int sel;
 	int total, total2;
-	static INT8 submenu_choice;
-	static UINT8 textedit_active;
+	static int8_t submenu_choice;
+	static uint8_t textedit_active;
 	const char *menu_item[NUM_ENTRIES];
 	const char *menu_subitem[NUM_ENTRIES];
 	char setting[NUM_ENTRIES][30];
@@ -2356,12 +2356,12 @@ static INT32 ConfigureWatch (struct osd_bitmap *bitmap, INT32 selected, UINT8 wa
 				break;
 			case 2: /* number of bytes */
 				watches[watchnum].num_bytes --;
-				if (watches[watchnum].num_bytes == (UINT8) -1)
+				if (watches[watchnum].num_bytes == (uint8_t) -1)
 					watches[watchnum].num_bytes = 16;
 				break;
 			case 3: /* label type */
 				watches[watchnum].label_type --;
-				if (watches[watchnum].label_type == (UINT8) -1)
+				if (watches[watchnum].label_type == (uint8_t) -1)
 					watches[watchnum].label_type = 2;
 				break;
 			case 4: /* label string */
@@ -2369,12 +2369,12 @@ static INT32 ConfigureWatch (struct osd_bitmap *bitmap, INT32 selected, UINT8 wa
 				break;
 			case 5: /* x */
 				watches[watchnum].x --;
-				if (watches[watchnum].x == (UINT16) -1)
+				if (watches[watchnum].x == (uint16_t) -1)
 					watches[watchnum].x = Machine->uiwidth - 1;
 				break;
 			case 6: /* y */
 				watches[watchnum].y --;
-				if (watches[watchnum].y == (UINT16) -1)
+				if (watches[watchnum].y == (uint16_t) -1)
 					watches[watchnum].y = Machine->uiheight - 1;
 				break;
 		}
@@ -2485,7 +2485,7 @@ static INT32 ConfigureWatch (struct osd_bitmap *bitmap, INT32 selected, UINT8 wa
 		/* is this the address field? */
 		if (sel == 1)
 		{
-			INT8 hex_val;
+			int8_t hex_val;
 
 			/* see if a hex digit was typed */
 			hex_val = code_read_hex_async();
@@ -2526,10 +2526,10 @@ static INT32 ConfigureWatch (struct osd_bitmap *bitmap, INT32 selected, UINT8 wa
 	return sel + 1;
 }
 
-static INT32 ChooseWatch (struct osd_bitmap *bitmap, INT32 selected)
+static int32_t ChooseWatch (struct osd_bitmap *bitmap, int32_t selected)
 {
 	int sel;
-	static INT8 submenu_choice;
+	static int8_t submenu_choice;
 	const char *menu_item[MAX_WATCHES + 2];
 	char buf[MAX_WATCHES][80];
 	const char *watchpoint_str = ui_getstring (UI_watchpoint);
@@ -2627,7 +2627,7 @@ static INT32 ChooseWatch (struct osd_bitmap *bitmap, INT32 selected)
 #pragma mark -
 #endif
 
-static INT32 DisplayHelpFile (INT32 selected)
+static int32_t DisplayHelpFile (int32_t selected)
 {
 	return -1;
 }
@@ -2636,7 +2636,7 @@ static INT32 DisplayHelpFile (INT32 selected)
 #pragma mark -
 #endif
 
-INT32 cheat_menu(struct osd_bitmap *bitmap, INT32 selected)
+int32_t cheat_menu(struct osd_bitmap *bitmap, int32_t selected)
 {
 	enum {
 		Menu_EnableDisable = 0,
@@ -2651,9 +2651,9 @@ INT32 cheat_menu(struct osd_bitmap *bitmap, INT32 selected)
 	};
 
 	const char *menu_item[10];
-	INT32 sel;
-	UINT8 total = 0;
-	static INT8 submenu_choice;
+	int32_t sel;
+	uint8_t total = 0;
+	static int8_t submenu_choice;
 
 	sel = selected - 1;
 

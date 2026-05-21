@@ -29,7 +29,7 @@ void osd_stop_audio_stream(void)
 	samples_per_frame = 0;
 }
 
-int osd_update_audio_stream(INT16 *buffer)
+int osd_update_audio_stream(int16_t *buffer)
 {
 	memcpy(samples_buffer, buffer, samples_per_frame * (usestereo ? 4 : 2));
    hook_audio_done();

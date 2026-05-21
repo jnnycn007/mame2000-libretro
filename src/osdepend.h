@@ -128,7 +128,7 @@ void osd_save_snapshot(struct osd_bitmap *bitmap);
   adjustment is necessary to avoid drifting over time.
  */
 int osd_start_audio_stream(int stereo);
-int osd_update_audio_stream(INT16 *buffer);
+int osd_update_audio_stream(int16_t *buffer);
 void osd_stop_audio_stream(void);
 
 /*

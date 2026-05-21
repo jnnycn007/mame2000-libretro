@@ -26,7 +26,7 @@ void thunderj_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
 void thunderj_scanline_update(int scanline);
 
 
-static UINT8 *rts_address;
+static uint8_t *rts_address;
 
 
 

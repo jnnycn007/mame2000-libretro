@@ -51,8 +51,8 @@ WRITE_HANDLER( renegade_scroll1_w )
 
 static void get_bg_tilemap_info(int tile_index)
 {
-	const UINT8 *source = &videoram[tile_index];
-	UINT8 attributes = source[0x400]; /* CCC??BBB */
+	const uint8_t *source = &videoram[tile_index];
+	uint8_t attributes = source[0x400]; /* CCC??BBB */
 	SET_TILE_INFO(
 		1+(attributes&0x7), /* bank */
 		source[0],  /* tile_number */
@@ -62,8 +62,8 @@ static void get_bg_tilemap_info(int tile_index)
 
 static void get_fg_tilemap_info(int tile_index)
 {
-	const UINT8 *source = &renegade_textram[tile_index];
-	UINT8 attributes = source[0x400];
+	const uint8_t *source = &renegade_textram[tile_index];
+	uint8_t attributes = source[0x400];
 	SET_TILE_INFO(
 		0,
 		(attributes&3)*256 + source[0], /* tile_number */

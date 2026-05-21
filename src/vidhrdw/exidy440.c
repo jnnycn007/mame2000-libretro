@@ -19,30 +19,30 @@
 
 
 /* external globals */
-extern UINT8 exidy440_bank;
-extern UINT8 exidy440_topsecret;
+extern uint8_t exidy440_bank;
+extern uint8_t exidy440_topsecret;
 
 
 /* globals */
-UINT8 *exidy440_scanline;
-UINT8 *exidy440_imageram;
-UINT8 exidy440_firq_vblank;
-UINT8 exidy440_firq_beam;
-UINT8 topsecex_yscroll;
+uint8_t *exidy440_scanline;
+uint8_t *exidy440_imageram;
+uint8_t exidy440_firq_vblank;
+uint8_t exidy440_firq_beam;
+uint8_t topsecex_yscroll;
 
 /* local allocated storage */
-static UINT8 exidy440_latched_x;
-static UINT8 *local_videoram;
-static UINT8 *local_paletteram;
-static UINT8 *scanline_dirty;
-static UINT8 *spriteram_buffer;
+static uint8_t exidy440_latched_x;
+static uint8_t *local_videoram;
+static uint8_t *local_paletteram;
+static uint8_t *scanline_dirty;
+static uint8_t *spriteram_buffer;
 
 /* local variables */
-static UINT8 firq_enable;
-static UINT8 firq_select;
-static UINT8 palettebank_io;
-static UINT8 palettebank_vis;
-static UINT8 topsecex_last_yscroll;
+static uint8_t firq_enable;
+static uint8_t firq_select;
+static uint8_t palettebank_io;
+static uint8_t palettebank_vis;
+static uint8_t topsecex_last_yscroll;
 
 /* function prototypes */
 void exidy440_vh_stop(void);
@@ -77,7 +77,7 @@ int exidy440_vh_start(void)
 	topsecex_last_yscroll = 0;
 
 	/* allocate a buffer for VRAM */
-	local_videoram = (UINT8*)malloc(256 * 256 * 2);
+	local_videoram = (uint8_t*)malloc(256 * 256 * 2);
 	if (!local_videoram)
 	{
 		exidy440_vh_stop();
@@ -88,7 +88,7 @@ int exidy440_vh_start(void)
 	memset(local_videoram, 0, 256 * 256 * 2);
 
 	/* allocate a buffer for palette RAM */
-	local_paletteram = (UINT8*)malloc(512 * 2);
+	local_paletteram = (uint8_t*)malloc(512 * 2);
 	if (!local_paletteram)
 	{
 		exidy440_vh_stop();
@@ -99,7 +99,7 @@ int exidy440_vh_start(void)
 	memset(local_paletteram, 0, 512 * 2);
 
 	/* allocate a scanline dirty array */
-	scanline_dirty = (UINT8*)malloc(256);
+	scanline_dirty = (uint8_t*)malloc(256);
 	if (!scanline_dirty)
 	{
 		exidy440_vh_stop();
@@ -110,7 +110,7 @@ int exidy440_vh_start(void)
 	memset(scanline_dirty, 1, 256);
 
 	/* allocate a sprite cache */
-	spriteram_buffer = (UINT8*)malloc(SPRITERAM_SIZE * TOTAL_CHUNKS);
+	spriteram_buffer = (uint8_t*)malloc(SPRITERAM_SIZE * TOTAL_CHUNKS);
 	if (!spriteram_buffer)
 	{
 		exidy440_vh_stop();
@@ -184,7 +184,7 @@ static void scanline_callback(int scanline)
 
 READ_HANDLER( exidy440_videoram_r )
 {
-	UINT8 *base = &local_videoram[(*exidy440_scanline * 256 + offset) * 2];
+	uint8_t *base = &local_videoram[(*exidy440_scanline * 256 + offset) * 2];
 
 	/* combine the two pixel values into one byte */
 	return (base[0] << 4) | base[1];
@@ -193,7 +193,7 @@ READ_HANDLER( exidy440_videoram_r )
 
 WRITE_HANDLER( exidy440_videoram_w )
 {
-	UINT8 *base = &local_videoram[(*exidy440_scanline * 256 + offset) * 2];
+	uint8_t *base = &local_videoram[(*exidy440_scanline * 256 + offset) * 2];
 
 	/* expand the two pixel values into two bytes */
 	base[0] = (data >> 4) & 15;
@@ -530,13 +530,13 @@ void exidy440_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 #define INCLUDE_DRAW_CORE
 
 #define DRAW_FUNC update_screen_8
-#define TYPE UINT8
+#define TYPE uint8_t
 #include "exidy440.c"
 #undef TYPE
 #undef DRAW_FUNC
 
 #define DRAW_FUNC update_screen_16
-#define TYPE UINT16
+#define TYPE uint16_t
 #include "exidy440.c"
 #undef TYPE
 #undef DRAW_FUNC
@@ -556,8 +556,8 @@ void DRAW_FUNC(struct osd_bitmap *bitmap, int scroll_offset)
 	int orientation = Machine->orientation;
 	int xoffs, yoffs, count, scanline;
 	int x, y, i, sy;
-	UINT8 *palette;
-	UINT8 *sprite;
+	uint8_t *palette;
+	uint8_t *sprite;
 
 	/* recompute the palette, and mark all scanlines dirty if we need to redraw */
 	if (palette_recalc())
@@ -574,7 +574,7 @@ void DRAW_FUNC(struct osd_bitmap *bitmap, int scroll_offset)
 		/* only redraw if dirty */
 		if (scanline_dirty[sy])
 		{
-			UINT8 *src = &local_videoram[sy * 512];
+			uint8_t *src = &local_videoram[sy * 512];
 			TYPE *dst = (TYPE *)bitmap->line[y];
 			int xadv = 1;
 
@@ -600,7 +600,7 @@ void DRAW_FUNC(struct osd_bitmap *bitmap, int scroll_offset)
 		sprite = spriteram_buffer + SPRITERAM_SIZE * (scanline / CHUNK_SIZE) + (SPRITE_COUNT - 1) * 4;
 		for (i = 0; i < SPRITE_COUNT; i++, sprite -= 4)
 		{
-			UINT8 *src;
+			uint8_t *src;
 			int image = (~sprite[3] & 0x3f);
 			xoffs = (~((sprite[1] << 8) | sprite[2]) & 0x1ff);
 			yoffs = (~sprite[0] & 0xff) + 1;
@@ -633,7 +633,7 @@ void DRAW_FUNC(struct osd_bitmap *bitmap, int scroll_offset)
 				/* only draw scanlines that are in this chunk */
 				if (yoffs < scanline + CHUNK_SIZE)
 				{
-					UINT8 *old = &local_videoram[sy * 512 + xoffs];
+					uint8_t *old = &local_videoram[sy * 512 + xoffs];
 					TYPE *dst = &((TYPE *)bitmap->line[yoffs])[xoffs];
 					int currx = xoffs, xadv = 1;
 

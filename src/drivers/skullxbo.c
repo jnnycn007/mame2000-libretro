@@ -107,11 +107,11 @@ static void irq_gen(int param)
 
 static void alpha_row_update(int scanline)
 {
-	UINT16 *check = (UINT16 *)&atarigen_alpharam[((scanline / 8) * 64 + 42) * 2];
+	uint16_t *check = (uint16_t *)&atarigen_alpharam[((scanline / 8) * 64 + 42) * 2];
 
 	/* check for interrupts in the alpha ram */
 	/* the interrupt occurs on the HBLANK of the 6th scanline following */
-	if ((UINT8 *)check < &atarigen_alpharam[atarigen_alpharam_size] && (*check & 0x8000))
+	if ((uint8_t *)check < &atarigen_alpharam[atarigen_alpharam_size] && (*check & 0x8000))
 		timer_set(cpu_getscanlineperiod() * 6.9, 0, irq_gen);
 
 	/* update the playfield and motion objects */

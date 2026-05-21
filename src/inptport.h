@@ -15,24 +15,24 @@
 
 struct InputPortTiny
 {
-	UINT16 mask;			/* bits affected */
-	UINT16 default_value;	/* default value for the bits affected */
+	uint16_t mask;			/* bits affected */
+	uint16_t default_value;	/* default value for the bits affected */
 							/* you can also use one of the IP_ACTIVE defines below */
-	UINT32 type;			/* see defines below */
+	uint32_t type;			/* see defines below */
 	const char *name;		/* name to display */
 };
 
 struct InputPort
 {
-	UINT16 mask;			/* bits affected */
-	UINT16 default_value;	/* default value for the bits affected */
+	uint16_t mask;			/* bits affected */
+	uint16_t default_value;	/* default value for the bits affected */
 							/* you can also use one of the IP_ACTIVE defines below */
-	UINT32 type;			/* see defines below */
+	uint32_t type;			/* see defines below */
 	const char *name;		/* name to display */
 	InputSeq seq;                  	/* input sequence affecting the input bits */
 #ifdef MESS
-	UINT32 arg;				/* extra argument needed in some cases */
-	UINT16 min, max;		/* for analog controls */
+	uint32_t arg;				/* extra argument needed in some cases */
+	uint16_t min, max;		/* for analog controls */
 #endif
 };
 
@@ -333,7 +333,7 @@ READ_HANDLER( input_port_19_r );
 
 struct ipd
 {
-	UINT32 type;
+	uint32_t type;
 	const char *name;
 	InputSeq seq;
 };

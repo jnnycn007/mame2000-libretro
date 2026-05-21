@@ -72,9 +72,9 @@ void cave_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
 
 /* Variables only used here */
 
-static UINT8 vblank_irq;
-static UINT8 sound_irq;
-static UINT8 unknown_irq;
+static uint8_t vblank_irq;
+static uint8_t sound_irq;
+static uint8_t unknown_irq;
 
 
 
@@ -249,13 +249,13 @@ static void _cave_nvram_handler(void *file,int read_or_write,int type)
 			switch (type)
 			{
 				case 0: // donpachi, ddonpach, esprade
-					EEPROM_set_data((UINT8*)"\x00\x0C\xFF\xFF\xFF\xFF\xFF\xFF\x00\x04", 10);
+					EEPROM_set_data((uint8_t*)"\x00\x0C\xFF\xFF\xFF\xFF\xFF\xFF\x00\x04", 10);
 					break;
 				case 1: // dfeveron, guwange
-					EEPROM_set_data((UINT8*)"\x00\x0C\x11\x21\xFF\xFF\xFF\xFF\x00\x14\x11\x11", 12);
+					EEPROM_set_data((uint8_t*)"\x00\x0C\x11\x21\xFF\xFF\xFF\xFF\x00\x14\x11\x11", 12);
 					break;
 				case 2: // uopoko
-					EEPROM_set_data((UINT8*)"\x00\x03\x08\x00\xFF\xFF\xFF\xFF\x08\x00\x00\x00", 12);
+					EEPROM_set_data((uint8_t*)"\x00\x03\x08\x00\xFF\xFF\xFF\xFF\x08\x00\x00\x00", 12);
 					break;
 				default:
 					break;

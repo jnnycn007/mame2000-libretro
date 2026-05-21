@@ -123,8 +123,8 @@
 #include "vidhrdw/generic.h"
 
 
-extern UINT8 *atarisys1_bankselect;
-extern UINT8 *atarisys1_prioritycolor;
+extern uint8_t *atarisys1_bankselect;
+extern uint8_t *atarisys1_prioritycolor;
 
 READ_HANDLER( atarisys1_int3state_r );
 
@@ -142,20 +142,20 @@ void atarisys1_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
 
 
 
-static UINT8 joystick_type;
-static UINT8 trackball_type;
+static uint8_t joystick_type;
+static uint8_t trackball_type;
 
 static void *joystick_timer;
-static UINT8 joystick_int;
-static UINT8 joystick_int_enable;
-static UINT8 joystick_value;
+static uint8_t joystick_int;
+static uint8_t joystick_int_enable;
+static uint8_t joystick_value;
 
-static UINT8 m6522_ddra, m6522_ddrb;
-static UINT8 m6522_dra, m6522_drb;
-static UINT8 m6522_regs[16];
+static uint8_t m6522_ddra, m6522_ddrb;
+static uint8_t m6522_dra, m6522_drb;
+static uint8_t m6522_regs[16];
 
-static UINT8 *marble_speedcheck;
-static UINT32 speedcheck_time1, speedcheck_time2;
+static uint8_t *marble_speedcheck;
+static uint32_t speedcheck_time1, speedcheck_time2;
 
 
 
@@ -295,24 +295,24 @@ static READ_HANDLER( trakball_r )
 	/* Marble Madness trackball type -- rotated 45 degrees! */
 	if (trackball_type == 1)
 	{
-		static UINT8 cur[2][2];
+		static uint8_t cur[2][2];
 		int player = (offset >> 2) & 1;
 		int which = (offset >> 1) & 1;
 
 		/* when reading the even ports, do a real analog port update */
 		if (which == 0)
 		{
-			UINT8 posx,posy;
+			uint8_t posx,posy;
 
 			if (player == 0)
 			{
-				posx = (INT8)input_port_0_r(offset);
-				posy = (INT8)input_port_1_r(offset);
+				posx = (int8_t)input_port_0_r(offset);
+				posy = (int8_t)input_port_1_r(offset);
 			}
 			else
 			{
-				posx = (INT8)input_port_2_r(offset);
-				posy = (INT8)input_port_3_r(offset);
+				posx = (int8_t)input_port_2_r(offset);
+				posy = (int8_t)input_port_3_r(offset);
 			}
 
 			cur[player][0] = posx + posy;
@@ -939,7 +939,7 @@ static struct MachineDriver machine_driver_atarisy1 =
 
 static void rom_decode(void)
 {
-	UINT32 *data = (UINT32 *)&memory_region(REGION_GFX2)[0];
+	uint32_t *data = (uint32_t *)&memory_region(REGION_GFX2)[0];
 	int chips = memory_region_length(REGION_GFX2) / 0x8000;
 	int i, j;
 
@@ -997,7 +997,7 @@ static void init_marble(void)
 	atarigen_init_6502_speedup(1, 0x8108, 0x8120);
 
 	/* speed up the 68010 */
-	marble_speedcheck = (UINT8*)install_mem_read_handler(0, 0x400014, 0x400015, marble_speedcheck_r);
+	marble_speedcheck = (uint8_t*)install_mem_read_handler(0, 0x400014, 0x400015, marble_speedcheck_r);
 	install_mem_write_handler(0, 0x400014, 0x400015, marble_speedcheck_w);
 
 	/* display messages */

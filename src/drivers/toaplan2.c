@@ -93,10 +93,10 @@ static unsigned char *Zx80_shared_ram;
 
 static int mcu_data = 0;
 int toaplan2_sub_cpu = 0;
-static INT8 old_p1_paddle_h;
-static INT8 old_p1_paddle_v;
-static INT8 old_p2_paddle_h;
-static INT8 old_p2_paddle_v;
+static int8_t old_p1_paddle_h;
+static int8_t old_p1_paddle_v;
+static int8_t old_p2_paddle_h;
+static int8_t old_p2_paddle_v;
 
 
 /********* Video wrappers for PIPIBIBI *********/
@@ -416,7 +416,7 @@ static READ_HANDLER( video_count_r )
 
 static READ_HANDLER( ghox_p1_h_analog_r )
 {
-	INT8 value, new_value;
+	int8_t value, new_value;
 	new_value = input_port_7_r(0);
 	if (new_value == old_p1_paddle_h) return 0;
 	value = new_value - old_p1_paddle_h;
@@ -425,7 +425,7 @@ static READ_HANDLER( ghox_p1_h_analog_r )
 }
 static READ_HANDLER( ghox_p1_v_analog_r )
 {
-	INT8 new_value;
+	int8_t new_value;
 	new_value = input_port_9_r(0);		/* fake vertical movement */
 	if (new_value == old_p1_paddle_v) return input_port_1_r(0);
 	if (new_value >  old_p1_paddle_v)
@@ -438,7 +438,7 @@ static READ_HANDLER( ghox_p1_v_analog_r )
 }
 static READ_HANDLER( ghox_p2_h_analog_r )
 {
-	INT8 value, new_value;
+	int8_t value, new_value;
 	new_value = input_port_8_r(0);
 	if (new_value == old_p2_paddle_h) return 0;
 	value = new_value - old_p2_paddle_h;
@@ -447,7 +447,7 @@ static READ_HANDLER( ghox_p2_h_analog_r )
 }
 static READ_HANDLER( ghox_p2_v_analog_r )
 {
-	INT8 new_value;
+	int8_t new_value;
 	new_value = input_port_10_r(0);		/* fake vertical movement */
 	if (new_value == old_p2_paddle_v) return input_port_2_r(0);
 	if (new_value >  old_p2_paddle_v)

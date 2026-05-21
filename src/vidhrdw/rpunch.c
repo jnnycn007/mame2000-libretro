@@ -23,24 +23,24 @@
  *
  *************************************/
 
-UINT8 *rpunch_bitmapram;
+uint8_t *rpunch_bitmapram;
 size_t rpunch_bitmapram_size;
-static UINT32 *rpunch_bitmapsum;
+static uint32_t *rpunch_bitmapsum;
 
 int rpunch_sprite_palette;
 
 static struct tilemap *background[2];
 
-static UINT16 videoflags;
-static UINT8 crtc_register;
+static uint16_t videoflags;
+static uint8_t crtc_register;
 static void *crtc_timer;
-static UINT8 bins, gins;
+static uint8_t bins, gins;
 
-static const UINT16 *callback_videoram;
-static UINT8 callback_gfxbank;
-static UINT8 callback_colorbase;
-static UINT16 callback_imagebase;
-static UINT16 callback_imagemask;
+static const uint16_t *callback_videoram;
+static uint8_t callback_gfxbank;
+static uint8_t callback_colorbase;
+static uint16_t callback_imagebase;
+static uint16_t callback_imagemask;
 
 
 /*************************************
@@ -95,7 +95,7 @@ int rpunch_vh_start(void)
 	background[1] = tilemap_create(get_bg_tile_info,tilemap_scan_cols,TILEMAP_TRANSPARENT,8,8,64,64);
 
 	/* allocate a bitmap sum */
-	rpunch_bitmapsum = (UINT32*)malloc(BITMAP_HEIGHT * sizeof(UINT32));
+	rpunch_bitmapsum = (uint32_t*)malloc(BITMAP_HEIGHT * sizeof(uint32_t));
 
 	/* if anything failed, clean up and return an error */
 	if (!background[0] || !background[1] || !rpunch_bitmapsum)
@@ -266,7 +266,7 @@ WRITE_HANDLER(rpunch_ins_w)
 
 static void mark_sprite_palette(void)
 {
-	UINT16 used_colors[16];
+	uint16_t used_colors[16];
 	int offs, i, j;
 
 	memset(used_colors, 0, sizeof(used_colors));
@@ -293,7 +293,7 @@ static void mark_sprite_palette(void)
 
 	for (i = 0; i < 16; i++)
 	{
-		UINT16 used = used_colors[i];
+		uint16_t used = used_colors[i];
 		if (used)
 		{
 			for (j = 0; j < 15; j++)
@@ -346,7 +346,7 @@ void rpunch_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 
 	/* update background 0 */
 	callback_gfxbank = 0;
-	callback_videoram = (const UINT16 *)&videoram[0];
+	callback_videoram = (const uint16_t *)&videoram[0];
 	callback_colorbase = (videoflags & 0x0010) >> 1;
 	callback_imagebase = (videoflags & 0x0400) << 3;
 	callback_imagemask = callback_imagebase ? 0x0fff : 0x1fff;
@@ -354,7 +354,7 @@ void rpunch_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 
 	/* update background 1 */
 	callback_gfxbank = 1;
-	callback_videoram = (const UINT16 *)&videoram[videoram_size / 2];
+	callback_videoram = (const uint16_t *)&videoram[videoram_size / 2];
 	callback_colorbase = (videoflags & 0x0020) >> 2;
 	callback_imagebase = (videoflags & 0x0800) << 2;
 	callback_imagemask = callback_imagebase ? 0x0fff : 0x1fff;
@@ -435,13 +435,13 @@ void rpunch_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 #define INCLUDE_DRAW_CORE
 
 #define DRAW_FUNC draw_bitmap_8
-#define TYPE UINT8
+#define TYPE uint8_t
 #include "rpunch.c"
 #undef TYPE
 #undef DRAW_FUNC
 
 #define DRAW_FUNC draw_bitmap_16
-#define TYPE UINT16
+#define TYPE uint16_t
 #include "rpunch.c"
 #undef TYPE
 #undef DRAW_FUNC
@@ -458,7 +458,7 @@ void rpunch_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 
 void DRAW_FUNC(struct osd_bitmap *bitmap)
 {
-	UINT16 *pens = &Machine->pens[512 + (videoflags & 15) * 16];
+	uint16_t *pens = &Machine->pens[512 + (videoflags & 15) * 16];
 	int orientation = Machine->orientation;
 	int x, y;
 
@@ -466,7 +466,7 @@ void DRAW_FUNC(struct osd_bitmap *bitmap)
 	for (y = 0; y < BITMAP_HEIGHT; y++)
 		if (rpunch_bitmapsum[y] != (BITMAP_WIDTH/4) * 0xffff)
 		{
-			UINT16 *src = (UINT16 *)&rpunch_bitmapram[y * 256 + BITMAP_XOFFSET/2];
+			uint16_t *src = (uint16_t *)&rpunch_bitmapram[y * 256 + BITMAP_XOFFSET/2];
 			TYPE *dst = (TYPE *)bitmap->line[y];
 			int xadv = 1;
 

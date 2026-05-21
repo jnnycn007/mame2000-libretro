@@ -130,9 +130,9 @@ static WRITE_HANDLER( io_latch_w )
 
 -------------------------------------------------------------------------*/
 
-static UINT8 *bankswitch_base;
-static UINT8 *bankrom_base;
-static UINT32 bank_offset;
+static uint8_t *bankswitch_base;
+static uint8_t *bankrom_base;
+static uint32_t bank_offset;
 
 static READ_HANDLER( bankswitch_r )
 {
@@ -181,7 +181,7 @@ static READ_HANDLER( bankrom_r )
 
 -------------------------------------------------------------------------*/
 
-static UINT8 *spritecache_count;
+static uint8_t *spritecache_count;
 
 static READ_HANDLER( spritecache_count_r )
 {
@@ -190,7 +190,7 @@ static READ_HANDLER( spritecache_count_r )
 	/* if this read is coming from $99f8 or $9992, it's in the sprite copy loop */
 	if (prevpc == 0x99f8 || prevpc == 0x9992)
 	{
-		UINT16 *data = (UINT16 *)&spritecache_count[-0x200];
+		uint16_t *data = (uint16_t *)&spritecache_count[-0x200];
 		int oldword = READ_WORD(&spritecache_count[0]);
 		int count = oldword >> 8;
 		int i, width = 0;
@@ -234,7 +234,7 @@ static READ_HANDLER( spritecache_count_r )
 
 -------------------------------------------------------------------------*/
 
-static UINT8 *unknown_verify_base;
+static uint8_t *unknown_verify_base;
 
 static READ_HANDLER( unknown_verify_r )
 {
@@ -503,7 +503,7 @@ ROM_END
  *
  *************************************/
 
-static const UINT16 default_eeprom[] =
+static const uint16_t default_eeprom[] =
 {
 	0x0001,0x011A,0x012A,0x0146,0x0100,0x0168,0x0300,0x011E,
 	0x0700,0x0122,0x0600,0x0120,0x0400,0x0102,0x0300,0x017E,
@@ -528,9 +528,9 @@ static void init_offtwall(void)
 	atarigen_init_6502_speedup(1, 0x41dd, 0x41f5);
 
 	/* install son-of-slapstic workarounds */
-	spritecache_count = (UINT8*)install_mem_read_handler(0, 0x3fde42, 0x3fde43, spritecache_count_r);
-	bankswitch_base = (UINT8*)install_mem_read_handler(0, 0x037ec2, 0x037f39, bankswitch_r);
-	unknown_verify_base = (UINT8*)install_mem_read_handler(0, 0x3fdf1e, 0x3fdf1f, unknown_verify_r);
+	spritecache_count = (uint8_t*)install_mem_read_handler(0, 0x3fde42, 0x3fde43, spritecache_count_r);
+	bankswitch_base = (uint8_t*)install_mem_read_handler(0, 0x037ec2, 0x037f39, bankswitch_r);
+	unknown_verify_base = (uint8_t*)install_mem_read_handler(0, 0x3fdf1e, 0x3fdf1f, unknown_verify_r);
 
 	/* display messages */
 	atarigen_show_sound_message();
@@ -549,9 +549,9 @@ static void init_offtwalc(void)
 	atarigen_init_6502_speedup(1, 0x41dd, 0x41f5);
 
 	/* install son-of-slapstic workarounds */
-	spritecache_count = (UINT8*)install_mem_read_handler(0, 0x3fde42, 0x3fde43, spritecache_count_r);
-	bankswitch_base = (UINT8*)install_mem_read_handler(0, 0x037eca, 0x037f43, bankswitch_r);
-	unknown_verify_base = (UINT8*)install_mem_read_handler(0, 0x3fdf24, 0x3fdf25, unknown_verify_r);
+	spritecache_count = (uint8_t*)install_mem_read_handler(0, 0x3fde42, 0x3fde43, spritecache_count_r);
+	bankswitch_base = (uint8_t*)install_mem_read_handler(0, 0x037eca, 0x037f43, bankswitch_r);
+	unknown_verify_base = (uint8_t*)install_mem_read_handler(0, 0x3fdf24, 0x3fdf25, unknown_verify_r);
 
 	/* display messages */
 	atarigen_show_sound_message();

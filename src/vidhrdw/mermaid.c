@@ -149,7 +149,7 @@ void mermaid_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 	/* draw the sprites */
 	for (offs = spriteram_size - 4;offs >= 0;offs -= 4)
 	{
-		UINT8 flipx,flipy,sx,sy,code,bank = 0;
+		uint8_t flipx,flipy,sx,sy,code,bank = 0;
 
 		sx = spriteram[offs + 3] + 1;
 		sy = 240 - spriteram[offs + 1];

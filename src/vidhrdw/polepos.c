@@ -3,10 +3,10 @@
 #include "driver.h"
 #include "vidhrdw/generic.h"
 
-UINT8 *polepos_view_memory;
-UINT8 *polepos_road_memory;
-UINT8 *polepos_sprite_memory;
-UINT8 *polepos_alpha_memory;
+uint8_t *polepos_view_memory;
+uint8_t *polepos_road_memory;
+uint8_t *polepos_sprite_memory;
+uint8_t *polepos_alpha_memory;
 
 /* modified vertical position built from three nibbles (12 bit)
  * of ROMs 136014-142, 136014-143, 136014-144
@@ -14,17 +14,17 @@ UINT8 *polepos_alpha_memory;
  * to this value and the upper 10 bits of the result are used to
  * address the playfield video memory (AB0 - AB9).
  */
-static UINT16 polepos_vertical_position_modifier[256];
+static uint16_t polepos_vertical_position_modifier[256];
 
-static UINT16 view_hscroll;
-static UINT16 road_vscroll;
+static uint16_t view_hscroll;
+static uint16_t road_vscroll;
 
-static const UINT8 *road_control;
-static const UINT8 *road_bits1;
-static const UINT8 *road_bits2;
+static const uint8_t *road_control;
+static const uint8_t *road_bits1;
+static const uint8_t *road_bits2;
 
 static struct osd_bitmap *view_bitmap;
-static UINT8 *view_dirty;
+static uint8_t *view_dirty;
 
 
 static void draw_road_core_8(struct osd_bitmap *bitmap, int sx, int sy, int dx, int dy);
@@ -46,7 +46,7 @@ static void draw_road_core_16(struct osd_bitmap *bitmap, int sx, int sy, int dx,
 
 ***************************************************************************/
 
-void polepos_vh_convert_color_prom(UINT8 *palette, UINT16 *colortable, const UINT8 *color_prom)
+void polepos_vh_convert_color_prom(uint8_t *palette, uint16_t *colortable, const uint8_t *color_prom)
 {
 	int i, j;
 
@@ -160,7 +160,7 @@ int polepos_vh_start(void)
 		return 1;
 
 	/* allocate view dirty buffer */
-	view_dirty = (UINT8*)malloc(64*16);
+	view_dirty = (uint8_t*)malloc(64*16);
 	if (!view_dirty)
 	{
 		bitmap_free(view_bitmap);
@@ -372,8 +372,8 @@ static void draw_road(struct osd_bitmap *bitmap)
 
 static void draw_sprites(struct osd_bitmap *bitmap)
 {
-	UINT16 *posmem = (UINT16 *)&polepos_sprite_memory[0x700];
-	UINT16 *sizmem = (UINT16 *)&polepos_sprite_memory[0xf00];
+	uint16_t *posmem = (uint16_t *)&polepos_sprite_memory[0x700];
+	uint16_t *sizmem = (uint16_t *)&polepos_sprite_memory[0xf00];
 	int i;
 
 	for (i = 0; i < 64; i++, posmem += 2, sizmem += 2)
@@ -462,13 +462,13 @@ void polepos_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 #define ROAD_CORE_INCLUDE
 
 #define NAME draw_road_core_8
-#define TYPE UINT8
+#define TYPE uint8_t
 #include "polepos.c"
 #undef TYPE
 #undef NAME
 
 #define NAME draw_road_core_16
-#define TYPE UINT16
+#define TYPE uint16_t
 #include "polepos.c"
 #undef TYPE
 #undef NAME
@@ -490,7 +490,7 @@ static void NAME(struct osd_bitmap *bitmap, int sx, int sy, int dx, int dy)
 	for (y = 128; y < 256; y++, base += dy)
 	{
 		int xoffs, yoffs, roadpal;
-		UINT16 *colortable;
+		uint16_t *colortable;
 		TYPE *dest;
 
 		/* first add the vertical position modifier and the vertical scroll */

@@ -83,10 +83,10 @@
 #include "vidhrdw/generic.h"
 
 
-extern INT8 mcr12_sprite_xoffs;
-extern INT8 mcr12_sprite_xoffs_flip;
+extern int8_t mcr12_sprite_xoffs;
+extern int8_t mcr12_sprite_xoffs_flip;
 
-static UINT8 wacko_mux_select;
+static uint8_t wacko_mux_select;
 
 
 int mcr12_vh_start(void);

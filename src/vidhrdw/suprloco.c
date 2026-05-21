@@ -233,8 +233,8 @@ static void render_sprite(struct osd_bitmap *bitmap,int spr_number)
 	for (row = 0;row < height;row++,adjy+=dy)
 	{
 		int color1,color2,flipx;
-		UINT8 data;
-		UINT8 *gfx;
+		uint8_t data;
+		uint8_t *gfx;
 
 		src += skip;
 

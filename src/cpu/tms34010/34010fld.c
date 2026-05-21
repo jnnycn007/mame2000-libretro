@@ -193,112 +193,112 @@ WRITE_HANDLER( wfield_32 )
 
 READ_HANDLER( rfield_z_01 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x01,16);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_02 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x03,15);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_03 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x07,14);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_04 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x0f,13);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_05 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x1f,12);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_06 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x3f,11);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_07 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x7f,10);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_08 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_8;
 	return ret;
 }
 
 READ_HANDLER( rfield_z_09 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x1ff,8);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_10 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x3ff,7);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_11 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x7ff,6);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_12 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0xfff,5);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_13 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x1fff,4);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_14 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x3fff,3);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_15 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x7fff,2);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_16 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	if (offset & 0x0f)
 	{
 		RFIELDMAC(0xffff,1);
@@ -311,105 +311,105 @@ READ_HANDLER( rfield_z_16 )
 
 READ_HANDLER( rfield_z_17 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x1ffff,0);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_18 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x3ffff,15);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_19 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x7ffff,14);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_20 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0xfffff,13);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_21 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x1fffff,12);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_22 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x3fffff,11);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_23 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x7fffff,10);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_24 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0xffffff,9);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_25 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x1ffffff,8);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_26 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x3ffffff,7);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_27 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x7ffffff,6);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_28 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0xfffffff,5);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_29 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x1fffffff,4);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_30 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x3fffffff,3);
 	return ret;
 }
 
 READ_HANDLER( rfield_z_31 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x7fffffff,2);
 	return ret;
 }
@@ -427,56 +427,56 @@ READ_HANDLER( rfield_32 )
 
 READ_HANDLER( rfield_s_01 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x01,16);
-	return ((INT32)(ret << 31)) >> 31;
+	return ((int32_t)(ret << 31)) >> 31;
 }
 
 READ_HANDLER( rfield_s_02 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x03,15);
-	return ((INT32)(ret << 30)) >> 30;
+	return ((int32_t)(ret << 30)) >> 30;
 }
 
 READ_HANDLER( rfield_s_03 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x07,14);
-	return ((INT32)(ret << 29)) >> 29;
+	return ((int32_t)(ret << 29)) >> 29;
 }
 
 READ_HANDLER( rfield_s_04 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x0f,13);
-	return ((INT32)(ret << 28)) >> 28;
+	return ((int32_t)(ret << 28)) >> 28;
 }
 
 READ_HANDLER( rfield_s_05 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x1f,12);
-	return ((INT32)(ret << 27)) >> 27;
+	return ((int32_t)(ret << 27)) >> 27;
 }
 
 READ_HANDLER( rfield_s_06 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x3f,11);
-	return ((INT32)(ret << 26)) >> 26;
+	return ((int32_t)(ret << 26)) >> 26;
 }
 
 READ_HANDLER( rfield_s_07 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x7f,10);
-	return ((INT32)(ret << 25)) >> 25;
+	return ((int32_t)(ret << 25)) >> 25;
 }
 
 READ_HANDLER( rfield_s_08 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	if (offset & 0x07)											
 	{															
 		RFIELDMAC(0xff,9);
@@ -484,61 +484,61 @@ READ_HANDLER( rfield_s_08 )
 															
 	else														
 		ret = TMS34010_RDMEM(TOBYTE(offset));					
-	return (INT32)(INT8)ret;
+	return (int32_t)(int8_t)ret;
 }
 
 READ_HANDLER( rfield_s_09 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x1ff,8);
-	return ((INT32)(ret << 23)) >> 23;
+	return ((int32_t)(ret << 23)) >> 23;
 }
 
 READ_HANDLER( rfield_s_10 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x3ff,7);
-	return ((INT32)(ret << 22)) >> 22;
+	return ((int32_t)(ret << 22)) >> 22;
 }
 
 READ_HANDLER( rfield_s_11 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x7ff,6);
-	return ((INT32)(ret << 21)) >> 21;
+	return ((int32_t)(ret << 21)) >> 21;
 }
 
 READ_HANDLER( rfield_s_12 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0xfff,5);
-	return ((INT32)(ret << 20)) >> 20;
+	return ((int32_t)(ret << 20)) >> 20;
 }
 
 READ_HANDLER( rfield_s_13 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x1fff,4);
-	return ((INT32)(ret << 19)) >> 19;
+	return ((int32_t)(ret << 19)) >> 19;
 }
 
 READ_HANDLER( rfield_s_14 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x3fff,3);
-	return ((INT32)(ret << 18)) >> 18;
+	return ((int32_t)(ret << 18)) >> 18;
 }
 
 READ_HANDLER( rfield_s_15 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x7fff,2);
-	return ((INT32)(ret << 17)) >> 17;
+	return ((int32_t)(ret << 17)) >> 17;
 }
 
 READ_HANDLER( rfield_s_16 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	if (offset & 0x0f)
 	{
 		RFIELDMAC(0xffff,1);
@@ -549,112 +549,112 @@ READ_HANDLER( rfield_s_16 )
 		ret = TMS34010_RDMEM_WORD(TOBYTE(offset));
 	}
 
-	return (INT32)(INT16)ret;
+	return (int32_t)(int16_t)ret;
 }
 
 READ_HANDLER( rfield_s_17 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC(0x1ffff,0);
-	return ((INT32)(ret << 15)) >> 15;
+	return ((int32_t)(ret << 15)) >> 15;
 }
 
 READ_HANDLER( rfield_s_18 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x3ffff,15);
-	return ((INT32)(ret << 14)) >> 14;
+	return ((int32_t)(ret << 14)) >> 14;
 }
 
 READ_HANDLER( rfield_s_19 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x7ffff,14);
-	return ((INT32)(ret << 13)) >> 13;
+	return ((int32_t)(ret << 13)) >> 13;
 }
 
 READ_HANDLER( rfield_s_20 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0xfffff,13);
-	return ((INT32)(ret << 12)) >> 12;
+	return ((int32_t)(ret << 12)) >> 12;
 }
 
 READ_HANDLER( rfield_s_21 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x1fffff,12);
-	return ((INT32)(ret << 11)) >> 11;
+	return ((int32_t)(ret << 11)) >> 11;
 }
 
 READ_HANDLER( rfield_s_22 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x3fffff,11);
-	return ((INT32)(ret << 10)) >> 10;
+	return ((int32_t)(ret << 10)) >> 10;
 }
 
 READ_HANDLER( rfield_s_23 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x7fffff,10);
-	return ((INT32)(ret << 9)) >> 9;
+	return ((int32_t)(ret << 9)) >> 9;
 }
 
 READ_HANDLER( rfield_s_24 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0xffffff,9);
-	return ((INT32)(ret << 8)) >> 8;
+	return ((int32_t)(ret << 8)) >> 8;
 }
 
 READ_HANDLER( rfield_s_25 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x1ffffff,8);
-	return ((INT32)(ret << 7)) >> 7;
+	return ((int32_t)(ret << 7)) >> 7;
 }
 
 READ_HANDLER( rfield_s_26 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x3ffffff,7);
-	return ((INT32)(ret << 6)) >> 6;
+	return ((int32_t)(ret << 6)) >> 6;
 }
 
 READ_HANDLER( rfield_s_27 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x7ffffff,6);
-	return ((INT32)(ret << 5)) >> 5;
+	return ((int32_t)(ret << 5)) >> 5;
 }
 
 READ_HANDLER( rfield_s_28 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0xfffffff,5);
-	return ((INT32)(ret << 4)) >> 4;
+	return ((int32_t)(ret << 4)) >> 4;
 }
 
 READ_HANDLER( rfield_s_29 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x1fffffff,4);
-	return ((INT32)(ret << 3)) >> 3;
+	return ((int32_t)(ret << 3)) >> 3;
 }
 
 READ_HANDLER( rfield_s_30 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x3fffffff,3);
-	return ((INT32)(ret << 2)) >> 2;
+	return ((int32_t)(ret << 2)) >> 2;
 }
 
 READ_HANDLER( rfield_s_31 )
 {
-	UINT32 ret;
+	uint32_t ret;
 	RFIELDMAC_BIG(0x7fffffff,2);
-	return ((INT32)(ret << 1)) >> 1;
+	return ((int32_t)(ret << 1)) >> 1;
 }
 
 

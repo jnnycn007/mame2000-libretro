@@ -18,11 +18,11 @@ size_t b_paletteram_size;
 
 
 static struct osd_bitmap *pixel_layer;
-static UINT32 pixel_layer_colors[256]; /*to keep track of colors used*/
-static UINT8  pixel_layer_dirty[512];
+static uint32_t pixel_layer_colors[256]; /*to keep track of colors used*/
+static uint8_t  pixel_layer_dirty[512];
 
-static UINT8 video_control = 0;
-static UINT8 text_video_control = 0;
+static uint8_t video_control = 0;
+static uint8_t text_video_control = 0;
 
 /*TileMaps*/
 static struct tilemap *bg_tilemap, *fg_tilemap, *tx_tilemap;

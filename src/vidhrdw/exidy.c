@@ -9,28 +9,28 @@
 #include "driver.h"
 #include "vidhrdw/generic.h"
 
-UINT8 *exidy_characterram;
-UINT8 *exidy_color_latch;
-UINT8 *exidy_sprite_no;
-UINT8 *exidy_sprite_enable;
-UINT8 *exidy_sprite1_xpos;
-UINT8 *exidy_sprite1_ypos;
-UINT8 *exidy_sprite2_xpos;
-UINT8 *exidy_sprite2_ypos;
+uint8_t *exidy_characterram;
+uint8_t *exidy_color_latch;
+uint8_t *exidy_sprite_no;
+uint8_t *exidy_sprite_enable;
+uint8_t *exidy_sprite1_xpos;
+uint8_t *exidy_sprite1_ypos;
+uint8_t *exidy_sprite2_xpos;
+uint8_t *exidy_sprite2_ypos;
 
-UINT8 exidy_collision_mask;
-UINT8 exidy_collision_invert;
+uint8_t exidy_collision_mask;
+uint8_t exidy_collision_invert;
 
-UINT8 *exidy_palette;
-UINT16 *exidy_colortable;
+uint8_t *exidy_palette;
+uint16_t *exidy_colortable;
 
 static struct osd_bitmap *motion_object_1_vid;
 static struct osd_bitmap *motion_object_2_vid;
 
-static UINT8 chardirty[256];
-static UINT8 update_complete;
+static uint8_t chardirty[256];
+static uint8_t update_complete;
 
-static UINT8 int_condition;
+static uint8_t int_condition;
 
 
 
@@ -42,7 +42,7 @@ static UINT8 int_condition;
 
 /* Sidetrack/Targ/Spectar don't have a color PROM; colors are changed by the means of 8x3 */
 /* dip switches on the board. Here are the colors they map to. */
-UINT8 sidetrac_palette[] =
+uint8_t sidetrac_palette[] =
 {
 	0x00,0x00,0x00,   /* BACKGND */
 	0x00,0x00,0x00,   /* CSPACE0 */
@@ -55,7 +55,7 @@ UINT8 sidetrac_palette[] =
 };
 
 /* Targ has different colors */
-UINT8 targ_palette[] =
+uint8_t targ_palette[] =
 {
 					/* color   use                            */
 	0x00,0x00,0xff, /* blue    background             */
@@ -69,7 +69,7 @@ UINT8 targ_palette[] =
 };
 
 /* Spectar has different colors */
-UINT8 spectar_palette[] =
+uint8_t spectar_palette[] =
 {
 					/* color   use                            */
 	0x00,0x00,0xff, /* blue    background             */
@@ -90,7 +90,7 @@ UINT8 spectar_palette[] =
  *
  *************************************/
 
-UINT16 exidy_1bpp_colortable[] =
+uint16_t exidy_1bpp_colortable[] =
 {
 	/* one-bit characters */
 	0, 4,  /* chars 0x00-0x3F */
@@ -105,7 +105,7 @@ UINT16 exidy_1bpp_colortable[] =
 	0, 6,
 };
 
-UINT16 exidy_2bpp_colortable[] =
+uint16_t exidy_2bpp_colortable[] =
 {
 	/* two-bit characters */
 	/* (Because this is 2-bit color, the colorspace is only divided
@@ -135,7 +135,7 @@ UINT16 exidy_2bpp_colortable[] =
 #define PALETTE_LEN 8
 #define COLORTABLE_LEN 20
 
-void exidy_vh_init_palette(UINT8 *palette, UINT16 *colortable, const UINT8 *color_prom)
+void exidy_vh_init_palette(uint8_t *palette, uint16_t *colortable, const uint8_t *color_prom)
 {
 	if (!(Machine->drv->video_attributes & VIDEO_MODIFIES_PALETTE))
 		memcpy(palette, exidy_palette, 3 * PALETTE_LEN);
@@ -351,7 +351,7 @@ static void collision_irq_callback(int param)
 
 void exidy_vh_eof(void)
 {
-	UINT8 enable_set = ((*exidy_sprite_enable & 0x20) != 0);
+	uint8_t enable_set = ((*exidy_sprite_enable & 0x20) != 0);
     struct rectangle clip = { 0, 15, 0, 15 };
     int pen0 = Machine->pens[0];
     int sx, sy, org_x, org_y;
@@ -397,7 +397,7 @@ void exidy_vh_eof(void)
 	    for (sx = 0; sx < 16; sx++)
     		if (read_pixel(motion_object_1_vid, sx, sy) != pen0)
     		{
-    			UINT8 collision_mask = 0;
+    			uint8_t collision_mask = 0;
 
                 /* check for background collision (M1CHAR) */
 				if (read_pixel(tmpbitmap, org_x + sx, org_y + sy) != pen0)
@@ -447,7 +447,7 @@ void exidy_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 	/* draw sprite 1 next */
 	if (!(*exidy_sprite_enable & 0x80) || (*exidy_sprite_enable & 0x10))
 	{
-		UINT8 enable_set = ((*exidy_sprite_enable & 0x20) != 0);
+		uint8_t enable_set = ((*exidy_sprite_enable & 0x20) != 0);
 
 		sx = 236 - *exidy_sprite1_xpos - 4;
 		sy = 244 - *exidy_sprite1_ypos - 4;

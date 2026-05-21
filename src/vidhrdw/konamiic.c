@@ -754,10 +754,10 @@ reads from 0x0006, and only uses bit 1.
 	(it could be easily converted into an iterative one).
 	It's called shuffle because it mimics the shuffling of a deck of cards.
 */
-static void shuffle(UINT16 *buf,int len)
+static void shuffle(uint16_t *buf,int len)
 {
 	int i;
-	UINT16 t;
+	uint16_t t;
 
 	if (len == 2) return;
 
@@ -780,7 +780,7 @@ static void shuffle(UINT16 *buf,int len)
 /* helper function to join two 16-bit ROMs and form a 32-bit data stream */
 void konami_rom_deinterleave_2(int mem_region)
 {
-	shuffle((UINT16 *)memory_region(mem_region),memory_region_length(mem_region)/2);
+	shuffle((uint16_t *)memory_region(mem_region),memory_region_length(mem_region)/2);
 }
 
 /* helper function to join four 16-bit ROMs and form a 64-bit data stream */
@@ -868,7 +868,7 @@ WRITE_HANDLER( K007121_ctrl_1_w )
 
 void K007121_sprites_draw(int chip,struct osd_bitmap *bitmap,
 		const unsigned char *source,int base_color,int global_x_offset,int bank_base,
-		UINT32 pri_mask)
+		uint32_t pri_mask)
 {
 	const struct GfxElement *gfx = Machine->gfx[chip];
 	int flipscreen = K007121_flipscreen[chip];
@@ -1122,7 +1122,7 @@ static void tilemap_1_preupdate(void)
 	layer = 1;
 }
 
-static UINT32 K007342_scan(UINT32 col,UINT32 row,UINT32 num_cols,UINT32 num_rows)
+static uint32_t K007342_scan(uint32_t col,uint32_t row,uint32_t num_cols,uint32_t num_rows)
 {
 	/* logical (col,row) -> memory offset */
 	return (col & 0x1f) + ((row & 0x1f) << 5) + ((col & 0x20) << 5);
@@ -3903,18 +3903,18 @@ void K051316_tilemap_update_2(void)
 }
 
 
-void K051316_zoom_draw(int chip, struct osd_bitmap *bitmap,UINT32 priority)
+void K051316_zoom_draw(int chip, struct osd_bitmap *bitmap,uint32_t priority)
 {
-	UINT32 startx,starty;
+	uint32_t startx,starty;
 	int incxx,incxy,incyx,incyy;
 	struct osd_bitmap *srcbitmap = K051316_tilemap[chip]->pixmap;
 
-	startx = 256 * ((INT16)(256 * K051316_ctrlram[chip][0x00] + K051316_ctrlram[chip][0x01]));
-	incxx  =        (INT16)(256 * K051316_ctrlram[chip][0x02] + K051316_ctrlram[chip][0x03]);
-	incyx  =        (INT16)(256 * K051316_ctrlram[chip][0x04] + K051316_ctrlram[chip][0x05]);
-	starty = 256 * ((INT16)(256 * K051316_ctrlram[chip][0x06] + K051316_ctrlram[chip][0x07]));
-	incxy  =        (INT16)(256 * K051316_ctrlram[chip][0x08] + K051316_ctrlram[chip][0x09]);
-	incyy  =        (INT16)(256 * K051316_ctrlram[chip][0x0a] + K051316_ctrlram[chip][0x0b]);
+	startx = 256 * ((int16_t)(256 * K051316_ctrlram[chip][0x00] + K051316_ctrlram[chip][0x01]));
+	incxx  =        (int16_t)(256 * K051316_ctrlram[chip][0x02] + K051316_ctrlram[chip][0x03]);
+	incyx  =        (int16_t)(256 * K051316_ctrlram[chip][0x04] + K051316_ctrlram[chip][0x05]);
+	starty = 256 * ((int16_t)(256 * K051316_ctrlram[chip][0x06] + K051316_ctrlram[chip][0x07]));
+	incxy  =        (int16_t)(256 * K051316_ctrlram[chip][0x08] + K051316_ctrlram[chip][0x09]);
+	incyy  =        (int16_t)(256 * K051316_ctrlram[chip][0x0a] + K051316_ctrlram[chip][0x0b]);
 
 	startx -= (16 + K051316_offset[chip][1]) * incyx;
 	starty -= (16 + K051316_offset[chip][1]) * incyy;
@@ -3946,17 +3946,17 @@ void K051316_zoom_draw(int chip, struct osd_bitmap *bitmap,UINT32 priority)
 #endif
 }
 
-void K051316_zoom_draw_0(struct osd_bitmap *bitmap,UINT32 priority)
+void K051316_zoom_draw_0(struct osd_bitmap *bitmap,uint32_t priority)
 {
 	K051316_zoom_draw(0,bitmap,priority);
 }
 
-void K051316_zoom_draw_1(struct osd_bitmap *bitmap,UINT32 priority)
+void K051316_zoom_draw_1(struct osd_bitmap *bitmap,uint32_t priority)
 {
 	K051316_zoom_draw(1,bitmap,priority);
 }
 
-void K051316_zoom_draw_2(struct osd_bitmap *bitmap,UINT32 priority)
+void K051316_zoom_draw_2(struct osd_bitmap *bitmap,uint32_t priority)
 {
 	K051316_zoom_draw(2,bitmap,priority);
 }

@@ -59,7 +59,7 @@ static int segapcm_gaintable[] = {
 #endif
 
 
-static void SEGAPCMUpdate( int num, INT16 **buffer, int length );
+static void SEGAPCMUpdate( int num, int16_t **buffer, int length );
 
 
 /************************************************/
@@ -179,13 +179,13 @@ void SEGAPCMResetChip( void )
 
 static INLINE int ILimit(int v, int max, int min) { return v > max ? max : (v < min ? min : v); }
 
-static void SEGAPCMUpdate( int num, INT16 **buffer, int length )
+static void SEGAPCMUpdate( int num, int16_t **buffer, int length )
 {
 	int i, j;
 	unsigned int addr, old_addr, end_addr, end_check_addr;
 	unsigned char *pcm_buf;
 	int  lv, rv;
-	INT16  *datap[2];
+	int16_t  *datap[2];
 	int tmp;
 
 	if( Machine->sample_rate == 0 ) return;
@@ -194,8 +194,8 @@ static void SEGAPCMUpdate( int num, INT16 **buffer, int length )
 	datap[0] = buffer[0];
 	datap[1] = buffer[1];
 
-	memset( datap[0], 0x00, length * sizeof(INT16) );
-	memset( datap[1], 0x00, length * sizeof(INT16) );
+	memset( datap[0], 0x00, length * sizeof(int16_t) );
+	memset( datap[1], 0x00, length * sizeof(int16_t) );
 
 	for( i = 0; i < SEGAPCM_MAX; i++ )
 	{

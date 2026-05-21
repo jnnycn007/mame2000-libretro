@@ -31,25 +31,25 @@
 int s2650_ICount = 0;
 
 typedef struct {
-	UINT16	ppc;	/* previous program counter (page + iar) */
-    UINT16  page;   /* 8K page select register (A14..A13) */
-    UINT16  iar;    /* instruction address register (A12..A0) */
-    UINT16  ea;     /* effective address (A14..A0) */
-    UINT8   psl;    /* processor status lower */
-    UINT8   psu;    /* processor status upper */
-    UINT8   r;      /* absolute addressing dst/src register */
-    UINT8   reg[7]; /* 7 general purpose registers */
-    UINT8   halt;   /* 1 if cpu is halted */
-    UINT8   ir;     /* instruction register */
-    UINT16  ras[8]; /* 8 return address stack entries */
-	UINT8	irq_state;
+	uint16_t	ppc;	/* previous program counter (page + iar) */
+    uint16_t  page;   /* 8K page select register (A14..A13) */
+    uint16_t  iar;    /* instruction address register (A12..A0) */
+    uint16_t  ea;     /* effective address (A14..A0) */
+    uint8_t   psl;    /* processor status lower */
+    uint8_t   psu;    /* processor status upper */
+    uint8_t   r;      /* absolute addressing dst/src register */
+    uint8_t   reg[7]; /* 7 general purpose registers */
+    uint8_t   halt;   /* 1 if cpu is halted */
+    uint8_t   ir;     /* instruction register */
+    uint16_t  ras[8]; /* 8 return address stack entries */
+	uint8_t	irq_state;
     int     (*irq_callback)(int irqline);
 }   s2650_Regs;
 
 static s2650_Regs S;
 
 /* condition code changes for a byte */
-static	UINT8 ccc[0x200] = {
+static	uint8_t ccc[0x200] = {
 	0x00,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,
 	0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,
 	0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,0x40,
@@ -134,9 +134,9 @@ static	UINT8 ccc[0x200] = {
  * ROP
  * read next opcode
  ***************************************************************/
-static INLINE UINT8 ROP(void)
+static INLINE uint8_t ROP(void)
 {
-	UINT8 result = cpu_readop(S.page + S.iar);
+	uint8_t result = cpu_readop(S.page + S.iar);
 	S.iar = (S.iar + 1) & PMSK;
 	return result;
 }
@@ -145,9 +145,9 @@ static INLINE UINT8 ROP(void)
  * ARG
  * read next opcode argument
  ***************************************************************/
-static INLINE UINT8 ARG(void)
+static INLINE uint8_t ARG(void)
 {
-	UINT8 result = cpu_readop_arg(S.page + S.iar);
+	uint8_t result = cpu_readop_arg(S.page + S.iar);
 	S.iar = (S.iar + 1) & PMSK;
 	return result;
 }
@@ -188,7 +188,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define _REL_EA(page)											\
 {																\
-	UINT8 hr = ARG();	/* get 'holding register' */            \
+	uint8_t hr = ARG();	/* get 'holding register' */            \
 	/* build effective address within current 8K page */		\
 	S.ea = page + ((S.iar + S2650_relative[hr]) & PMSK);		\
 	if (hr & 0x80) { /* indirect bit set ? */					\
@@ -207,7 +207,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define _REL_ZERO(page)											\
 {																\
-	UINT8 hr = ARG();	/* get 'holding register' */            \
+	uint8_t hr = ARG();	/* get 'holding register' */            \
 	/* build effective address from 0 */						\
 	S.ea = (S2650_relative[hr] & PMSK);							\
 	if (hr & 0x80) { /* indirect bit set ? */					\
@@ -226,7 +226,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define _ABS_EA()												\
 {																\
-	UINT8 hr, dr;												\
+	uint8_t hr, dr;												\
 	hr = ARG(); 	/* get 'holding register' */                \
 	dr = ARG(); 	/* get 'data bus register' */               \
 	/* build effective address within current 8K page */		\
@@ -268,7 +268,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define _BRA_EA()												\
 {																\
-	UINT8 hr, dr;												\
+	uint8_t hr, dr;												\
 	hr = ARG(); 	/* get 'holding register' */                \
 	dr = ARG(); 	/* get 'data bus register' */               \
 	/* build address in 32K address space */					\
@@ -291,7 +291,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define SWAP_REGS												\
 {																\
-	UINT8 tmp;													\
+	uint8_t tmp;													\
 	tmp = S.reg[1]; 											\
 	S.reg[1] = S.reg[4];										\
 	S.reg[4] = tmp; 											\
@@ -511,7 +511,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define M_ADD(dest,source)										\
 {																\
-	UINT8 before = dest;										\
+	uint8_t before = dest;										\
 	/* add source; carry only if WC is set */					\
 	dest = dest + source + ((S.psl >> 3) & S.psl & C);			\
 	S.psl &= ~(C | OVF | IDC);									\
@@ -527,7 +527,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define M_SUB(dest,source)										\
 {																\
-	UINT8 before = dest;										\
+	uint8_t before = dest;										\
 	/* subtract source; borrow only if WC is set */ 			\
 	dest = dest - source - ((S.psl >> 3) & (S.psl ^ C) & C);	\
 	S.psl &= ~(C | OVF | IDC);									\
@@ -545,8 +545,8 @@ static	int 	S2650_relative[0x100] =
 {																\
 	int d;														\
 	S.psl &= ~CC;												\
-	if (S.psl & COM) d = (UINT8)reg - (UINT8)val;				\
-				else d = (INT8)reg - (INT8)val; 				\
+	if (S.psl & COM) d = (uint8_t)reg - (uint8_t)val;				\
+				else d = (int8_t)reg - (int8_t)val; 				\
 	if( d < 0 ) S.psl |= 0x80;									\
 	else														\
 	if( d > 0 ) S.psl |= 0x40;									\
@@ -576,10 +576,10 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define M_RRL(dest) 											\
 {																\
-	UINT8 before = dest;										\
+	uint8_t before = dest;										\
 	if( S.psl & WC )											\
 	{															\
-		UINT8 c = S.psl & C;									\
+		uint8_t c = S.psl & C;									\
 		S.psl &= ~(C + IDC);									\
 		dest = (before << 1) | c;								\
 		S.psl |= (before >> 7) + (dest & IDC);					\
@@ -598,10 +598,10 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define M_RRR(dest) 											\
 {																\
-	UINT8 before = dest;										\
+	uint8_t before = dest;										\
 	if (S.psl & WC) 											\
 	{															\
-		UINT8 c = S.psl & C;									\
+		uint8_t c = S.psl & C;									\
 		S.psl &= ~(C + IDC);									\
 		dest = (before >> 1) | (c << 7);						\
 		S.psl |= (before & C) + (dest & IDC);					\
@@ -635,7 +635,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define M_CPSU()												\
 {																\
-	UINT8 cpsu = ARG(); 										\
+	uint8_t cpsu = ARG(); 										\
 	S.psu = S.psu & ~cpsu;										\
 	CHECK_IRQ_LINE; 											\
 }
@@ -646,7 +646,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define M_CPSL()												\
 {																\
-	UINT8 cpsl = ARG(); 										\
+	uint8_t cpsl = ARG(); 										\
 	/* select other register set now ? */						\
 	if( (cpsl & RS) && (S.psl & RS) )							\
 		SWAP_REGS;												\
@@ -661,7 +661,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define M_PPSU()												\
 {																\
-	UINT8 ppsu = ARG() & ~PSU34;								\
+	uint8_t ppsu = ARG() & ~PSU34;								\
 	S.psu = S.psu | ppsu;										\
 }
 
@@ -671,7 +671,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define M_PPSL()												\
 {																\
-	UINT8 ppsl = ARG(); 										\
+	uint8_t ppsl = ARG(); 										\
 	/* select 2nd register set now ? */ 						\
 	if ((ppsl & RS) && !(S.psl & RS))							\
 		SWAP_REGS;												\
@@ -684,7 +684,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define M_TPSU()												\
 {																\
-	UINT8 tpsu = ARG(); 										\
+	uint8_t tpsu = ARG(); 										\
 	S.psl &= ~CC;												\
 	if( (S.psu & tpsu) != tpsu )								\
 		S.psl |= 0x80;											\
@@ -696,7 +696,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define M_TPSL()												\
 {																\
-	UINT8 tpsl = ARG(); 										\
+	uint8_t tpsl = ARG(); 										\
 	if( (S.psl & tpsl) != tpsl )								\
 		S.psl = (S.psl & ~CC) | 0x80;							\
 	else														\
@@ -709,7 +709,7 @@ static	int 	S2650_relative[0x100] =
  ***************************************************************/
 #define M_TMI(value)											\
 {																\
-	UINT8 tmi = ARG();											\
+	uint8_t tmi = ARG();											\
 	S.psl &= ~CC;												\
 	if( (value & tmi) != tmi )									\
 		S.psl |= 0x80;											\

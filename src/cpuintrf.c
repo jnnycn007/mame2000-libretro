@@ -1084,7 +1084,7 @@ int cpu_getfperiod(void)
 ***************************************************************************/
 int cpu_scalebyfcount(int value)
 {
-    int result = ( ((INT64)value) * ((INT64)timer_timeelapsed(refresh_timer)) ) / ((INT64)refresh_period);
+    int result = ( ((int64_t)value) * ((int64_t)timer_timeelapsed(refresh_timer)) ) / ((int64_t)refresh_period);
 	if (value >= 0) return (result < value) ? result : value;
 	else return (result > value) ? result : value;
 }
@@ -1165,7 +1165,7 @@ int cpu_gethorzbeampos(void)
 	timer_tm time_since_scanline = elapsed_time - scanline * scanline_period;
 	*/
 	timer_tm time_since_scanline = timer_timeelapsed(refresh_timer) % scanline_period;
-    return ( ((INT64)time_since_scanline) * ((INT64)Machine->drv->screen_width) ) / ((INT64)scanline_period);
+    return ( ((int64_t)time_since_scanline) * ((int64_t)Machine->drv->screen_width) ) / ((int64_t)scanline_period);
 }
 
 

@@ -10,7 +10,7 @@
 
 #define VEC_SHIFT 16
 
-UINT8 *aztarac_vectorram;
+uint8_t *aztarac_vectorram;
 
 static int xcenter, ycenter;
 

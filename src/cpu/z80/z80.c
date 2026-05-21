@@ -51,7 +51,7 @@
  *		now also adjust the R register depending on the skipped opcodes.
  *   Changes in 2.2:
  *	  - Fixed bugs in CPL, SCF and CCF instructions flag handling.
- *	  - Changed variable EA and ARG16() function to UINT32; this
+ *	  - Changed variable EA and ARG16() function to uint32_t; this
  *		produces slightly more efficient code.
  *	  - The DD/FD XY CB opcodes where XY is 40-7F and Y is not 6/E
  *		are changed to calls to the X6/XE opcodes to reduce object size.
@@ -75,13 +75,13 @@
 typedef struct {
 /* 00 */    PAIR    PREPC,PC,SP,AF,BC,DE,HL,IX,IY;
 /* 24 */    PAIR    AF2,BC2,DE2,HL2;
-/* 34 */    UINT8   R,R2,IFF1,IFF2,HALT,IM,I;
-/* 3B */    UINT8   irq_max;            /* number of daisy chain devices        */
-/* 3C */	INT8	request_irq;		/* daisy chain next request device		*/
-/* 3D */	INT8	service_irq;		/* daisy chain next reti handling device */
-/* 3E */	UINT8	nmi_state;			/* nmi line state */
-/* 3F */	UINT8	irq_state;			/* irq line state */
-/* 40 */    UINT8   int_state[Z80_MAXDAISY];
+/* 34 */    uint8_t   R,R2,IFF1,IFF2,HALT,IM,I;
+/* 3B */    uint8_t   irq_max;            /* number of daisy chain devices        */
+/* 3C */	int8_t	request_irq;		/* daisy chain next request device		*/
+/* 3D */	int8_t	service_irq;		/* daisy chain next reti handling device */
+/* 3E */	uint8_t	nmi_state;			/* nmi line state */
+/* 3F */	uint8_t	irq_state;			/* irq line state */
+/* 40 */    uint8_t   int_state[Z80_MAXDAISY];
 /* 44 */    Z80_DaisyChain irq[Z80_MAXDAISY];
 /* 84 */    int     (*irq_callback)(int irqline);
 /* 88 */    int     extra_cycles;       /* extra cycles for interrupts */
@@ -148,30 +148,30 @@ typedef struct {
 
 int z80_ICount;
 static Z80_Regs Z80;
-static UINT32 EA;
+static uint32_t EA;
 static int after_EI = 0;
 
-static UINT8 SZ[256];		/* zero and sign flags */
-static UINT8 SZ_BIT[256];	/* zero, sign and parity/overflow (=zero) flags for BIT opcode */
-static UINT8 SZP[256];		/* zero, sign and parity flags */
-static UINT8 SZHV_inc[256]; /* zero, sign, half carry and overflow flags INC r8 */
-static UINT8 SZHV_dec[256]; /* zero, sign, half carry and overflow flags DEC r8 */
+static uint8_t SZ[256];		/* zero and sign flags */
+static uint8_t SZ_BIT[256];	/* zero, sign and parity/overflow (=zero) flags for BIT opcode */
+static uint8_t SZP[256];		/* zero, sign and parity flags */
+static uint8_t SZHV_inc[256]; /* zero, sign, half carry and overflow flags INC r8 */
+static uint8_t SZHV_dec[256]; /* zero, sign, half carry and overflow flags DEC r8 */
 
-static UINT8 *SZHVC_add = 0;
-static UINT8 *SZHVC_sub = 0;
+static uint8_t *SZHVC_add = 0;
+static uint8_t *SZHVC_sub = 0;
 
 /* tmp1 value for ini/inir/outi/otir for [C.1-0][io.1-0] */
-static UINT8 irep_tmp1[4][4] = {
+static uint8_t irep_tmp1[4][4] = {
 	{0,0,1,0},{0,1,0,1},{1,0,1,1},{0,1,1,0}
 };
 
 /* tmp1 value for ind/indr/outd/otdr for [C.1-0][io.1-0] */
-static UINT8 drep_tmp1[4][4] = {
+static uint8_t drep_tmp1[4][4] = {
 	{0,1,0,0},{1,0,0,1},{0,0,1,0},{0,1,0,1}
 };
 
 /* tmp2 value for all in/out repeated opcodes for B.7-0 */
-static UINT8 breg_tmp2[256] = {
+static uint8_t breg_tmp2[256] = {
 	0,0,1,1,0,1,0,0,1,1,0,0,1,0,1,1,
 	0,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,
 	1,1,0,0,1,0,1,1,0,0,1,1,0,1,0,0,
@@ -190,7 +190,7 @@ static UINT8 breg_tmp2[256] = {
 	1,0,1,1,0,1,0,0,1,1,0,0,1,0,1,1
 };
 
-static UINT8 cc_op[0x100] = {
+static uint8_t cc_op[0x100] = {
  4,10, 7, 6, 4, 4, 7, 4, 4,11, 7, 6, 4, 4, 7, 4,
  8,10, 7, 6, 4, 4, 7, 4,12,11, 7, 6, 4, 4, 7, 4,
  7,10,16, 6, 4, 4, 7, 4, 7,11,16, 6, 4, 4, 7, 4,
@@ -208,7 +208,7 @@ static UINT8 cc_op[0x100] = {
  5,10,10,19,10,11, 7,11, 5, 4,10, 4,10, 0, 7,11,
  5,10,10, 4,10,11, 7,11, 5, 6,10, 4,10, 0, 7,11};
 
-static UINT8 cc_cb[0x100] = {
+static uint8_t cc_cb[0x100] = {
  8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8,
  8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8,
  8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8,
@@ -226,7 +226,7 @@ static UINT8 cc_cb[0x100] = {
  8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8,
  8, 8, 8, 8, 8, 8,15, 8, 8, 8, 8, 8, 8, 8,15, 8};
 
-static UINT8 cc_ed[0x100] = {
+static uint8_t cc_ed[0x100] = {
  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
@@ -244,7 +244,7 @@ static UINT8 cc_ed[0x100] = {
  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8,
  8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8};
 
-static UINT8 cc_xy[0x100] = {
+static uint8_t cc_xy[0x100] = {
  4, 4, 4, 4, 4, 4, 4, 4, 4,15, 4, 4, 4, 4, 4, 4,
  4, 4, 4, 4, 4, 4, 4, 4, 4,15, 4, 4, 4, 4, 4, 4,
  4,14,20,10, 9, 9, 9, 4, 4,15,20,10, 9, 9, 9, 4,
@@ -262,7 +262,7 @@ static UINT8 cc_xy[0x100] = {
  4,14, 4,23, 4,15, 4, 4, 4, 8, 4, 4, 4, 4, 4, 4,
  4, 4, 4, 4, 4, 4, 4, 4, 4,10, 4, 4, 4, 4, 4, 4};
 
-static UINT8 cc_xycb[0x100] = {
+static uint8_t cc_xycb[0x100] = {
 23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,
 23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,
 23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,
@@ -281,7 +281,7 @@ static UINT8 cc_xycb[0x100] = {
 23,23,23,23,23,23,23,23,23,23,23,23,23,23,23,23};
 
 /* extra cycles if jr/jp/call taken and 'interrupt latency' on rst 0-7 */
-static UINT8 cc_ex[0x100] = {
+static uint8_t cc_ex[0x100] = {
  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
  5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,	/* DJNZ */
  5, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0,	/* JR NZ/JR Z */
@@ -299,7 +299,7 @@ static UINT8 cc_ex[0x100] = {
  6, 0, 0, 0, 7, 0, 0, 2, 6, 0, 0, 0, 7, 0, 0, 2,
  6, 0, 0, 0, 7, 0, 0, 2, 6, 0, 0, 0, 7, 0, 0, 2};
 
-static UINT8 *cc[6] = { cc_op, cc_cb, cc_ed, cc_xy, cc_xycb, cc_ex };
+static uint8_t *cc[6] = { cc_op, cc_cb, cc_ed, cc_xy, cc_xycb, cc_ex };
 #define Z80_TABLE_dd	Z80_TABLE_xy
 #define Z80_TABLE_fd	Z80_TABLE_xy
 
@@ -469,7 +469,7 @@ static INLINE void BURNODD(int cycles, int opcodes, int cyclesum)
 /***************************************************************
  * Input a byte from given I/O port
  ***************************************************************/
-#define IN(port)   ((UINT8)cpu_readport(port))
+#define IN(port)   ((uint8_t)cpu_readport(port))
 
 /***************************************************************
  * Output a byte to given I/O port
@@ -479,12 +479,12 @@ static INLINE void BURNODD(int cycles, int opcodes, int cyclesum)
 /***************************************************************
  * Read a byte from given memory location
  ***************************************************************/
-#define RM(addr) (UINT8)cpu_readmem16(addr)
+#define RM(addr) (uint8_t)cpu_readmem16(addr)
 
 /***************************************************************
  * Read a word from given memory location
  ***************************************************************/
-static INLINE void RM16( UINT32 addr, PAIR *r )
+static INLINE void RM16( uint32_t addr, PAIR *r )
 {
 	r->b.l = RM(addr);
 	r->b.h = RM((addr+1)&0xffff);
@@ -498,7 +498,7 @@ static INLINE void RM16( UINT32 addr, PAIR *r )
 /***************************************************************
  * Write a word to given memory location
  ***************************************************************/
-static INLINE void WM16( UINT32 addr, PAIR *r )
+static INLINE void WM16( uint32_t addr, PAIR *r )
 {
 	WM(addr,r->b.l);
 	WM((addr+1)&0xffff,r->b.h);
@@ -509,7 +509,7 @@ static INLINE void WM16( UINT32 addr, PAIR *r )
  * reading opcodes. In case of system with memory mapped I/O,
  * this function can be used to greatly speed up emulation
  ***************************************************************/
-static INLINE UINT8 ROP(void)
+static INLINE uint8_t ROP(void)
 {
 	unsigned pc = _PCD;
 	_PC++;
@@ -522,14 +522,14 @@ static INLINE UINT8 ROP(void)
  * support systems that use different encoding mechanisms for
  * opcodes and opcode arguments
  ***************************************************************/
-static INLINE UINT8 ARG(void)
+static INLINE uint8_t ARG(void)
 {
 	unsigned pc = _PCD;
     _PC++;
 	return cpu_readop_arg(pc);
 }
 
-static INLINE UINT32 ARG16(void)
+static INLINE uint32_t ARG16(void)
 {
 	unsigned pc = _PCD;
     _PC += 2;
@@ -540,8 +540,8 @@ static INLINE UINT32 ARG16(void)
  * Calculate the effective address EA of an opcode using
  * IX+offset resp. IY+offset addressing.
  ***************************************************************/
-#define EAX EA = (UINT32)(UINT16)(_IX+(INT8)ARG())
-#define EAY EA = (UINT32)(UINT16)(_IY+(INT8)ARG())
+#define EAX EA = (uint32_t)(uint16_t)(_IX+(int8_t)ARG())
+#define EAY EA = (uint32_t)(uint16_t)(_IY+(int8_t)ARG())
 
 /***************************************************************
  * POP
@@ -568,7 +568,7 @@ static INLINE UINT32 ARG16(void)
 	}															\
 	else														\
 	{															\
-		UINT8 op = cpu_readop(_PCD);							\
+		uint8_t op = cpu_readop(_PCD);							\
 		if( _PCD == oldpc-1 )									\
 		{														\
 			/* NOP - JP $-1 or EI - JP $-1 */					\
@@ -611,7 +611,7 @@ static INLINE UINT32 ARG16(void)
 #define JR()													\
 {																\
 	unsigned oldpc = _PCD-1;									\
-	INT8 arg = (INT8)ARG(); /* ARG() also increments _PC */ 	\
+	int8_t arg = (int8_t)ARG(); /* ARG() also increments _PC */ 	\
 	_PC += arg; 			/* so don't do _PC += ARG() */      \
 	change_pc16(_PCD);											\
     /* speed up busy loop */                                    \
@@ -622,7 +622,7 @@ static INLINE UINT32 ARG16(void)
 	}															\
 	else														\
 	{															\
-		UINT8 op = cpu_readop(_PCD);							\
+		uint8_t op = cpu_readop(_PCD);							\
 		if( _PCD == oldpc-1 )									\
 		{														\
 			/* NOP - JR $-1 or EI - JR $-1 */					\
@@ -650,7 +650,7 @@ static INLINE UINT32 ARG16(void)
 #define JR_COND(cond,opcode)									\
 	if( cond )													\
 	{															\
-		INT8 arg = (INT8)ARG(); /* ARG() also increments _PC */ \
+		int8_t arg = (int8_t)ARG(); /* ARG() also increments _PC */ \
 		_PC += arg; 			/* so don't do _PC += ARG() */  \
 		CC(ex,opcode);											\
 		change_pc16(_PCD);										\
@@ -769,19 +769,19 @@ static INLINE UINT32 ARG16(void)
 /***************************************************************
  * INC	r8
  ***************************************************************/
-static INLINE UINT8 INC(UINT8 value)
+static INLINE uint8_t INC(uint8_t value)
 {
-	UINT8 res = value + 1;
+	uint8_t res = value + 1;
 	_F = (_F & CF) | SZHV_inc[res];
-	return (UINT8)res;
+	return (uint8_t)res;
 }
 
 /***************************************************************
  * DEC	r8
  ***************************************************************/
-static INLINE UINT8 DEC(UINT8 value)
+static INLINE uint8_t DEC(uint8_t value)
 {
-	UINT8 res = value - 1;
+	uint8_t res = value - 1;
 	_F = (_F & CF) | SZHV_dec[res];
     return res;
 }
@@ -804,8 +804,8 @@ static INLINE UINT8 DEC(UINT8 value)
  * RLA
  ***************************************************************/
 #define RLA {													\
-	UINT8 res = (_A << 1) | (_F & CF);							\
-	UINT8 c = (_A & 0x80) ? CF : 0; 							\
+	uint8_t res = (_A << 1) | (_F & CF);							\
+	uint8_t c = (_A & 0x80) ? CF : 0; 							\
 	_F = (_F & (SF | ZF | PF)) | c | (res & (YF | XF)); 		\
 	_A = res;													\
 }
@@ -814,8 +814,8 @@ static INLINE UINT8 DEC(UINT8 value)
  * RRA
  ***************************************************************/
 #define RRA {                                                   \
-	UINT8 res = (_A >> 1) | (_F << 7);							\
-	UINT8 c = (_A & 0x01) ? CF : 0; 							\
+	uint8_t res = (_A >> 1) | (_F << 7);							\
+	uint8_t c = (_A & 0x01) ? CF : 0; 							\
 	_F = (_F & (SF | ZF | PF)) | c | (res & (YF | XF)); 		\
 	_A = res;													\
 }
@@ -824,7 +824,7 @@ static INLINE UINT8 DEC(UINT8 value)
  * RRD
  ***************************************************************/
 #define RRD {													\
-	UINT8 n = RM(_HL);											\
+	uint8_t n = RM(_HL);											\
 	WM( _HL, (n >> 4) | (_A << 4) );							\
 	_A = (_A & 0xf0) | (n & 0x0f);								\
 	_F = (_F & CF) | SZP[_A];									\
@@ -834,7 +834,7 @@ static INLINE UINT8 DEC(UINT8 value)
  * RLD
  ***************************************************************/
 #define RLD {                                                   \
-    UINT8 n = RM(_HL);                                          \
+    uint8_t n = RM(_HL);                                          \
 	WM( _HL, (n << 4) | (_A & 0x0f) );							\
     _A = (_A & 0xf0) | (n >> 4);                                \
 	_F = (_F & CF) | SZP[_A];									\
@@ -845,8 +845,8 @@ static INLINE UINT8 DEC(UINT8 value)
  ***************************************************************/
 #define ADD(value)												\
 {																\
-	UINT32 ah = _AFD & 0xff00;									\
-	UINT32 res = (UINT8)((ah >> 8) + value);					\
+	uint32_t ah = _AFD & 0xff00;									\
+	uint32_t res = (uint8_t)((ah >> 8) + value);					\
 	_F = SZHVC_add[ah | res];									\
     _A = res;                                                   \
 }
@@ -856,8 +856,8 @@ static INLINE UINT8 DEC(UINT8 value)
  ***************************************************************/
 #define ADC(value)												\
 {																\
-	UINT32 ah = _AFD & 0xff00, c = _AFD & 1;					\
-	UINT32 res = (UINT8)((ah >> 8) + value + c);				\
+	uint32_t ah = _AFD & 0xff00, c = _AFD & 1;					\
+	uint32_t res = (uint8_t)((ah >> 8) + value + c);				\
 	_F = SZHVC_add[(c << 16) | ah | res];						\
     _A = res;                                                   \
 }
@@ -867,8 +867,8 @@ static INLINE UINT8 DEC(UINT8 value)
  ***************************************************************/
 #define SUB(value)												\
 {																\
-	UINT32 ah = _AFD & 0xff00;									\
-	UINT32 res = (UINT8)((ah >> 8) - value);					\
+	uint32_t ah = _AFD & 0xff00;									\
+	uint32_t res = (uint8_t)((ah >> 8) - value);					\
 	_F = SZHVC_sub[ah | res];									\
     _A = res;                                                   \
 }
@@ -878,8 +878,8 @@ static INLINE UINT8 DEC(UINT8 value)
  ***************************************************************/
 #define SBC(value)												\
 {																\
-	UINT32 ah = _AFD & 0xff00, c = _AFD & 1;					\
-	UINT32 res = (UINT8)((ah >> 8) - value - c);				\
+	uint32_t ah = _AFD & 0xff00, c = _AFD & 1;					\
+	uint32_t res = (uint8_t)((ah >> 8) - value - c);				\
 	_F = SZHVC_sub[(c<<16) | ah | res]; 						\
     _A = res;                                                   \
 }
@@ -888,7 +888,7 @@ static INLINE UINT8 DEC(UINT8 value)
  * NEG
  ***************************************************************/
 #define NEG {                                                   \
-	UINT8 value = _A;											\
+	uint8_t value = _A;											\
 	_A = 0; 													\
 	SUB(value); 												\
 }
@@ -906,7 +906,7 @@ static INLINE UINT8 DEC(UINT8 value)
 }
 */
 #define DAA {													\
-	UINT8 cf, nf, hf, lo, hi, diff;								\
+	uint8_t cf, nf, hf, lo, hi, diff;								\
 	cf = _F & CF;												\
 	nf = _F & NF;												\
 	hf = _F & HF;												\
@@ -969,8 +969,8 @@ static INLINE UINT8 DEC(UINT8 value)
  ***************************************************************/
 #define CP(value)												\
 {																\
-	UINT32 ah = _AFD & 0xff00;									\
-	UINT32 res = (UINT8)((ah >> 8) - value);					\
+	uint32_t ah = _AFD & 0xff00;									\
+	uint32_t res = (uint8_t)((ah >> 8) - value);					\
 	_F = SZHVC_sub[ah | res];									\
 }
 
@@ -1017,11 +1017,11 @@ static INLINE UINT8 DEC(UINT8 value)
  ***************************************************************/
 #define ADD16(DR,SR)											\
 {																\
-	UINT32 res = Z80.DR.d + Z80.SR.d;							\
+	uint32_t res = Z80.DR.d + Z80.SR.d;							\
 	_F = (_F & (SF | ZF | VF)) |								\
 		(((Z80.DR.d ^ res ^ Z80.SR.d) >> 8) & HF) | 			\
 		((res >> 16) & CF); 									\
-	Z80.DR.w.l = (UINT16)res;									\
+	Z80.DR.w.l = (uint16_t)res;									\
 }
 
 /***************************************************************
@@ -1029,13 +1029,13 @@ static INLINE UINT8 DEC(UINT8 value)
  ***************************************************************/
 #define ADC16(Reg)												\
 {																\
-	UINT32 res = _HLD + Z80.Reg.d + (_F & CF);					\
+	uint32_t res = _HLD + Z80.Reg.d + (_F & CF);					\
 	_F = (((_HLD ^ res ^ Z80.Reg.d) >> 8) & HF) |				\
 		((res >> 16) & CF) |									\
 		((res >> 8) & SF) | 									\
 		((res & 0xffff) ? 0 : ZF) | 							\
 		(((Z80.Reg.d ^ _HLD ^ 0x8000) & (Z80.Reg.d ^ res) & 0x8000) >> 13); \
-	_HL = (UINT16)res;											\
+	_HL = (uint16_t)res;											\
 }
 
 /***************************************************************
@@ -1043,19 +1043,19 @@ static INLINE UINT8 DEC(UINT8 value)
  ***************************************************************/
 #define SBC16(Reg)												\
 {																\
-	UINT32 res = _HLD - Z80.Reg.d - (_F & CF);					\
+	uint32_t res = _HLD - Z80.Reg.d - (_F & CF);					\
 	_F = (((_HLD ^ res ^ Z80.Reg.d) >> 8) & HF) | NF |			\
 		((res >> 16) & CF) |									\
 		((res >> 8) & SF) | 									\
 		((res & 0xffff) ? 0 : ZF) | 							\
 		(((Z80.Reg.d ^ _HLD) & (_HLD ^ res) &0x8000) >> 13);	\
-	_HL = (UINT16)res;											\
+	_HL = (uint16_t)res;											\
 }
 
 /***************************************************************
  * RLC	r8
  ***************************************************************/
-static INLINE UINT8 RLC(UINT8 value)
+static INLINE uint8_t RLC(uint8_t value)
 {
 	unsigned res = value;
 	unsigned c = (res & 0x80) ? CF : 0;
@@ -1067,7 +1067,7 @@ static INLINE UINT8 RLC(UINT8 value)
 /***************************************************************
  * RRC	r8
  ***************************************************************/
-static INLINE UINT8 RRC(UINT8 value)
+static INLINE uint8_t RRC(uint8_t value)
 {
 	unsigned res = value;
 	unsigned c = (res & 0x01) ? CF : 0;
@@ -1079,7 +1079,7 @@ static INLINE UINT8 RRC(UINT8 value)
 /***************************************************************
  * RL	r8
  ***************************************************************/
-static INLINE UINT8 RL(UINT8 value)
+static INLINE uint8_t RL(uint8_t value)
 {
 	unsigned res = value;
 	unsigned c = (res & 0x80) ? CF : 0;
@@ -1091,7 +1091,7 @@ static INLINE UINT8 RL(UINT8 value)
 /***************************************************************
  * RR	r8
  ***************************************************************/
-static INLINE UINT8 RR(UINT8 value)
+static INLINE uint8_t RR(uint8_t value)
 {
 	unsigned res = value;
 	unsigned c = (res & 0x01) ? CF : 0;
@@ -1103,7 +1103,7 @@ static INLINE UINT8 RR(UINT8 value)
 /***************************************************************
  * SLA	r8
  ***************************************************************/
-static INLINE UINT8 SLA(UINT8 value)
+static INLINE uint8_t SLA(uint8_t value)
 {
 	unsigned res = value;
 	unsigned c = (res & 0x80) ? CF : 0;
@@ -1115,7 +1115,7 @@ static INLINE UINT8 SLA(UINT8 value)
 /***************************************************************
  * SRA	r8
  ***************************************************************/
-static INLINE UINT8 SRA(UINT8 value)
+static INLINE uint8_t SRA(uint8_t value)
 {
 	unsigned res = value;
 	unsigned c = (res & 0x01) ? CF : 0;
@@ -1127,7 +1127,7 @@ static INLINE UINT8 SRA(UINT8 value)
 /***************************************************************
  * SLL	r8
  ***************************************************************/
-static INLINE UINT8 SLL(UINT8 value)
+static INLINE uint8_t SLL(uint8_t value)
 {
 	unsigned res = value;
 	unsigned c = (res & 0x80) ? CF : 0;
@@ -1139,7 +1139,7 @@ static INLINE UINT8 SLL(UINT8 value)
 /***************************************************************
  * SRL	r8
  ***************************************************************/
-static INLINE UINT8 SRL(UINT8 value)
+static INLINE uint8_t SRL(uint8_t value)
 {
 	unsigned res = value;
 	unsigned c = (res & 0x01) ? CF : 0;
@@ -1163,7 +1163,7 @@ static INLINE UINT8 SRL(UINT8 value)
 /***************************************************************
  * RES	bit,r8
  ***************************************************************/
-static INLINE UINT8 RES(UINT8 bit, UINT8 value)
+static INLINE uint8_t RES(uint8_t bit, uint8_t value)
 {
 	return value & ~(1<<bit);
 }
@@ -1171,7 +1171,7 @@ static INLINE UINT8 RES(UINT8 bit, UINT8 value)
 /***************************************************************
  * SET  bit,r8
  ***************************************************************/
-static INLINE UINT8 SET(UINT8 bit, UINT8 value)
+static INLINE uint8_t SET(uint8_t bit, uint8_t value)
 {
 	return value | (1<<bit);
 }
@@ -1180,7 +1180,7 @@ static INLINE UINT8 SET(UINT8 bit, UINT8 value)
  * LDI
  ***************************************************************/
 #define LDI {													\
-	UINT8 io = RM(_HL); 										\
+	uint8_t io = RM(_HL); 										\
 	WM( _DE, io );												\
 	_F &= SF | ZF | CF; 										\
 	if( (_A + io) & 0x02 ) _F |= YF; /* bit 1 -> flag 5 */		\
@@ -1193,8 +1193,8 @@ static INLINE UINT8 SET(UINT8 bit, UINT8 value)
  * CPI
  ***************************************************************/
 #define CPI {													\
-	UINT8 val = RM(_HL);										\
-	UINT8 res = _A - val;										\
+	uint8_t val = RM(_HL);										\
+	uint8_t res = _A - val;										\
 	_HL++; _BC--;												\
 	_F = (_F & CF) | (SZ[res] & ~(YF|XF)) | ((_A ^ val ^ res) & HF) | NF;  \
 	if( _F & HF ) res -= 1; 									\
@@ -1207,7 +1207,7 @@ static INLINE UINT8 SET(UINT8 bit, UINT8 value)
  * INI
  ***************************************************************/
 #define INI {													\
-	UINT8 io = IN(_BC); 										\
+	uint8_t io = IN(_BC); 										\
     _B--;                                                       \
 	WM( _HL, io );												\
 	_HL++;														\
@@ -1225,7 +1225,7 @@ static INLINE UINT8 SET(UINT8 bit, UINT8 value)
  * OUTI
  ***************************************************************/
 #define OUTI {													\
-	UINT8 io = RM(_HL); 										\
+	uint8_t io = RM(_HL); 										\
     _B--;                                                       \
 	OUT( _BC, io ); 											\
 	_HL++;														\
@@ -1243,7 +1243,7 @@ static INLINE UINT8 SET(UINT8 bit, UINT8 value)
  * LDD
  ***************************************************************/
 #define LDD {													\
-	UINT8 io = RM(_HL); 										\
+	uint8_t io = RM(_HL); 										\
 	WM( _DE, io );												\
 	_F &= SF | ZF | CF; 										\
 	if( (_A + io) & 0x02 ) _F |= YF; /* bit 1 -> flag 5 */		\
@@ -1256,8 +1256,8 @@ static INLINE UINT8 SET(UINT8 bit, UINT8 value)
  * CPD
  ***************************************************************/
 #define CPD {													\
-	UINT8 val = RM(_HL);										\
-	UINT8 res = _A - val;										\
+	uint8_t val = RM(_HL);										\
+	uint8_t res = _A - val;										\
 	_HL--; _BC--;												\
 	_F = (_F & CF) | (SZ[res] & ~(YF|XF)) | ((_A ^ val ^ res) & HF) | NF;  \
 	if( _F & HF ) res -= 1; 									\
@@ -1270,7 +1270,7 @@ static INLINE UINT8 SET(UINT8 bit, UINT8 value)
  * IND
  ***************************************************************/
 #define IND {													\
-    UINT8 io = IN(_BC);                                         \
+    uint8_t io = IN(_BC);                                         \
 	_B--;														\
 	WM( _HL, io );												\
 	_HL--;														\
@@ -1288,7 +1288,7 @@ static INLINE UINT8 SET(UINT8 bit, UINT8 value)
  * OUTD
  ***************************************************************/
 #define OUTD {													\
-	UINT8 io = RM(_HL); 										\
+	uint8_t io = RM(_HL); 										\
     _B--;                                                       \
 	OUT( _BC, io ); 											\
 	_HL--;														\
@@ -1648,10 +1648,10 @@ void z80_reset(void *param)
 	if( !SZHVC_add || !SZHVC_sub )
     {
 		int oldval, newval, val;
-		UINT8 *padd, *padc, *psub, *psbc;
+		uint8_t *padd, *padc, *psub, *psbc;
         /* allocate big flag arrays once */
-		SZHVC_add = (UINT8 *)malloc(2*256*256);
-		SZHVC_sub = (UINT8 *)malloc(2*256*256);
+		SZHVC_add = (uint8_t *)malloc(2*256*256);
+		SZHVC_sub = (uint8_t *)malloc(2*256*256);
 		padd = &SZHVC_add[	0*256];
 		padc = &SZHVC_add[256*256];
 		psub = &SZHVC_sub[	0*256];
@@ -2157,7 +2157,7 @@ void *z80_get_cycle_table (int which)
 void z80_set_cycle_table (int which, void *new_table)
 {
 	if (which >= 0 && which <= Z80_TABLE_xycb)
-		cc[which] = (UINT8*)new_table;
+		cc[which] = (uint8_t*)new_table;
 }
 
 /****************************************************************************

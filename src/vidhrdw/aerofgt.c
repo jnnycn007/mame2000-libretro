@@ -25,40 +25,40 @@ static int sprite_gfx;
 
 static void get_pspikes_tile_info(int tile_index)
 {
-	UINT16 code = READ_WORD(&aerofgt_bg1videoram[2*tile_index]);
+	uint16_t code = READ_WORD(&aerofgt_bg1videoram[2*tile_index]);
 	int bank = (code & 0x1000) >> 12;
 	SET_TILE_INFO(0,(code & 0x0fff) + (gfxbank[bank] << 12),((code & 0xe000) >> 13) + 8 * charpalettebank)
 }
 
 static void karatblz_bg1_tile_info(int tile_index)
 {
-	UINT16 code = READ_WORD(&aerofgt_bg1videoram[2*tile_index]);
+	uint16_t code = READ_WORD(&aerofgt_bg1videoram[2*tile_index]);
 	SET_TILE_INFO(0,(code & 0x1fff) + (gfxbank[0] << 13),(code & 0xe000) >> 13)
 }
 
 /* also spinlbrk */
 static void karatblz_bg2_tile_info(int tile_index)
 {
-	UINT16 code = READ_WORD(&aerofgt_bg2videoram[2*tile_index]);
+	uint16_t code = READ_WORD(&aerofgt_bg2videoram[2*tile_index]);
 	SET_TILE_INFO(1,(code & 0x1fff) + (gfxbank[1] << 13),(code & 0xe000) >> 13)
 }
 
 static void spinlbrk_bg1_tile_info(int tile_index)
 {
-	UINT16 code = READ_WORD(&aerofgt_bg1videoram[2*tile_index]);
+	uint16_t code = READ_WORD(&aerofgt_bg1videoram[2*tile_index]);
 	SET_TILE_INFO(0,(code & 0x0fff) + (gfxbank[0] << 12),(code & 0xf000) >> 12)
 }
 
 static void get_bg1_tile_info(int tile_index)
 {
-	UINT16 code = READ_WORD(&aerofgt_bg1videoram[2*tile_index]);
+	uint16_t code = READ_WORD(&aerofgt_bg1videoram[2*tile_index]);
 	int bank = (code & 0x1800) >> 11;
 	SET_TILE_INFO(0,(code & 0x07ff) + (gfxbank[bank] << 11),(code & 0xe000) >> 13)
 }
 
 static void get_bg2_tile_info(int tile_index)
 {
-	UINT16 code = READ_WORD(&aerofgt_bg2videoram[2*tile_index]);
+	uint16_t code = READ_WORD(&aerofgt_bg2videoram[2*tile_index]);
 	int bank = 4 + ((code & 0x1800) >> 11);
 	SET_TILE_INFO(1,(code & 0x07ff) + (gfxbank[bank] << 11),(code & 0xe000) >> 13)
 }

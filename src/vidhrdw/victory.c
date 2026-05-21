@@ -9,32 +9,32 @@
 
 
 /* globally-accessible storage */
-UINT8 *victory_charram;
+uint8_t *victory_charram;
 
 /* local allocated storage */
 static struct osd_bitmap *bgbitmap;
 static struct osd_bitmap *fgbitmap;
-static UINT8 *bgdirty;
-static UINT8 *chardirty;
-static UINT8 *scandirty;
-static UINT8 *rram, *gram, *bram;
+static uint8_t *bgdirty;
+static uint8_t *chardirty;
+static uint8_t *scandirty;
+static uint8_t *rram, *gram, *bram;
 
 /* interrupt, collision, and control states */
-static UINT8 vblank_irq;
-static UINT8 fgcoll, fgcollx, fgcolly;
-static UINT8 bgcoll, bgcollx, bgcolly;
-static UINT8 scrollx, scrolly;
-static UINT8 update_complete;
-static UINT8 video_control;
+static uint8_t vblank_irq;
+static uint8_t fgcoll, fgcollx, fgcolly;
+static uint8_t bgcoll, bgcollx, bgcolly;
+static uint8_t scrollx, scrolly;
+static uint8_t update_complete;
+static uint8_t video_control;
 
 /* microcode state */
 static struct
 {
-	UINT16	i;
-	UINT16	pc;
-	UINT8	r,g,b;
-	UINT8	x,xp,y,yp;
-	UINT8	cmd,cmdlo;
+	uint16_t	i;
+	uint16_t	pc;
+	uint8_t	r,g,b;
+	uint8_t	x,xp,y,yp;
+	uint8_t	cmd,cmdlo;
 	void *	timer;
 	timer_tm	endtime;
 } micro;
@@ -73,18 +73,18 @@ static int command7(void);
 int victory_vh_start(void)
 {
 	/* allocate bitmapram */
-	rram = (UINT8*)malloc(0x4000);
-	gram = (UINT8*)malloc(0x4000);
-	bram = (UINT8*)malloc(0x4000);
+	rram = (uint8_t*)malloc(0x4000);
+	gram = (uint8_t*)malloc(0x4000);
+	bram = (uint8_t*)malloc(0x4000);
 
 	/* allocate bitmaps */
 	bgbitmap = bitmap_alloc(32 * 8, 32 * 8);
 	fgbitmap = bitmap_alloc(32 * 8, 32 * 8);
 
 	/* allocate dirty maps */
-	bgdirty = (UINT8*)malloc(32 * 32);
-	chardirty = (UINT8*)malloc(256);
-	scandirty = (UINT8*)malloc(512);
+	bgdirty = (uint8_t*)malloc(32 * 32);
+	chardirty = (uint8_t*)malloc(256);
+	scandirty = (uint8_t*)malloc(512);
 
 	/* fail if something went wrong */
 	if (!rram || !gram || !bram || !bgbitmap || !fgbitmap || !bgdirty || !chardirty || !scandirty)
@@ -709,7 +709,7 @@ static int command3(void)
 		{
 			int srcoffs = micro.i++ & 0x3fff;
 			int dstoffs = (sy++ & 0xff) * 32 + micro.xp / 8;
-			UINT8 src;
+			uint8_t src;
 
 			/* non-collision-detect case */
 			if (!(micro.cmd & 0x08) || fgcoll)
@@ -879,7 +879,7 @@ static int command5(void)
 		case 7: 1011 -> X++, Y		1111 -> X++, Y++
 
 */
-	static const INT8 inctable[8][4] =
+	static const int8_t inctable[8][4] =
 	{
 		{  1, 0, 1,-1 },
 		{  0,-1, 1,-1 },
@@ -895,8 +895,8 @@ static int command5(void)
 	int yinc = inctable[(micro.cmd >> 4) & 7][1];
 	int xincc = inctable[(micro.cmd >> 4) & 7][2];
 	int yincc = inctable[(micro.cmd >> 4) & 7][3];
-	UINT8 x = micro.xp;
-	UINT8 y = micro.yp;
+	uint8_t x = micro.xp;
+	uint8_t y = micro.yp;
 	int acc = 0x80;
 	int i = micro.i >> 8;
 	int c;
@@ -1164,9 +1164,9 @@ static void update_foreground(void)
 		{
 			for (x = 0; x < 256; x += 8)
 			{
-				UINT8 g = gram[y * 32 + x / 8];
-				UINT8 b = bram[y * 32 + x / 8];
-				UINT8 r = rram[y * 32 + x / 8];
+				uint8_t g = gram[y * 32 + x / 8];
+				uint8_t b = bram[y * 32 + x / 8];
+				uint8_t r = rram[y * 32 + x / 8];
 				plot_pixel(fgbitmap, x + 0, y, ((r & 0x80) >> 5) | ((b & 0x80) >> 6) | ((g & 0x80) >> 7));
 				plot_pixel(fgbitmap, x + 1, y, ((r & 0x40) >> 4) | ((b & 0x40) >> 5) | ((g & 0x40) >> 6));
 				plot_pixel(fgbitmap, x + 2, y, ((r & 0x20) >> 3) | ((b & 0x20) >> 4) | ((g & 0x20) >> 5));
@@ -1236,8 +1236,8 @@ void victory_vh_eof(void)
 		int sy = (scrolly + y) & 255;
 		if (fgbitmap->depth == 8)
 		{
-			UINT8 *fg = &fgbitmap->line[sy][0];
-			UINT8 *bg = &bgbitmap->line[y][0];
+			uint8_t *fg = &fgbitmap->line[sy][0];
+			uint8_t *bg = &bgbitmap->line[y][0];
 
 			for (x = 0; x < 256; x++)
 			{
@@ -1249,8 +1249,8 @@ void victory_vh_eof(void)
 		}
 		else
 		{
-			UINT16 *fg = &((UINT16 *)fgbitmap->line[sy])[0];
-			UINT16 *bg = &((UINT16 *)bgbitmap->line[y])[0];
+			uint16_t *fg = &((uint16_t *)fgbitmap->line[sy])[0];
+			uint16_t *bg = &((uint16_t *)bgbitmap->line[y])[0];
 
 			for (x = 0; x < 256; x++)
 			{
@@ -1290,9 +1290,9 @@ void victory_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 		int sy = (scrolly + y) & 255;
 		if (bitmap->depth == 8)
 		{
-			UINT8 *fg = &fgbitmap->line[y][0];
-			UINT8 *bg = &bgbitmap->line[sy][0];
-			UINT8 *dst = &bitmap->line[y][0];
+			uint8_t *fg = &fgbitmap->line[y][0];
+			uint8_t *bg = &bgbitmap->line[sy][0];
+			uint8_t *dst = &bitmap->line[y][0];
 
 			for (x = 0; x < 256; x++)
 			{
@@ -1305,9 +1305,9 @@ void victory_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 		}
 		else
 		{
-			UINT16 *fg = &((UINT16 *)fgbitmap->line[y])[0];
-			UINT16 *bg = &((UINT16 *)bgbitmap->line[sy])[0];
-			UINT16 *dst = &((UINT16 *)bitmap->line[y])[0];
+			uint16_t *fg = &((uint16_t *)fgbitmap->line[y])[0];
+			uint16_t *bg = &((uint16_t *)bgbitmap->line[sy])[0];
+			uint16_t *dst = &((uint16_t *)bitmap->line[y])[0];
 
 			for (x = 0; x < 256; x++)
 			{

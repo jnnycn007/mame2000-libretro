@@ -88,7 +88,7 @@ void vindictr_scanline_update(int scanline);
  *
  *************************************/
 
-static UINT8 *shared_ram_4;
+static uint8_t *shared_ram_4;
 
 static READ_HANDLER( shared_ram_1_r ) { return READ_WORD(&atarigen_playfieldram[offset]); }
 static READ_HANDLER( shared_ram_2_r ) { return READ_WORD(&atarigen_spriteram[offset]); }

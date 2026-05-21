@@ -26,7 +26,7 @@ void batman_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
 void batman_scanline_update(int scanline);
 
 
-static UINT8 *latch_data;
+static uint8_t *latch_data;
 
 
 /*************************************
@@ -268,7 +268,7 @@ static struct MachineDriver machine_driver_batman =
 
 static void rom_decode(void)
 {
-	UINT8 *base = memory_region(REGION_SOUND1);
+	uint8_t *base = memory_region(REGION_SOUND1);
 	int i;
 
 	/* invert the graphics bits on the playfield and motion objects */
@@ -298,7 +298,7 @@ static void rom_decode(void)
 
 static void init_batman(void)
 {
-	static const UINT16 default_eeprom[] =
+	static const uint16_t default_eeprom[] =
 	{
 		0x0001,0x01F1,0x0154,0x01C5,0x0100,0x0113,0x0300,0x0173,
 		0x0700,0x0154,0x0200,0x0107,0x0100,0x0120,0x0300,0x0165,

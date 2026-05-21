@@ -14,9 +14,9 @@ enum {
 
 /* PUBLIC FUNCTIONS */
 extern unsigned pdp1_get_pc(void);
-extern void pdp1_set_pc(UINT32 newpc);
+extern void pdp1_set_pc(uint32_t newpc);
 extern unsigned pdp1_get_sp(void);
-extern void pdp1_set_sp(UINT32 newsp);
+extern void pdp1_set_sp(uint32_t newsp);
 extern unsigned pdp1_get_context (void *dst);
 extern void pdp1_set_context (void *src);
 extern unsigned pdp1_get_reg (int regnum);

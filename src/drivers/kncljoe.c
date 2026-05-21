@@ -29,7 +29,7 @@ void kncljoe_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
 WRITE_HANDLER(kncljoe_videoram_w);
 WRITE_HANDLER(kncljoe_control_w);
 WRITE_HANDLER(kncljoe_scroll_w);
-extern UINT8 *kncljoe_scrollregs;       /* 0.72u2 */
+extern uint8_t *kncljoe_scrollregs;       /* 0.72u2 */
 
 
 

@@ -33,8 +33,8 @@
 
 /* transmit and receive data callbacks types */
 #if SUPPORT_2101_EXTENSIONS
-typedef INT32 (*RX_CALLBACK)( int port );
-typedef void  (*TX_CALLBACK)( int port, INT32 data );
+typedef int32_t (*RX_CALLBACK)( int port );
+typedef void  (*TX_CALLBACK)( int port, int32_t data );
 #endif
 
 

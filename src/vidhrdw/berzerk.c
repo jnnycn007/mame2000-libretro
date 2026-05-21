@@ -18,7 +18,7 @@ static int collision = 0;
 
 static INLINE void copy_byte(int x, int y, int data, int col)
 {
-	UINT16 fore, back;
+	uint16_t fore, back;
 
 
 	if (y < 32)  return;

@@ -26,9 +26,9 @@ void relief_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh);
 void relief_scanline_update(int scanline);
 
 
-static UINT8 ym2413_volume;
-static UINT8 overall_volume;
-static UINT32 adpcm_bank_base;
+static uint8_t ym2413_volume;
+static uint8_t overall_volume;
+static uint32_t adpcm_bank_base;
 
 
 
@@ -383,7 +383,7 @@ static struct MachineDriver machine_driver_relief =
 
 static void rom_decode(void)
 {
-	UINT8 *base = memory_region(REGION_SOUND1);
+	uint8_t *base = memory_region(REGION_SOUND1);
 	int i;
 
 	/* invert the graphics bits */
@@ -421,7 +421,7 @@ static void rom_decode(void)
 
 static void init_relief(void)
 {
-	static const UINT16 default_eeprom[] =
+	static const uint16_t default_eeprom[] =
 	{
 		0x0001,0x0166,0x0128,0x01E6,0x0100,0x012C,0x0300,0x0144,
 		0x0700,0x01C0,0x2F00,0x01EC,0x0B00,0x0148,0x0140,0x0100,
@@ -440,7 +440,7 @@ static void init_relief(void)
 
 static void init_relief2(void)
 {
-	static const UINT16 default_eeprom[] =
+	static const uint16_t default_eeprom[] =
 	{
 		0x0001,0x01FD,0x019F,0x015E,0x01FF,0x019E,0x03FF,0x015F,
 		0x07FF,0x01FD,0x12FF,0x01FC,0x01FB,0x07FF,0x01F7,0x01FF,

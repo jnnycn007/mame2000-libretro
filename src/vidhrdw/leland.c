@@ -33,46 +33,46 @@
 
 struct vram_state_data
 {
-	UINT16	addr;
-	UINT8	plane;
-	UINT8	latch[2];
+	uint16_t	addr;
+	uint8_t	plane;
+	uint8_t	latch[2];
 };
 
 struct scroll_position
 {
-	UINT16 	scanline;
-	UINT16 	x, y;
-	UINT8 	gfxbank;
+	uint16_t 	scanline;
+	uint16_t 	x, y;
+	uint8_t 	gfxbank;
 };
 
 
 /* video RAM */
-UINT8 *leland_video_ram;
-UINT8 *ataxx_qram;
-UINT8 leland_last_scanline_int;
+uint8_t *leland_video_ram;
+uint8_t *ataxx_qram;
+uint8_t leland_last_scanline_int;
 
 /* video RAM bitmap drawing */
 static struct vram_state_data vram_state[2];
-static UINT8 sync_next_write;
+static uint8_t sync_next_write;
 
 /* partial screen updating */
-static UINT8 *video_ram_copy;
+static uint8_t *video_ram_copy;
 static int next_update_scanline;
 
 /* scroll background registers */
-static UINT16 xscroll;
-static UINT16 yscroll;
-static UINT8 gfxbank;
-static UINT8 scroll_index;
+static uint16_t xscroll;
+static uint16_t yscroll;
+static uint8_t gfxbank;
+static uint8_t scroll_index;
 static struct scroll_position scroll_pos[VIDEO_HEIGHT];
 
-static UINT32 *ataxx_pen_usage;
+static uint32_t *ataxx_pen_usage;
 
 
 /* sound routines */
-extern UINT8 leland_dac_control;
+extern uint8_t leland_dac_control;
 
-extern void leland_dac_update(int indx, UINT8 *base);
+extern void leland_dac_update(int indx, uint8_t *base);
 
 /* bitmap blending routines */
 static void draw_bitmap_8(struct osd_bitmap *bitmap);
@@ -91,8 +91,8 @@ int leland_vh_start(void)
 	void leland_vh_stop(void);
 
 	/* allocate memory */
-    leland_video_ram = (UINT8*)malloc(VRAM_SIZE);
-    video_ram_copy = (UINT8*)malloc(VRAM_SIZE);
+    leland_video_ram = (uint8_t*)malloc(VRAM_SIZE);
+    video_ram_copy = (uint8_t*)malloc(VRAM_SIZE);
 
 	/* error cases */
     if (!leland_video_ram || !video_ram_copy)
@@ -118,7 +118,7 @@ int ataxx_vh_start(void)
 	void ataxx_vh_stop(void);
 
 	const struct GfxElement *gfx = Machine->gfx[0];
-	UINT32 usage[2];
+	uint32_t usage[2];
 	int i, x, y;
 
 	/* first do the standard stuff */
@@ -126,8 +126,8 @@ int ataxx_vh_start(void)
 		return 1;
 
 	/* allocate memory */
-	ataxx_qram = (UINT8*)malloc(QRAM_SIZE);
-	ataxx_pen_usage = (UINT32*)malloc(gfx->total_elements * 2 * sizeof(UINT32));
+	ataxx_qram = (uint8_t*)malloc(QRAM_SIZE);
+	ataxx_pen_usage = (uint32_t*)malloc(gfx->total_elements * 2 * sizeof(uint32_t));
 
 	/* error cases */
     if (!ataxx_qram || !ataxx_pen_usage)
@@ -139,7 +139,7 @@ int ataxx_vh_start(void)
 	/* build up color usage */
 	for (i = 0; i < gfx->total_elements; i++)
 	{
-		UINT8 *src = gfx->gfxdata + i * gfx->char_modulo;
+		uint8_t *src = gfx->gfxdata + i * gfx->char_modulo;
 
 		usage[0] = usage[1] = 0;
 		for (y = 0; y < gfx->height; y++)
@@ -597,10 +597,10 @@ void leland_vh_eof(void)
 
 void leland_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 {
-	const UINT8 *background_prom = memory_region(REGION_USER1);
+	const uint8_t *background_prom = memory_region(REGION_USER1);
 	const struct GfxElement *gfx = Machine->gfx[0];
 	int total_elements = gfx->total_elements;
-	UINT8 background_usage[8];
+	uint8_t background_usage[8];
 	int x, y, chunk;
 
 	/* update anything remaining */
@@ -661,7 +661,7 @@ void leland_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh)
 	palette_init_used_colors();
 	for (y = 0; y < 8; y++)
 	{
-		UINT8 usage = background_usage[y];
+		uint8_t usage = background_usage[y];
 		for (x = 0; x < 8; x++)
 			if (usage & (1 << x))
 			{
@@ -691,7 +691,7 @@ void ataxx_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 {
 	const struct GfxElement *gfx = Machine->gfx[0];
 	int total_elements = gfx->total_elements;
-	UINT32 background_usage[2];
+	uint32_t background_usage[2];
 	int x, y, chunk;
 
 	/* update anything remaining */
@@ -744,7 +744,7 @@ void ataxx_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 	palette_init_used_colors();
 	for (y = 0; y < 2; y++)
 	{
-		UINT32 usage = background_usage[y];
+		uint32_t usage = background_usage[y];
 		for (x = 0; x < 32; x++)
 			if (usage & (1 << x))
 			{
@@ -797,13 +797,13 @@ void ataxx_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 #define INCLUDE_DRAW_CORE
 
 #define DRAW_FUNC draw_bitmap_8
-#define TYPE UINT8
+#define TYPE uint8_t
 #include "leland.c"
 #undef TYPE
 #undef DRAW_FUNC
 
 #define DRAW_FUNC draw_bitmap_16
-#define TYPE UINT16
+#define TYPE uint16_t
 #include "leland.c"
 #undef TYPE
 #undef DRAW_FUNC
@@ -820,15 +820,15 @@ void ataxx_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 
 void DRAW_FUNC(struct osd_bitmap *bitmap)
 {
-	const UINT16 *pens = &Machine->pens[0];
+	const uint16_t *pens = &Machine->pens[0];
 	int orientation = Machine->orientation;
 	int x, y;
 
 	/* draw any non-transparent scanlines from the VRAM directly */
 	for (y = Machine->visible_area.min_y; y <= Machine->visible_area.max_y; y++)
 	{
-		UINT8 *srclo = &video_ram_copy[y * 128 + VRAM_LO];
-		UINT8 *srchi = &video_ram_copy[y * 128 + VRAM_HI];
+		uint8_t *srclo = &video_ram_copy[y * 128 + VRAM_LO];
+		uint8_t *srchi = &video_ram_copy[y * 128 + VRAM_HI];
 		TYPE *dst = (TYPE *)bitmap->line[y];
 		int xadv = 1;
 
@@ -838,7 +838,7 @@ void DRAW_FUNC(struct osd_bitmap *bitmap)
 		/* redraw the scanline */
 		for (x = 0; x < VIDEO_WIDTH*2; x++)
 		{
-			UINT16 data = (*srclo++ << 8) | *srchi++;
+			uint16_t data = (*srclo++ << 8) | *srchi++;
 
 			*dst = pens[*dst | ((data & 0xf000) >> 6)];
 			dst += xadv;

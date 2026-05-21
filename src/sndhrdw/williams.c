@@ -69,79 +69,79 @@ struct ym2151_state
 {
 	timer_tm	timer_base;
 	timer_tm	timer_period[3];
-	UINT16	timer_value[2];
-	UINT8	timer_is_active[2];
-	UINT8	current_register;
-	UINT8	active_timer;
+	uint16_t	timer_value[2];
+	uint8_t	timer_is_active[2];
+	uint8_t	current_register;
+	uint8_t	active_timer;
 };
 
 struct counter_state
 {
-	UINT8 *	downcount;
-	UINT8 *	divisor;
-	UINT8 *	value;
-	UINT16	adjusted_divisor;
-	UINT16	last_hotspot_counter;
-	UINT16	hotspot_hit_count;
-	UINT16	hotspot_start;
-	UINT16	hotspot_stop;
-	UINT16	last_read_pc;
+	uint8_t *	downcount;
+	uint8_t *	divisor;
+	uint8_t *	value;
+	uint16_t	adjusted_divisor;
+	uint16_t	last_hotspot_counter;
+	uint16_t	hotspot_hit_count;
+	uint16_t	hotspot_start;
+	uint16_t	hotspot_stop;
+	uint16_t	last_read_pc;
 	timer_tm	time_leftover;
 	void *	update_timer;
 	void *	enable_timer;
-	UINT8	invalid;
+	uint8_t	invalid;
 };
 
 struct cvsd_state
 {
-	UINT8 *	state;
-	UINT8 *	address;
-	UINT8 *	end;
-	UINT8 *	bank;
-	UINT32	bits_per_firq;
-	UINT32	sample_step;
-	UINT32	sample_position;
-	UINT16	current_sample;
-	UINT8	invalid;
+	uint8_t *	state;
+	uint8_t *	address;
+	uint8_t *	end;
+	uint8_t *	bank;
+	uint32_t	bits_per_firq;
+	uint32_t	sample_step;
+	uint32_t	sample_position;
+	uint16_t	current_sample;
+	uint8_t	invalid;
 	float	charge;
 	float	decay;
 	float	leak;
 	float	integrator;
 	float	filter;
-	UINT8	shiftreg;
+	uint8_t	shiftreg;
 };
 
 struct dac_state
 {
-	UINT8 *	state_bank;
-	UINT8 *	address;
-	UINT8 *	end;
-	UINT8 *	volume;
-	UINT32	bytes_per_firq;
-	UINT32	sample_step;
-	UINT32	sample_position;
-	UINT16	current_sample;
-	UINT8	invalid;
+	uint8_t *	state_bank;
+	uint8_t *	address;
+	uint8_t *	end;
+	uint8_t *	volume;
+	uint32_t	bytes_per_firq;
+	uint32_t	sample_step;
+	uint32_t	sample_position;
+	uint16_t	current_sample;
+	uint8_t	invalid;
 };
 
 struct dcs_state
 {
-	UINT8 * mem;
-	UINT16	size;
-	UINT16	incs;
+	uint8_t * mem;
+	uint16_t	size;
+	uint16_t	incs;
 	void  * reg_timer;
 	int		ireg;
-	UINT16	ireg_base;
-	UINT16	control_regs[32];
-	UINT16	bank;
-	UINT8	enabled;
+	uint16_t	ireg_base;
+	uint16_t	control_regs[32];
+	uint16_t	bank;
+	uint8_t	enabled;
 
-	INT16 *	buffer;
-	UINT32	buffer_in;
-	UINT32	sample_step;
-	UINT32	sample_position;
-	INT16	current_sample;
-	UINT16	latch_control;
+	int16_t *	buffer;
+	uint32_t	buffer_in;
+	uint32_t	sample_step;
+	uint32_t	sample_position;
+	int16_t	current_sample;
+	uint16_t	latch_control;
 };
 
 
@@ -149,13 +149,13 @@ struct dcs_state
 	STATIC GLOBALS
 ****************************************************************************/
 
-UINT8 williams_sound_int_state;
+uint8_t williams_sound_int_state;
 
-static UINT8 williams_cpunum;
-static UINT8 williams_pianum;
+static uint8_t williams_cpunum;
+static uint8_t williams_pianum;
 
-static UINT8 williams_audio_type;
-static UINT8 adpcm_bank_count;
+static uint8_t williams_audio_type;
+static uint8_t adpcm_bank_count;
 
 static struct counter_state counter;
 static struct ym2151_state ym2151;
@@ -166,8 +166,8 @@ static struct dcs_state dcs;
 static int dac_stream;
 static int cvsd_stream;
 
-static UINT8 *dcs_speedup1;
-static UINT8 *dcs_speedup2;
+static uint8_t *dcs_speedup1;
+static uint8_t *dcs_speedup2;
 
 
 /***************************************************************************
@@ -175,7 +175,7 @@ static UINT8 *dcs_speedup2;
 ****************************************************************************/
 
 static void init_audio_state(int first_time);
-static void locate_audio_hotspot(UINT8 *base, UINT16 start);
+static void locate_audio_hotspot(uint8_t *base, uint16_t start);
 
 static int williams_custom_start(const struct MachineSound *msound);
 
@@ -217,10 +217,10 @@ static WRITE_HANDLER( cvsd_state_w );
 static WRITE_HANDLER( dac_state_bank_w );
 
 static void update_counter(void);
-static void cvsd_update(int num, INT16 *buffer, int length);
-static void dac_update(int num, INT16 *buffer, int length);
+static void cvsd_update(int num, int16_t *buffer, int length);
+static void dac_update(int num, int16_t *buffer, int length);
 
-static INT16 get_next_cvsd_sample(int bit);
+static int16_t get_next_cvsd_sample(int bit);
 
 /* ADSP */
 static WRITE_HANDLER( williams_dcs_bank_select_w );
@@ -229,9 +229,9 @@ static WRITE_HANDLER( williams_dcs_control_w );
 static READ_HANDLER( williams_dcs_latch_r );
 static WRITE_HANDLER( williams_dcs_latch_w );
 
-static void sound_tx_callback( int port, INT32 data );
+static void sound_tx_callback( int port, int32_t data );
 
-static void dcs_dac_update(int num, INT16 *buffer, int length);
+static void dcs_dac_update(int num, int16_t *buffer, int length);
 static WRITE_HANDLER( dcs_speedup1_w );
 static WRITE_HANDLER( dcs_speedup2_w );
 static void dcs_speedup_common(void);
@@ -448,7 +448,7 @@ struct CustomSound_interface williams_dcs_custom_interface =
 	INLINES
 ****************************************************************************/
 
-static INLINE UINT16 get_cvsd_address(void)
+static INLINE uint16_t get_cvsd_address(void)
 {
 	if (cvsd.address)
 		return cvsd.address[0] * 256 + cvsd.address[1];
@@ -456,7 +456,7 @@ static INLINE UINT16 get_cvsd_address(void)
 		return cpunum_get_reg(williams_cpunum, M6809_Y);
 }
 
-static INLINE void set_cvsd_address(UINT16 address)
+static INLINE void set_cvsd_address(uint16_t address)
 {
 	if (cvsd.address)
 	{
@@ -467,7 +467,7 @@ static INLINE void set_cvsd_address(UINT16 address)
 		cpunum_set_reg(williams_cpunum, M6809_Y, address);
 }
 
-static INLINE UINT16 get_dac_address(void)
+static INLINE uint16_t get_dac_address(void)
 {
 	if (dac.address)
 		return dac.address[0] * 256 + dac.address[1];
@@ -475,7 +475,7 @@ static INLINE UINT16 get_dac_address(void)
 		return cpunum_get_reg(williams_cpunum, M6809_Y);
 }
 
-static INLINE void set_dac_address(UINT16 address)
+static INLINE void set_dac_address(uint16_t address)
 {
 	if (dac.address)
 	{
@@ -486,33 +486,33 @@ static INLINE void set_dac_address(UINT16 address)
 		cpunum_set_reg(williams_cpunum, M6809_Y, address);
 }
 
-static INLINE UINT8 *get_cvsd_bank_base(int data)
+static INLINE uint8_t *get_cvsd_bank_base(int data)
 {
-	UINT8 *RAM = memory_region(REGION_CPU1+williams_cpunum);
+	uint8_t *RAM = memory_region(REGION_CPU1+williams_cpunum);
 	int bank = data & 3;
 	int quarter = (data >> 2) & 3;
 	if (bank == 3) bank = 0;
 	return &RAM[0x10000 + (bank * 0x20000) + (quarter * 0x8000)];
 }
 
-static INLINE UINT8 *get_adpcm_bank_base(int data)
+static INLINE uint8_t *get_adpcm_bank_base(int data)
 {
-	UINT8 *RAM = memory_region(REGION_CPU1+williams_cpunum);
+	uint8_t *RAM = memory_region(REGION_CPU1+williams_cpunum);
 	int bank = data & 7;
 	return &RAM[0x10000 + (bank * 0x8000)];
 }
 
-static INLINE UINT8 *get_narc_master_bank_base(int data)
+static INLINE uint8_t *get_narc_master_bank_base(int data)
 {
-	UINT8 *RAM = memory_region(REGION_CPU1+williams_cpunum);
+	uint8_t *RAM = memory_region(REGION_CPU1+williams_cpunum);
 	int bank = data & 3;
 	if (!(data & 4)) bank = 0;
 	return &RAM[0x10000 + (bank * 0x8000)];
 }
 
-static INLINE UINT8 *get_narc_slave_bank_base(int data)
+static INLINE uint8_t *get_narc_slave_bank_base(int data)
 {
-	UINT8 *RAM = memory_region(REGION_CPU1+williams_cpunum + 1);
+	uint8_t *RAM = memory_region(REGION_CPU1+williams_cpunum + 1);
 	int bank = data & 7;
 	return &RAM[0x10000 + (bank * 0x8000)];
 }
@@ -524,8 +524,8 @@ static INLINE UINT8 *get_narc_slave_bank_base(int data)
 
 void williams_cvsd_init(int cpunum, int pianum)
 {
-	UINT16 entry_point;
-	UINT8 *RAM;
+	uint16_t entry_point;
+	uint8_t *RAM;
 
 	/* configure the CPU */
 	williams_cpunum = cpunum;
@@ -546,14 +546,14 @@ void williams_cvsd_init(int cpunum, int pianum)
 	{
 		/* Joust 2 case */
 		case 0x8045:
-			counter.downcount = (UINT8*)install_mem_write_handler(cpunum, 0x217, 0x217, counter_down_w);
-			counter.divisor = (UINT8*)install_mem_write_handler(cpunum, 0x216, 0x216, counter_divisor_w);
-			counter.value 	= (UINT8*)install_mem_write_handler(cpunum, 0x214, 0x215, counter_value_w);
+			counter.downcount = (uint8_t*)install_mem_write_handler(cpunum, 0x217, 0x217, counter_down_w);
+			counter.divisor = (uint8_t*)install_mem_write_handler(cpunum, 0x216, 0x216, counter_divisor_w);
+			counter.value 	= (uint8_t*)install_mem_write_handler(cpunum, 0x214, 0x215, counter_value_w);
 
 			install_mem_read_handler(cpunum, 0x217, 0x217, counter_down_r);
 			install_mem_read_handler(cpunum, 0x214, 0x215, counter_value_r);
 
-			cvsd.state		= (UINT8*)install_mem_write_handler(cpunum, 0x220, 0x221, cvsd_state_w);
+			cvsd.state		= (uint8_t*)install_mem_write_handler(cpunum, 0x220, 0x221, cvsd_state_w);
 			cvsd.address	= NULL;	/* in Y */
 			cvsd.end		= &RAM[0x21d];
 			cvsd.bank		= &RAM[0x21f];
@@ -568,14 +568,14 @@ void williams_cvsd_init(int cpunum, int pianum)
 
 		/* Arch Rivals case */
 		case 0x8067:
-			counter.downcount = (UINT8*)install_mem_write_handler(cpunum, 0x239, 0x239, counter_down_w);
-			counter.divisor = (UINT8*)install_mem_write_handler(cpunum, 0x238, 0x238, counter_divisor_w);
-			counter.value 	= (UINT8*)install_mem_write_handler(cpunum, 0x236, 0x237, counter_value_w);
+			counter.downcount = (uint8_t*)install_mem_write_handler(cpunum, 0x239, 0x239, counter_down_w);
+			counter.divisor = (uint8_t*)install_mem_write_handler(cpunum, 0x238, 0x238, counter_divisor_w);
+			counter.value 	= (uint8_t*)install_mem_write_handler(cpunum, 0x236, 0x237, counter_value_w);
 
 			install_mem_read_handler(cpunum, 0x239, 0x239, counter_down_r);
 			install_mem_read_handler(cpunum, 0x236, 0x237, counter_value_r);
 
-			cvsd.state		= (UINT8*)install_mem_write_handler(cpunum, 0x23e, 0x23f, cvsd_state_w);
+			cvsd.state		= (uint8_t*)install_mem_write_handler(cpunum, 0x23e, 0x23f, cvsd_state_w);
 			cvsd.address	= NULL;	/* in Y */
 			cvsd.end		= &RAM[0x242];
 			cvsd.bank		= &RAM[0x22b];
@@ -590,20 +590,20 @@ void williams_cvsd_init(int cpunum, int pianum)
 
 		/* General CVSD case */
 		case 0x80c8:
-			counter.downcount = (UINT8*)install_mem_write_handler(cpunum, 0x23a, 0x23a, counter_down_w);
-			counter.divisor = (UINT8*)install_mem_write_handler(cpunum, 0x238, 0x238, counter_divisor_w);
-			counter.value 	= (UINT8*)install_mem_write_handler(cpunum, 0x236, 0x237, counter_value_w);
+			counter.downcount = (uint8_t*)install_mem_write_handler(cpunum, 0x23a, 0x23a, counter_down_w);
+			counter.divisor = (uint8_t*)install_mem_write_handler(cpunum, 0x238, 0x238, counter_divisor_w);
+			counter.value 	= (uint8_t*)install_mem_write_handler(cpunum, 0x236, 0x237, counter_value_w);
 
 			install_mem_read_handler(cpunum, 0x23a, 0x23a, counter_down_r);
 			install_mem_read_handler(cpunum, 0x236, 0x237, counter_value_r);
 
-			cvsd.state		= (UINT8*)install_mem_write_handler(cpunum, 0x23f, 0x240, cvsd_state_w);
+			cvsd.state		= (uint8_t*)install_mem_write_handler(cpunum, 0x23f, 0x240, cvsd_state_w);
 			cvsd.address	= &RAM[0x241];
 			cvsd.end		= &RAM[0x243];
 			cvsd.bank		= &RAM[0x22b];
 			cvsd.bits_per_firq = 4;
 
-			dac.state_bank	= (UINT8*)install_mem_write_handler(cpunum, 0x22c, 0x22c, dac_state_bank_w);
+			dac.state_bank	= (uint8_t*)install_mem_write_handler(cpunum, 0x22c, 0x22c, dac_state_bank_w);
 			dac.address		= NULL;	/* in Y */
 			dac.end			= &RAM[0x234];
 			dac.volume		= &RAM[0x231];
@@ -623,8 +623,8 @@ void williams_cvsd_init(int cpunum, int pianum)
 
 void williams_adpcm_init(int cpunum)
 {
-	UINT16 entry_point;
-	UINT8 *RAM;
+	uint16_t entry_point;
+	uint8_t *RAM;
 	int i;
 
 	/* configure the CPU */
@@ -647,9 +647,9 @@ void williams_adpcm_init(int cpunum)
 		case 0xdc51:
 		case 0xdd51:
 		case 0xdd55:
-			counter.downcount 	= (UINT8*)install_mem_write_handler(cpunum, 0x238, 0x238, counter_down_w);
-			counter.divisor = (UINT8*)install_mem_write_handler(cpunum, 0x236, 0x236, counter_divisor_w);
-			counter.value 	= (UINT8*)install_mem_write_handler(cpunum, 0x234, 0x235, counter_value_w);
+			counter.downcount 	= (uint8_t*)install_mem_write_handler(cpunum, 0x238, 0x238, counter_down_w);
+			counter.divisor = (uint8_t*)install_mem_write_handler(cpunum, 0x236, 0x236, counter_divisor_w);
+			counter.value 	= (uint8_t*)install_mem_write_handler(cpunum, 0x234, 0x235, counter_value_w);
 
 			install_mem_read_handler(cpunum, 0x238, 0x238, counter_down_r);
 			install_mem_read_handler(cpunum, 0x234, 0x235, counter_value_r);
@@ -660,7 +660,7 @@ void williams_adpcm_init(int cpunum)
 			cvsd.bank		= NULL;
 			cvsd.bits_per_firq = 0;
 
-			dac.state_bank	= (UINT8*)install_mem_write_handler(cpunum, 0x22a, 0x22a, dac_state_bank_w);
+			dac.state_bank	= (uint8_t*)install_mem_write_handler(cpunum, 0x22a, 0x22a, dac_state_bank_w);
 			dac.address		= NULL;	/* in Y */
 			dac.end			= &RAM[0x232];
 			dac.volume		= &RAM[0x22f];
@@ -689,8 +689,8 @@ void williams_adpcm_init(int cpunum)
 
 void williams_narc_init(int cpunum)
 {
-	UINT16 entry_point;
-	UINT8 *RAM;
+	uint16_t entry_point;
+	uint8_t *RAM;
 
 	/* configure the CPU */
 	williams_cpunum = cpunum;
@@ -712,9 +712,9 @@ void williams_narc_init(int cpunum)
 	{
 		/* General ADPCM case */
 		case 0xc060:
-			counter.downcount 	= (UINT8*)install_mem_write_handler(cpunum, 0x249, 0x249, counter_down_w);
-			counter.divisor = (UINT8*)install_mem_write_handler(cpunum, 0x248, 0x248, counter_divisor_w);
-			counter.value 	= (UINT8*)install_mem_write_handler(cpunum, 0x246, 0x247, counter_value_w);
+			counter.downcount 	= (uint8_t*)install_mem_write_handler(cpunum, 0x249, 0x249, counter_down_w);
+			counter.divisor = (uint8_t*)install_mem_write_handler(cpunum, 0x248, 0x248, counter_divisor_w);
+			counter.value 	= (uint8_t*)install_mem_write_handler(cpunum, 0x246, 0x247, counter_value_w);
 
 			install_mem_read_handler(cpunum, 0x249, 0x249, counter_down_r);
 			install_mem_read_handler(cpunum, 0x246, 0x247, counter_value_r);
@@ -725,7 +725,7 @@ void williams_narc_init(int cpunum)
 			cvsd.bank		= NULL;
 			cvsd.bits_per_firq = 0;
 
-			dac.state_bank	= (UINT8*)install_mem_write_handler(cpunum, 0x23c, 0x23c, dac_state_bank_w);
+			dac.state_bank	= (uint8_t*)install_mem_write_handler(cpunum, 0x23c, 0x23c, dac_state_bank_w);
 			dac.address		= NULL;	/* in Y */
 			dac.end			= &RAM[0x244];
 			dac.volume		= &RAM[0x241];
@@ -746,11 +746,11 @@ void williams_narc_init(int cpunum)
 
 static void williams_dcs_boot( void )
 {
-	UINT32	bank_offset = ( dcs.bank & 0x7ff ) << 12;
-	UINT32	*src = ( UINT32 * )( ( memory_region( REGION_CPU1+williams_cpunum ) + ADSP2100_SIZE + bank_offset ) );
-	UINT32	*dst = ( UINT32 * )( ( memory_region( REGION_CPU1+williams_cpunum ) + ADSP2100_PGM_OFFSET ) );
-	UINT32	size;
-	UINT32	i, data;
+	uint32_t	bank_offset = ( dcs.bank & 0x7ff ) << 12;
+	uint32_t	*src = ( uint32_t * )( ( memory_region( REGION_CPU1+williams_cpunum ) + ADSP2100_SIZE + bank_offset ) );
+	uint32_t	*dst = ( uint32_t * )( ( memory_region( REGION_CPU1+williams_cpunum ) + ADSP2100_PGM_OFFSET ) );
+	uint32_t	size;
+	uint32_t	i, data;
 
 	/* see how many words we need to copy */
 	data = src[0];
@@ -810,8 +810,8 @@ void williams_dcs_init(int cpunum)
 
 	/* install the speedup handler */
 #if (!DISABLE_DCS_SPEEDUP)
-	dcs_speedup1 = (UINT8*)install_mem_write_handler(williams_cpunum, ADSP_DATA_ADDR_RANGE(0x04f8, 0x04f8), dcs_speedup1_w);
-	dcs_speedup2 = (UINT8*)install_mem_write_handler(williams_cpunum, ADSP_DATA_ADDR_RANGE(0x063d, 0x063d), dcs_speedup2_w);
+	dcs_speedup1 = (uint8_t*)install_mem_write_handler(williams_cpunum, ADSP_DATA_ADDR_RANGE(0x04f8, 0x04f8), dcs_speedup1_w);
+	dcs_speedup2 = (uint8_t*)install_mem_write_handler(williams_cpunum, ADSP_DATA_ADDR_RANGE(0x063d, 0x063d), dcs_speedup2_w);
 #endif
 	
 	/* initialize the comm bits */
@@ -876,7 +876,7 @@ static void init_audio_state(int first_time)
 	}
 }
 
-static void locate_audio_hotspot(UINT8 *base, UINT16 start)
+static void locate_audio_hotspot(uint8_t *base, uint16_t start)
 {
 	int i;
 
@@ -923,7 +923,7 @@ static int dcs_custom_start(const struct MachineSound *msound)
 	dac_stream = stream_init("DCS DAC", 100, Machine->sample_rate, 0, dcs_dac_update);
 	
 	/* allocate memory for our buffer */
-	dcs.buffer = (INT16*)malloc(DCS_BUFFER_SIZE * sizeof(INT16));
+	dcs.buffer = (int16_t*)malloc(DCS_BUFFER_SIZE * sizeof(int16_t));
 	if (!dcs.buffer)
 		return 1;
 
@@ -1055,7 +1055,7 @@ WRITE_HANDLER( williams_dcs_bank_select_w )
 
 READ_HANDLER( williams_dcs_bank_r )
 {
-	UINT8	*banks = memory_region( REGION_CPU1+williams_cpunum ) + ADSP2100_SIZE;
+	uint8_t	*banks = memory_region( REGION_CPU1+williams_cpunum ) + ADSP2100_SIZE;
 
 	offset >>= 1;
 	offset += ( dcs.bank & 0x7ff ) << 12;
@@ -1439,7 +1439,7 @@ static WRITE_HANDLER( counter_down_w )
 
 static READ_HANDLER( counter_value_r )
 {
-	UINT16 pc = cpu_getpreviouspc();
+	uint16_t pc = cpu_getpreviouspc();
 
 	/* only update the counter on the MSB */
 	/* also, don't update it if we just read from it a few instructions back */
@@ -1450,7 +1450,7 @@ static READ_HANDLER( counter_value_r )
 	/* on the second LSB read in the hotspot, check to see if we will be looping */
 	if (offset == 1 && pc == counter.hotspot_start + 6 && !DISABLE_LOOP_CATCHERS)
 	{
-		UINT16 new_counter = counter.value[0] * 256 + counter.value[1];
+		uint16_t new_counter = counter.value[0] * 256 + counter.value[1];
 
 		/* count how many hits in a row we got the same value */
 		if (new_counter == counter.last_hotspot_counter)
@@ -1561,17 +1561,17 @@ static WRITE_HANDLER( dac_state_bank_w )
 	SOUND GENERATION
 ****************************************************************************/
 
-static void cvsd_update(int num, INT16 *buffer, int length)
+static void cvsd_update(int num, int16_t *buffer, int length)
 {
-	UINT8 *bank_base, *source, *end;
-	UINT32 current;
+	uint8_t *bank_base, *source, *end;
+	uint32_t current;
 	int i;
 
 	/* CVSD generation */
 	if (cvsd.state && !(cvsd.state[0] & 0x80))
 	{
-		UINT8 bits_left = cvsd.state[0];
-		UINT8 current_byte = cvsd.state[1];
+		uint8_t bits_left = cvsd.state[0];
+		uint8_t current_byte = cvsd.state[1];
 
 		/* determine start and end points */
 		bank_base = get_cvsd_bank_base(cvsd.bank[0]) - 0x8000;
@@ -1595,7 +1595,7 @@ static void cvsd_update(int num, INT16 *buffer, int length)
 						cvsd.integrator = 0;
 						cvsd.filter = FILTER_MIN;
 						cvsd.shiftreg = 0xaa;
-						memset(buffer, 0, (length - i) * sizeof(INT16));
+						memset(buffer, 0, (length - i) * sizeof(int16_t));
 						goto finished;
 					}
 					current_byte = *source++;
@@ -1617,19 +1617,19 @@ static void cvsd_update(int num, INT16 *buffer, int length)
 		cvsd.state[1] = current_byte;
 	}
 	else
-		memset(buffer, 0, length * sizeof(INT16));
+		memset(buffer, 0, length * sizeof(int16_t));
 }
 
-static void dac_update(int num, INT16 *buffer, int length)
+static void dac_update(int num, int16_t *buffer, int length)
 {
-	UINT8 *bank_base, *source, *end;
-	UINT32 current;
+	uint8_t *bank_base, *source, *end;
+	uint32_t current;
 	int i;
 
 	/* DAC generation */
 	if (dac.state_bank && !(dac.state_bank[0] & 0x80))
 	{
-		UINT8 volume = dac.volume[0] / 2;
+		uint8_t volume = dac.volume[0] / 2;
 
 		/* determine start and end points */
 		if (williams_audio_type == WILLIAMS_CVSD)
@@ -1653,7 +1653,7 @@ static void dac_update(int num, INT16 *buffer, int length)
 				{
 					dac.state_bank[0] |= 0x80;
 					dac.sample_position = 0x10000;
-					memset(buffer, 0, (length - i) * sizeof(INT16));
+					memset(buffer, 0, (length - i) * sizeof(int16_t));
 					goto finished;
 				}
 				dac.current_sample = *source++ * volume;
@@ -1670,13 +1670,13 @@ static void dac_update(int num, INT16 *buffer, int length)
 		dac.sample_position = current;
 	}
 	else
-		memset(buffer, 0, length * sizeof(INT16));
+		memset(buffer, 0, length * sizeof(int16_t));
 }
 
-static void dcs_dac_update(int num, INT16 *buffer, int length)
+static void dcs_dac_update(int num, int16_t *buffer, int length)
 {
-	UINT32 current, step, indx;
-	INT16 *source;
+	uint32_t current, step, indx;
+	int16_t *source;
 	int i;
 
 	/* DAC generation */
@@ -1711,7 +1711,7 @@ static void dcs_dac_update(int num, INT16 *buffer, int length)
 		dcs.sample_position = current;
 	}
 	else
-		memset(buffer, 0, length * sizeof(INT16));
+		memset(buffer, 0, length * sizeof(int16_t));
 }
 
 
@@ -1719,7 +1719,7 @@ static void dcs_dac_update(int num, INT16 *buffer, int length)
 	CVSD DECODING (cribbed from HC55516.c)
 ****************************************************************************/
 
-INT16 get_next_cvsd_sample(int bit)
+int16_t get_next_cvsd_sample(int bit)
 {
 	float temp;
 
@@ -1898,7 +1898,7 @@ static void williams_dcs_irq(int state)
 }
 
 
-static void sound_tx_callback( int port, INT32 data )
+static void sound_tx_callback( int port, int32_t data )
 {
 	/* check if it's for SPORT1 */
 	if ( port != 1 )
@@ -1912,7 +1912,7 @@ static void sound_tx_callback( int port, INT32 data )
 		{
 			/* get the autobuffer registers */
 			int		mreg, lreg;
-			UINT16	source;
+			uint16_t	source;
 			int		sample_rate;
 			
 			stream_update(dac_stream, 0);
@@ -2049,7 +2049,7 @@ static void dcs_speedup_common()
 		0120: DM($063F) = SR0
 */
 
-	INT16 *source = (INT16 *)memory_region(REGION_CPU1 + williams_cpunum);
+	int16_t *source = (int16_t *)memory_region(REGION_CPU1 + williams_cpunum);
 	int mem63d = 2;
 	int mem63e = 0x40;
 	int mem63f = mem63e >> 1;
@@ -2057,15 +2057,15 @@ static void dcs_speedup_common()
 	
 	for (i = 0; i < 6; i++)
 	{
-		INT16 *i4 = &source[0x780];
-		INT16 *i5 = &source[0x700];
-		INT16 *i0 = &source[0x3800];
-		INT16 *i1 = &source[0x3800 + mem63e];
-		INT16 *i2 = i1;
+		int16_t *i4 = &source[0x780];
+		int16_t *i5 = &source[0x700];
+		int16_t *i0 = &source[0x3800];
+		int16_t *i1 = &source[0x3800 + mem63e];
+		int16_t *i2 = i1;
 
 		for (j = 0; j < mem63d; j++)
 		{
-			INT32 mx0, mx1, my0, my1, ax0, ay0, ay1, mr1, temp;
+			int32_t mx0, mx1, my0, my1, ax0, ay0, ay1, mr1, temp;
 		
 			my0 = *i4++;
 			my1 = *i5++;

@@ -23,7 +23,7 @@ static int flipscreen;
 
 static void get_bg_tile_info(int tile_index)
 {
-	UINT16 *videoram1 = (UINT16 *)bionicc_bgvideoram;
+	uint16_t *videoram1 = (uint16_t *)bionicc_bgvideoram;
 	int attr = videoram1[2*tile_index+1];
 	SET_TILE_INFO(1,(videoram1[2*tile_index] & 0xff) + ((attr & 0x07) << 8),(attr & 0x18) >> 3);
 	tile_info.flags = TILE_FLIPXY((attr & 0xc0) >> 6);
@@ -31,7 +31,7 @@ static void get_bg_tile_info(int tile_index)
 
 static void get_fg_tile_info(int tile_index)
 {
-	UINT16 *videoram1 = (UINT16 *)bionicc_fgvideoram;
+	uint16_t *videoram1 = (uint16_t *)bionicc_fgvideoram;
 	int attr = videoram1[2*tile_index+1];
 	SET_TILE_INFO(2,(videoram1[2*tile_index] & 0xff) + ((attr & 0x07) << 8),(attr & 0x18) >> 3);
 	if ((attr & 0xc0) == 0xc0)
@@ -48,7 +48,7 @@ static void get_fg_tile_info(int tile_index)
 
 static void get_tx_tile_info(int tile_index)
 {
-	UINT16 *videoram1 = (UINT16 *)bionicc_txvideoram;
+	uint16_t *videoram1 = (uint16_t *)bionicc_txvideoram;
 	int attr = videoram1[tile_index + 0x400];
 	SET_TILE_INFO(0,(videoram1[tile_index] & 0xff) + ((attr & 0x00c0) << 2),attr & 0x3f);
 }

@@ -139,25 +139,25 @@ static int get_num_tiles (void)
     return ((memory_region_length(REGION_GFX2)/128)+(memory_region_length(REGION_GFX3)/128));
 }
 
-static UINT32 *get_tile (int tileno)
+static uint32_t *get_tile (int tileno)
 {
-    UINT32 *gfxdata=NULL;
+    uint32_t *gfxdata=NULL;
     
     if (memory_region_length(REGION_GFX3)>0)
     {
         unsigned int tiles_gfx2=memory_region_length(REGION_GFX2)>>7;
         if (tileno>=tiles_gfx2)
         {
-    	    gfxdata = (UINT32 *)&memory_region(REGION_GFX3)[(tileno-tiles_gfx2)<<7];
+    	    gfxdata = (uint32_t *)&memory_region(REGION_GFX3)[(tileno-tiles_gfx2)<<7];
         }
         else
         {
-    	    gfxdata = (UINT32 *)&memory_region(REGION_GFX2)[tileno<<7];
+    	    gfxdata = (uint32_t *)&memory_region(REGION_GFX2)[tileno<<7];
         }
     }
     else
     {
-	    gfxdata = (UINT32 *)&memory_region(REGION_GFX2)[tileno<<7];
+	    gfxdata = (uint32_t *)&memory_region(REGION_GFX2)[tileno<<7];
     }
     
     return gfxdata;
@@ -166,7 +166,7 @@ static UINT32 *get_tile (int tileno)
 static void decodetile(int tileno)
 {
 	unsigned char swap[128];
-	UINT32 *gfxdata;
+	uint32_t *gfxdata;
 	int x,y;
 	unsigned int pen;
 
@@ -176,7 +176,7 @@ static void decodetile(int tileno)
 
 	for (y = 0;y < 16;y++)
 	{
-		UINT32 dw;
+		uint32_t dw;
 
 		dw = 0;
 		for (x = 0;x < 8;x++)
@@ -542,7 +542,7 @@ void NeoMVSDrawGfx(unsigned char **line,const struct GfxElement *gfx, /* AJP */
 
 	int mydword;
 
-	UINT32 *fspr;
+	uint32_t *fspr;
 
 	char *l_y_skip;
 
@@ -729,7 +729,7 @@ void NeoMVSDrawGfx16(unsigned char **line,const struct GfxElement *gfx, /* AJP *
 
 	int mydword;
 
-	UINT32 *fspr;
+	uint32_t *fspr;
 
 	char *l_y_skip;
 

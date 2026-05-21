@@ -60,7 +60,7 @@ unsigned tms320c10_dasm(char *buffer, unsigned pc);
 
 /*	 Input a word from given I/O port
  */
-#define TMS320C10_In(Port) ((UINT16)cpu_readport(Port))
+#define TMS320C10_In(Port) ((uint16_t)cpu_readport(Port))
 
 
 /*	 Output a word to given I/O port

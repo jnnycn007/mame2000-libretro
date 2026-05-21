@@ -78,7 +78,7 @@ void safarir_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 	for (offs = safarir_ram_size/2 - 1;offs >= 0;offs--)
 	{
 		int sx,sy;
-		UINT8 code;
+		uint8_t code;
 
 
 		sx = offs % 32;
@@ -101,7 +101,7 @@ void safarir_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 	for (offs = safarir_ram_size/2 - 1;offs >= 0;offs--)
 	{
 		int sx,sy,transparency;
-		UINT8 code;
+		uint8_t code;
 
 
 		sx = offs % 32;

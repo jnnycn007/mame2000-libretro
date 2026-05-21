@@ -83,8 +83,8 @@ static READ_HANDLER( leta_r )
 	/* when reading the even ports, do a real analog port update */
 	if (which == 0)
 	{
-		int dx = (INT8)input_port_2_r(offset);
-		int dy = (INT8)input_port_3_r(offset);
+		int dx = (int8_t)input_port_2_r(offset);
+		int dy = (int8_t)input_port_3_r(offset);
 
 		cur[0] = dx + dy;
 		cur[1] = dx - dy;

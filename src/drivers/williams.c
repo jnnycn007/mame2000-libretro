@@ -484,8 +484,8 @@ Memory Map:
 
 /**** local stuff ****/
 
-static UINT16 cmos_base;
-static UINT16 cmos_length;
+static uint16_t cmos_base;
+static uint16_t cmos_length;
 
 
 
@@ -516,9 +516,9 @@ extern struct pia6821_interface tshoot_snd_pia_intf;
 extern struct pia6821_interface joust2_pia_1_intf;
 
 /* banking variables */
-extern UINT8 *defender_bank_base;
-extern const UINT32 *defender_bank_list;
-extern UINT8 *williams_bank_base;
+extern uint8_t *defender_bank_base;
+extern const uint32_t *defender_bank_list;
+extern uint8_t *williams_bank_base;
 
 /* initialization */
 void defender_init_machine(void);
@@ -537,7 +537,7 @@ WRITE_HANDLER( williams2_bank_select_w );
 WRITE_HANDLER( williams2_7segment_w );
 
 /* Mayday protection */
-extern UINT8 *mayday_protection;
+extern uint8_t *mayday_protection;
 READ_HANDLER( mayday_protection_r );
 
 
@@ -545,27 +545,27 @@ READ_HANDLER( mayday_protection_r );
 /**** from vidhrdw/williams.h ****/
 
 /* blitter variables */
-extern UINT8 *williams_blitterram;
-extern UINT8 williams_blitter_xor;
-extern UINT8 williams_blitter_remap;
-extern UINT8 williams_blitter_clip;
+extern uint8_t *williams_blitterram;
+extern uint8_t williams_blitter_xor;
+extern uint8_t williams_blitter_remap;
+extern uint8_t williams_blitter_clip;
 
 /* tilemap variables */
-extern UINT8 williams2_tilemap_mask;
-extern const UINT8 *williams2_row_to_palette;
-extern UINT8 williams2_M7_flip;
-extern INT8  williams2_videoshift;
-extern UINT8 williams2_special_bg_color;
+extern uint8_t williams2_tilemap_mask;
+extern const uint8_t *williams2_row_to_palette;
+extern uint8_t williams2_M7_flip;
+extern int8_t  williams2_videoshift;
+extern uint8_t williams2_special_bg_color;
 
 /* later-Williams video control variables */
-extern UINT8 *williams2_blit_inhibit;
-extern UINT8 *williams2_xscroll_low;
-extern UINT8 *williams2_xscroll_high;
+extern uint8_t *williams2_blit_inhibit;
+extern uint8_t *williams2_xscroll_low;
+extern uint8_t *williams2_xscroll_high;
 
 /* Blaster extra variables */
-extern UINT8 *blaster_color_zero_table;
-extern UINT8 *blaster_color_zero_flags;
-extern UINT8 *blaster_video_bits;
+extern uint8_t *blaster_color_zero_table;
+extern uint8_t *blaster_color_zero_flags;
+extern uint8_t *blaster_video_bits;
 
 
 WRITE_HANDLER( defender_videoram_w );
@@ -620,7 +620,7 @@ WRITE_HANDLER( williams2_bg_select_w );
 
 static void nvram_handler(void *file,int read_or_write)
 {
-	UINT8 *ram = memory_region(REGION_CPU1);
+	uint8_t *ram = memory_region(REGION_CPU1);
 
 	if (read_or_write)
 		osd_fwrite(file,&ram[cmos_base],cmos_length);
@@ -1599,7 +1599,7 @@ static struct MachineDriver machine_driver_joust2 =
 
 static void init_defender(void)
 {
-	static const UINT32 bank[8] = { 0x0c000, 0x10000, 0x11000, 0x12000, 0x0c000, 0x0c000, 0x0c000, 0x13000 };
+	static const uint32_t bank[8] = { 0x0c000, 0x10000, 0x11000, 0x12000, 0x0c000, 0x0c000, 0x0c000, 0x13000 };
 	defender_bank_list = bank;
 
 	/* CMOS configuration */
@@ -1645,12 +1645,12 @@ static void init_defndjeu(void)
 	ROMD.BIN    IC04-4.BIN            DFNDR-D.ROM           21
 */
 
-	UINT8 *rom = memory_region(REGION_CPU1);
+	uint8_t *rom = memory_region(REGION_CPU1);
 	int x;
 
 	for (x = 0xd000; x < 0x15000; x++)
 	{
-		UINT8 src = rom[x];
+		uint8_t src = rom[x];
 		rom[x] = (src & 0x7e) | (src >> 7) | (src << 7);
 	}
 }
@@ -1658,7 +1658,7 @@ static void init_defndjeu(void)
 #if 0
 static void init_defcmnd(void)
 {
-	static const UINT32 bank[8] = { 0x0c000, 0x10000, 0x11000, 0x12000, 0x13000, 0x0c000, 0x0c000, 0x14000 };
+	static const uint32_t bank[8] = { 0x0c000, 0x10000, 0x11000, 0x12000, 0x13000, 0x0c000, 0x0c000, 0x14000 };
 	defender_bank_list = bank;
 
 	/* CMOS configuration */
@@ -1671,7 +1671,7 @@ static void init_defcmnd(void)
 
 static void init_mayday(void)
 {
-	static const UINT32 bank[8] = { 0x0c000, 0x10000, 0x11000, 0x12000, 0x0c000, 0x0c000, 0x0c000, 0x13000 };
+	static const uint32_t bank[8] = { 0x0c000, 0x10000, 0x11000, 0x12000, 0x0c000, 0x0c000, 0x0c000, 0x13000 };
 	defender_bank_list = bank;
 
 	/* CMOS configuration */
@@ -1681,13 +1681,13 @@ static void init_mayday(void)
 	CONFIGURE_PIAS(williams_pia_0_intf, williams_pia_1_intf, williams_snd_pia_intf);
 
 	/* install a handler to catch protection checks */
-	mayday_protection = (UINT8*)install_mem_read_handler(0, 0xa190, 0xa191, mayday_protection_r);
+	mayday_protection = (uint8_t*)install_mem_read_handler(0, 0xa190, 0xa191, mayday_protection_r);
 }
 
 
 static void init_colony7(void)
 {
-	static const UINT32 bank[8] = { 0x0c000, 0x10000, 0x11000, 0x12000, 0x0c000, 0x0c000, 0x0c000, 0x0c000 };
+	static const uint32_t bank[8] = { 0x0c000, 0x10000, 0x11000, 0x12000, 0x0c000, 0x0c000, 0x0c000, 0x0c000 };
 	defender_bank_list = bank;
 
 	/* CMOS configuration */
@@ -1792,7 +1792,7 @@ static void init_blaster(void)
 
 static void init_tshoot(void)
 {
-	static const UINT8 tilemap_colors[] = { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7 };
+	static const uint8_t tilemap_colors[] = { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7 };
 
 	/* CMOS configuration */
 	CONFIGURE_CMOS(0xcc00, 0x400);
@@ -1808,7 +1808,7 @@ static void init_tshoot(void)
 
 static void init_joust2(void)
 {
-	static const UINT8 tilemap_colors[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	static const uint8_t tilemap_colors[] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	/* CMOS configuration */
 	CONFIGURE_CMOS(0xcc00, 0x400);
@@ -1832,7 +1832,7 @@ static void init_joust2(void)
 
 static void init_mysticm(void)
 {
-	static const UINT8 tilemap_colors[] = { 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+	static const uint8_t tilemap_colors[] = { 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
 	/* CMOS configuration */
 	CONFIGURE_CMOS(0xcc00, 0x400);
@@ -1852,7 +1852,7 @@ static void init_mysticm(void)
 
 static void init_inferno(void)
 {
-	static const UINT8 tilemap_colors[] = { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7 };
+	static const uint8_t tilemap_colors[] = { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7 };
 
 	/* CMOS configuration */
 	CONFIGURE_CMOS(0xcc00, 0x400);

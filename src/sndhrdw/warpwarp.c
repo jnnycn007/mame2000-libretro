@@ -13,7 +13,7 @@
 #define CLOCK_16H	(18432000/3/2/16)
 #define CLOCK_1V    (18432000/3/2/384)
 
-static INT16 *decay = NULL;
+static int16_t *decay = NULL;
 static int channel;
 static int sound_latch = 0;
 static int music1_latch = 0;
@@ -121,7 +121,7 @@ WRITE_HANDLER( warpwarp_music2_w )
 
 }
 
-static void warpwarp_sound_update(int param, INT16 *buffer, int length)
+static void warpwarp_sound_update(int param, int16_t *buffer, int length)
 {
     static int vcarry = 0;
     static int vcount = 0;
@@ -209,12 +209,12 @@ int warpwarp_sh_start(const struct MachineSound *msound)
 {
 	int i;
 
-	decay = (INT16 *) malloc(32768 * sizeof(INT16));
+	decay = (int16_t *) malloc(32768 * sizeof(int16_t));
 	if( !decay )
 		return 1;
 
     for( i = 0; i < 0x8000; i++ )
-		decay[0x7fff-i] = (INT16) (0x7fff/exp(1.0*i/4096));
+		decay[0x7fff-i] = (int16_t) (0x7fff/exp(1.0*i/4096));
 
 	channel = stream_init("WarpWarp", 100, Machine->sample_rate, 0, warpwarp_sound_update);
     return 0;

@@ -33,34 +33,34 @@ static int searchlight_enable = 0;
 
 #ifdef ALIGN_INTS /* GSL 980108 read/write nonaligned dword routine for ARM processor etc */
 
-static INLINE UINT32 read_dword(void *address)
+static INLINE uint32_t read_dword(void *address)
 {
 	if ((long)address & 3)
 	{
-  		return (*((UINT8 *)address+BL0) +
-			   (*((UINT8 *)address+BL1) << 8)  +
-			   (*((UINT8 *)address+BL2) << 16) +
-			   (*((UINT8 *)address+BL3) << 24) );
+  		return (*((uint8_t *)address+BL0) +
+			   (*((uint8_t *)address+BL1) << 8)  +
+			   (*((uint8_t *)address+BL2) << 16) +
+			   (*((uint8_t *)address+BL3) << 24) );
 	}
 	else
-		return *(UINT32 *)address;
+		return *(uint32_t *)address;
 }
 
 
 #else
-#define read_dword(address) *(UINT32 *)address
+#define read_dword(address) *(uint32_t *)address
 #endif
 
 
 static void drawgfx_shadow(struct osd_bitmap *dest,const struct GfxElement *gfx,
 		unsigned int code,unsigned int color,int sx,int sy,
 		const struct rectangle *clip,int transparency,
-		UINT8* shadow_mask, UINT8* layer_mask, int layer)
+		uint8_t* shadow_mask, uint8_t* layer_mask, int layer)
 {
 	int ox,oy,ex,ey,y,start;
-	const UINT8 *sd;
-	UINT8 *bm,*bme;
-	UINT8 col;
+	const uint8_t *sd;
+	uint8_t *bm,*bme;
+	uint8_t col;
 	int *sd4;
 	int col4;
 	int f,shadow=0,l;
@@ -293,8 +293,8 @@ void dday_vh_convert_color_prom(unsigned char *palette, unsigned short *colortab
 void dday_decode(void)
 {
 	int i;
-	UINT8 *mask = memory_region(REGION_GFX4);
-	UINT8 data;
+	uint8_t *mask = memory_region(REGION_GFX4);
+	uint8_t data;
 
 
 	/* create x-flipped search light mask */
@@ -366,7 +366,7 @@ void dday_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 	for (offs = videoram_size - 1;offs >= 0;offs--)
 	{
 		int code, code_background, sx, sy, flipx;
-		UINT8* searchlight_bitmap;
+		uint8_t* searchlight_bitmap;
 
 
 		sy = (offs / 32);
@@ -407,7 +407,7 @@ void dday_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 		/* is the vehicle layer character non-blank? */
 		if (code)
 		{
-			UINT8* layer_bitmap;
+			uint8_t* layer_bitmap;
 
 
 			layer_bitmap = &memory_region(REGION_GFX5)[code_background << 3];

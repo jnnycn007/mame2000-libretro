@@ -16,7 +16,7 @@
 WRITE_HANDLER( lasso_videoram_w );
 WRITE_HANDLER( lasso_backcolor_w );
 WRITE_HANDLER( lasso_cocktail_w );
-void lasso_vh_convert_color_prom( UINT8 *palette, UINT16 *colortable, const UINT8 *color_prom );
+void lasso_vh_convert_color_prom( uint8_t *palette, uint16_t *colortable, const uint8_t *color_prom );
 void lasso_vh_screenrefresh( struct osd_bitmap *bitmap, int fullrefresh );
 int lasso_vh_start( void );
 
@@ -33,7 +33,7 @@ int lasso_interrupt( void )
 }
 
 
-static UINT8 *shareram;
+static uint8_t *shareram;
 
 static READ_HANDLER( shareram_r )
 {

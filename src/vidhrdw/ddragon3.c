@@ -9,16 +9,16 @@
 #include "tilemap.h"
 
 unsigned char *ddragon3_bg_videoram;
-static UINT16 ddragon3_bg_scrollx;
-static UINT16 ddragon3_bg_scrolly;
+static uint16_t ddragon3_bg_scrollx;
+static uint16_t ddragon3_bg_scrolly;
 
-static UINT16 ddragon3_bg_tilebase;
-static UINT16 old_ddragon3_bg_tilebase;
+static uint16_t ddragon3_bg_tilebase;
+static uint16_t old_ddragon3_bg_tilebase;
 
 unsigned char *ddragon3_fg_videoram;
-static UINT16 ddragon3_fg_scrollx;
-static UINT16 ddragon3_fg_scrolly;
-UINT16 ddragon3_vreg;
+static uint16_t ddragon3_fg_scrollx;
+static uint16_t ddragon3_fg_scrolly;
+uint16_t ddragon3_vreg;
 
 static struct tilemap *background, *foreground;
 
@@ -54,7 +54,7 @@ WRITE_HANDLER( ddragon3_scroll_w ){
 /* background */
 static void get_bg_tile_info(int tile_index)
 {
-	UINT16 data = ((UINT16 *)ddragon3_bg_videoram)[tile_index];
+	uint16_t data = ((uint16_t *)ddragon3_bg_videoram)[tile_index];
 	SET_TILE_INFO( 0, (data&0xfff) | ((ddragon3_bg_tilebase&1)<<12), ((data&0xf000)>>12)+16 );  // GFX,NUMBER,COLOR
 }
 
@@ -78,8 +78,8 @@ READ_HANDLER( ddragon3_bg_videoram_r )
 /* foreground */
 static void get_fg_tile_info(int tile_index)
 {
-	UINT16 data0 = ((UINT16 *)ddragon3_fg_videoram)[2*tile_index];
-	UINT16 data1 = ((UINT16 *)ddragon3_fg_videoram)[2*tile_index+1];
+	uint16_t data0 = ((uint16_t *)ddragon3_fg_videoram)[2*tile_index];
+	uint16_t data1 = ((uint16_t *)ddragon3_fg_videoram)[2*tile_index+1];
 	SET_TILE_INFO( 0, data1&0x1fff , data0&0xf );  // GFX,NUMBER,COLOR
         tile_info.flags = ((data0&0x40) >> 6);  // FLIPX
 }
@@ -144,11 +144,11 @@ int ddragon3_vh_start(void){
 static void draw_sprites( struct osd_bitmap *bitmap ){
 	const struct rectangle *clip = &Machine->visible_area;
 	const struct GfxElement *gfx = Machine->gfx[1];
-	UINT16 *source = (UINT16 *)spriteram;
-	UINT16 *finish = source+0x800;
+	uint16_t *source = (uint16_t *)spriteram;
+	uint16_t *finish = source+0x800;
 
 	while( source<finish ){
-		UINT16 attributes = source[1];
+		uint16_t attributes = source[1];
 		if( attributes&0x01 ){ /* enable */
 			int flipx = attributes&0x10;
 			int flipy = attributes&0x08;
@@ -156,8 +156,8 @@ static void draw_sprites( struct osd_bitmap *bitmap ){
 
 			int sy = source[0]&0xff;
 			int sx = source[5]&0xff;
-			UINT16 tile_number = source[2]&0xff;
-			UINT16 color = source[4]&0xf;
+			uint16_t tile_number = source[2]&0xff;
+			uint16_t color = source[4]&0xf;
 			int bank = source[3]&0xff;
 			int i;
 

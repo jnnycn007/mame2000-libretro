@@ -78,7 +78,7 @@ static READ_HANDLER( ddragon3_io_r )
 	}
 }
 
-extern UINT16 ddragon3_vreg;
+extern uint16_t ddragon3_vreg;
 
 static int ddragon3_cpu_interrupt(void) { /* 6:0x177e - 5:0x176a */
 	if( cpu_getiloops() == 0 ){
@@ -90,7 +90,7 @@ static int ddragon3_cpu_interrupt(void) { /* 6:0x177e - 5:0x176a */
 	return MC68000_INT_NONE;
 }
 
-static UINT16 reg[8];
+static uint16_t reg[8];
 
 static WRITE_HANDLER( ddragon3_io_w ){
 	reg[offset/2] = COMBINE_WORD(reg[offset],data);

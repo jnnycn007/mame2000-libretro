@@ -26,7 +26,7 @@ void dump_tilemap(void);
 
 #ifdef TRANSPARENT_SHADOWS
 #define ShadowColorsShift 8
-UINT16 shade_table[MAXCOLOURS];
+uint16_t shade_table[MAXCOLOURS];
 int sys16_sh_shadowpal;
 #endif
 
@@ -35,9 +35,9 @@ static int sys16_MaxShadowColors_Shift;
 
 #define NUM_SPRITES 128
 
-extern UINT8 *sys16_textram;
-extern UINT8 *sys16_spriteram;
-extern UINT8 *sys16_tileram; /* contains tilemaps for 16 pages */
+extern uint8_t *sys16_textram;
+extern uint8_t *sys16_spriteram;
+extern uint8_t *sys16_tileram; /* contains tilemaps for 16 pages */
 
 static struct sprite_list *sprite_list;
 
@@ -111,7 +111,7 @@ static void draw_quartet_title_screen( struct osd_bitmap *bitmap,int playfield )
 
 /***************************************************************************/
 
-UINT32 sys16_bg_map( UINT32 col, UINT32 row, UINT32 num_cols, UINT32 num_rows ){
+uint32_t sys16_bg_map( uint32_t col, uint32_t row, uint32_t num_cols, uint32_t num_rows ){
 	int page = 0;
 	if( row<32 ){ /* top */
 		if( col<64 ) page = 0; else page = 1;
@@ -124,23 +124,23 @@ UINT32 sys16_bg_map( UINT32 col, UINT32 row, UINT32 num_cols, UINT32 num_rows ){
 	return page*64*32+row*64+col;
 }
 
-UINT32 sys16_text_map( UINT32 col, UINT32 row, UINT32 num_cols, UINT32 num_rows ){
+uint32_t sys16_text_map( uint32_t col, uint32_t row, uint32_t num_cols, uint32_t num_rows ){
 	return row*64+col+(64-40);
 }
 
 /***************************************************************************/
 
 WRITE_HANDLER( sys16_paletteram_w ){
-	UINT16 oldword = READ_WORD (&paletteram[offset]);
-	UINT16 newword = COMBINE_WORD (oldword, data);
+	uint16_t oldword = READ_WORD (&paletteram[offset]);
+	uint16_t newword = COMBINE_WORD (oldword, data);
 	if( oldword!=newword ){
 		/* we can do this, because we initialize palette RAM to all black in vh_start */
 		/*	   byte 0    byte 1 */
 		/*	GBGR BBBB GGGG RRRR */
 		/*	5444 3210 3210 3210 */
-		UINT8 r = (newword & 0x00f)<<1;
-		UINT8 g = (newword & 0x0f0)>>2;
-		UINT8 b = (newword & 0xf00)>>7;
+		uint8_t r = (newword & 0x00f)<<1;
+		uint8_t g = (newword & 0x0f0)>>2;
+		uint8_t b = (newword & 0xf00)>>7;
 		if( sys16_dactype == 0 ){
 			/* dac_type == 0 (from GCS file) */
 			if (newword&0x1000) r|=1;
@@ -220,7 +220,7 @@ WRITE_HANDLER( sys16_paletteram_w ){
 }
 
 static void sys16_refresh_palette(void){
-	UINT8 r,g,b;
+	uint8_t r,g,b;
 	int i;
 	for( i=0;i<Machine->drv->total_colors;i++ ){
 		if( sys16_palettedirty[i] ){
@@ -287,7 +287,7 @@ static void update_page( void ){
 }
 
 static void get_bg_tile_info( int offset ){
-	const UINT16 *source = 64*32*sys16_bg_page[offset/(64*32)] + (UINT16 *)sys16_tileram;
+	const uint16_t *source = 64*32*sys16_bg_page[offset/(64*32)] + (uint16_t *)sys16_tileram;
 	int data = source[offset%(64*32)];
 	int tile_number = (data&0xfff) + 0x1000*((data&sys16_tilebank_switch)?sys16_tile_bank1:sys16_tile_bank0);
 
@@ -317,7 +317,7 @@ static void get_bg_tile_info( int offset ){
 }
 
 static void get_fg_tile_info( int offset ){
-	const UINT16 *source = 64*32*sys16_fg_page[offset/(64*32)] + (UINT16 *)sys16_tileram;
+	const uint16_t *source = 64*32*sys16_fg_page[offset/(64*32)] + (uint16_t *)sys16_tileram;
 	int data = source[offset%(64*32)];
 	int tile_number = (data&0xfff) + 0x1000*((data&sys16_tilebank_switch)?sys16_tile_bank1:sys16_tile_bank0);
 
@@ -345,7 +345,7 @@ static void get_fg_tile_info( int offset ){
 }
 
 static void get_bg2_tile_info( int offset ){
-	const UINT16 *source = 64*32*sys16_bg2_page[offset/(64*32)] + (UINT16 *)sys16_tileram;
+	const uint16_t *source = 64*32*sys16_bg2_page[offset/(64*32)] + (uint16_t *)sys16_tileram;
 	int data = source[offset%(64*32)];
 	int tile_number = (data&0xfff) + 0x1000*((data&0x1000)?sys16_tile_bank1:sys16_tile_bank0);
 	if(sys16_textmode==0){
@@ -358,7 +358,7 @@ static void get_bg2_tile_info( int offset ){
 }
 
 static void get_fg2_tile_info( int offset ){
-	const UINT16 *source = 64*32*sys16_fg2_page[offset/(64*32)] + (UINT16 *)sys16_tileram;
+	const uint16_t *source = 64*32*sys16_fg2_page[offset/(64*32)] + (uint16_t *)sys16_tileram;
 	int data = source[offset%(64*32)];
 	int tile_number = (data&0xfff) + 0x1000*((data&0x1000)?sys16_tile_bank1:sys16_tile_bank0);
 	if(sys16_textmode==0){
@@ -412,7 +412,7 @@ READ_HANDLER( sys16_tileram_r ){
 /***************************************************************************/
 
 static void get_text_tile_info( int offset ){
-	const UINT16 *source = (UINT16 *)sys16_textram;
+	const uint16_t *source = (uint16_t *)sys16_textram;
 	int tile_number = source[offset];
 	int pri = tile_number >> 8;
 	if(sys16_textmode==0){
@@ -675,7 +675,7 @@ static void get_sprite_info( void ){
 	const unsigned short *base_pal = Machine->gfx[0]->colortable + 1024;
 	const unsigned char *base_gfx = memory_region(REGION_GFX2);
 
-	UINT16 *source = (UINT16 *)sys16_spriteram;
+	uint16_t *source = (uint16_t *)sys16_spriteram;
 	struct sprite *sprite = sprite_list->sprite;
 	const struct sprite *finish = sprite + NUM_SPRITES;
 
@@ -703,8 +703,8 @@ static void get_sprite_info( void ){
 	7	?						"sprite offset"
 */
 		while( sprite<finish ){
-			UINT16 ypos = source[0];
-			UINT16 width = source[2];
+			uint16_t ypos = source[0];
+			uint16_t width = source[2];
 			int top = ypos&0xff;
 			int bottom = ypos>>8;
 
@@ -719,9 +719,9 @@ static void get_sprite_info( void ){
 
 			if(bottom !=0 && bottom > top)
 			{
-				UINT16 attributes = source[4];
-				UINT16 zoomx = source[5]&0x3ff;
-				UINT16 zoomy = (source[6]&0x3ff);
+				uint16_t attributes = source[4];
+				uint16_t zoomx = source[5]&0x3ff;
+				uint16_t zoomy = (source[6]&0x3ff);
 				int gfx = source[3]*4;
 
 #ifdef SYS16_DEBUG
@@ -793,16 +793,16 @@ static void get_sprite_info( void ){
 	6,7	(unused)
 */
 		while( sprite<finish ){
-			UINT16 attributes = source[5];
-			UINT16 ypos = source[1];
+			uint16_t attributes = source[5];
+			uint16_t ypos = source[1];
 			int bottom = (ypos>>8)+passshot_y;
 			int top = (ypos&0xff)+passshot_y;
 			sprite->flags = 0;
 
 			if( bottom>top && ypos!=0xffff ){
 				int bank = (attributes>>4)&0xf;
-				UINT16 number = source[2];
-				UINT16 width = source[3];
+				uint16_t number = source[2];
+				uint16_t width = source[3];
 
 				int zoom = source[4]&0x3ff;
 				int xpos = source[0] + sys16_sprxoffset;
@@ -883,9 +883,9 @@ static void get_sprite_info( void ){
 	7	?						"sprite offset"
 */
 		while( sprite<finish ){
-			UINT16 ypos = source[0];
-			UINT16 width = source[2];
-			UINT16 attributes = source[4];
+			uint16_t ypos = source[0];
+			uint16_t width = source[2];
+			uint16_t attributes = source[4];
 			int top = ypos&0xff;
 			int bottom = ypos>>8;
 
@@ -903,8 +903,8 @@ static void get_sprite_info( void ){
 			if(bottom !=0 && bottom > top && (attributes&0x3f) !=0x3f)
 #endif
 			{
-				UINT16 zoomx = source[5]&0x3ff;
-				UINT16 zoomy = (source[6]&0x3ff);
+				uint16_t zoomx = source[5]&0x3ff;
+				uint16_t zoomy = (source[6]&0x3ff);
 				int gfx = source[3]*4;
 
 #ifdef SYS16_DEBUG
@@ -963,8 +963,8 @@ static void get_sprite_info( void ){
 			{
 				int spr_no=0;
 				while( sprite<finish ){
-					UINT16 ypos = source[0];
-					UINT16 pal=(source[4]>>8)&0x3f;
+					uint16_t ypos = source[0];
+					uint16_t pal=(source[4]>>8)&0x3f;
 					int top = ypos&0xff;
 					int bottom = ypos>>8;
 
@@ -987,10 +987,10 @@ static void get_sprite_info( void ){
 					if(bottom !=0 && bottom > top && pal !=0x3f)
 #endif
 					{
-						UINT16 spr_pri=(source[4])&0xf;
-						UINT16 bank=(source[4]>>4) &0xf;
-						UINT16 tsource[4];
-						UINT16 width;
+						uint16_t spr_pri=(source[4])&0xf;
+						uint16_t bank=(source[4]>>4) &0xf;
+						uint16_t tsource[4];
+						uint16_t width;
 						int gfx;
 
 						if (spr_no==5 && (source[4]&0x00ff) == 0x0021 &&
@@ -1069,7 +1069,7 @@ static void get_sprite_info( void ){
 			break;
 		case 2: // Quartet2 /Alexkidd + others
 		while( sprite<finish ){
-			UINT16 ypos = source[0];
+			uint16_t ypos = source[0];
 			int top = ypos&0xff;
 			int bottom = ypos>>8;
 
@@ -1084,11 +1084,11 @@ static void get_sprite_info( void ){
 
 			if(bottom !=0 && bottom > top)
 			{
-				UINT16 spr_pri=(source[4])&0xf;
-				UINT16 bank=(source[4]>>4) &0xf;
-				UINT16 pal=(source[4]>>8)&0x3f;
-				UINT16 tsource[4];
-				UINT16 width;
+				uint16_t spr_pri=(source[4])&0xf;
+				uint16_t bank=(source[4]>>4) &0xf;
+				uint16_t pal=(source[4]>>8)&0x3f;
+				uint16_t tsource[4];
+				uint16_t width;
 				int gfx;
 
 #ifdef SYS16_DEBUG
@@ -1169,7 +1169,7 @@ static void get_sprite_info( void ){
 		break;
 		case 5: // Hang-On
 		while( sprite<finish ){
-			UINT16 ypos = source[0];
+			uint16_t ypos = source[0];
 			int top = ypos&0xff;
 			int bottom = ypos>>8;
 
@@ -1184,10 +1184,10 @@ static void get_sprite_info( void ){
 
 			if(bottom !=0 && bottom > top)
 			{
-				UINT16 bank=(source[1]>>12);
-				UINT16 pal=(source[4]>>8)&0x3f;
-				UINT16 tsource[4];
-				UINT16 width;
+				uint16_t bank=(source[1]>>12);
+				uint16_t pal=(source[4]>>8)&0x3f;
+				uint16_t tsource[4];
+				uint16_t width;
 				int gfx;
 				int zoomx,zoomy;
 
@@ -1269,7 +1269,7 @@ static void get_sprite_info( void ){
 		break;
 		case 6: // Space Harrier
 		while( sprite<finish ){
-			UINT16 ypos = source[0];
+			uint16_t ypos = source[0];
 			int top = ypos&0xff;
 			int bottom = ypos>>8;
 
@@ -1284,10 +1284,10 @@ static void get_sprite_info( void ){
 
 			if(bottom !=0 && bottom > top)
 			{
-				UINT16 bank=(source[1]>>12);
-				UINT16 pal=(source[2]>>8)&0x3f;
-				UINT16 tsource[4];
-				UINT16 width;
+				uint16_t bank=(source[1]>>12);
+				uint16_t pal=(source[2]>>8)&0x3f;
+				uint16_t tsource[4];
+				uint16_t width;
 				int gfx;
 				int zoomx,zoomy;
 
@@ -1396,7 +1396,7 @@ static void get_sprite_info( void ){
 					else
 					{ // build pattern offset
 						unsigned width2=width&0x7f;
-						UINT8 *p,*p0;
+						uint8_t *p,*p0;
 						unsigned height=sprite->tile_height;
 						unsigned width_bytes;
 						int len_pattern;
@@ -1410,7 +1410,7 @@ static void get_sprite_info( void ){
 
 							// 32 bit sprite hardware ///////////////////////////////////////////
 							width_bytes = width2<<3;
-							p0 = (UINT8 *)sprite->pen_data;
+							p0 = (uint8_t *)sprite->pen_data;
 							/////////////////////////////////////////////////////////////////////
 
 							offset=0xe;
@@ -1456,9 +1456,9 @@ static void get_sprite_info( void ){
 
 			if (!(source[0]&0x4000))
 			{
-				UINT16 bank=(source[0]>>8)&7;
-				UINT16 pal=(source[5])&0x7f;
-				UINT16 width;
+				uint16_t bank=(source[0]>>8)&7;
+				uint16_t pal=(source[5])&0x7f;
+				uint16_t width;
 				int gfx;
 				int zoom;
 				int x;
@@ -2086,9 +2086,9 @@ extern int gr_bitmap_width;
 static void gr_colors(void)
 {
 	int i;
-	UINT16 ver_data;
+	uint16_t ver_data;
 	int colorflip;
-	UINT8 *data_ver=gr_ver;
+	uint8_t *data_ver=gr_ver;
 
 	for(i=0;i<224;i++)
 	{
@@ -2112,22 +2112,22 @@ static void gr_colors(void)
 static void render_gr(struct osd_bitmap *bitmap,int priority)
 {
 	int i,j;
-	UINT8 *data = memory_region(REGION_GFX3);
-	UINT8 *source;
-	UINT8 *line;
-	UINT16 *line16;
-	UINT32 *line32;
-	UINT8 *data_ver=gr_ver;
-	UINT32 ver_data,hor_pos;
-	UINT16 colors[5];
-//	UINT8 colors[5];
-	UINT32 fastfill;
+	uint8_t *data = memory_region(REGION_GFX3);
+	uint8_t *source;
+	uint8_t *line;
+	uint16_t *line16;
+	uint32_t *line32;
+	uint8_t *data_ver=gr_ver;
+	uint32_t ver_data,hor_pos;
+	uint16_t colors[5];
+//	uint8_t colors[5];
+	uint32_t fastfill;
 	int colorflip;
 	int yflip=0,ypos;
 	int dx=1,xoff=0;
 
-	UINT16 *paldata1 = Machine->gfx[0]->colortable + gr_palette;
-	UINT16 *paldata2 = Machine->gfx[0]->colortable + gr_palette_default;
+	uint16_t *paldata1 = Machine->gfx[0]->colortable + gr_palette;
+	uint16_t *paldata2 = Machine->gfx[0]->colortable + gr_palette_default;
 
 	priority=priority << 10;
 
@@ -2157,7 +2157,7 @@ static void render_gr(struct osd_bitmap *bitmap,int priority)
 						// fill line
 						for(j=0;j<320;j++)
 						{
-							line16=(UINT16 *)bitmap->line[j]+ypos;
+							line16=(uint16_t *)bitmap->line[j]+ypos;
 							*line16=colors[0];
 						}
 					}
@@ -2190,7 +2190,7 @@ static void render_gr(struct osd_bitmap *bitmap,int priority)
 
 						for(j=0;j<320;j++)
 						{
-							line16=(UINT16 *)bitmap->line[xoff+j*dx]+ypos;
+							line16=(uint16_t *)bitmap->line[xoff+j*dx]+ypos;
 							*line16 = colors[*source++];
 						}
 					}
@@ -2219,7 +2219,7 @@ static void render_gr(struct osd_bitmap *bitmap,int priority)
 
 					if((ver_data & 0x500) == 0x100 || (ver_data & 0x300) == 0x200)
 					{
-						line16=(UINT16 *)bitmap->line[ypos];
+						line16=(uint16_t *)bitmap->line[ypos];
 						for(j=0;j<320;j++)
 						{
 							*line16++=colors[0];
@@ -2228,7 +2228,7 @@ static void render_gr(struct osd_bitmap *bitmap,int priority)
 					else
 					{
 						// copy line
-						line16 = (UINT16 *)bitmap->line[ypos]+xoff;
+						line16 = (uint16_t *)bitmap->line[ypos]+xoff;
 						ver_data=ver_data & 0x00ff;
 						colorflip = (READ_WORD(&gr_flip[ver_data<<1]) >> 3) & 1;
 
@@ -2351,7 +2351,7 @@ static void render_gr(struct osd_bitmap *bitmap,int priority)
 					if((ver_data & 0x500) == 0x100 || (ver_data & 0x300) == 0x200)
 					{
 						// fill line
-						line32 = (UINT32 *)bitmap->line[ypos];
+						line32 = (uint32_t *)bitmap->line[ypos];
 						fastfill = colors[0] + (colors[0] << 8) + (colors[0] << 16) + (colors[0] << 24);
 						for(j=0;j<320;j+=4)
 						{
@@ -2468,9 +2468,9 @@ void sys16_ho_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh){
 static void grv2_colors(void)
 {
 	int i;
-	UINT16 ver_data;
+	uint16_t ver_data;
 	int colorflip,colorflip_info;
-	UINT8 *data_ver=gr_ver;
+	uint8_t *data_ver=gr_ver;
 
 	for(i=0;i<224;i++)
 	{
@@ -2500,23 +2500,23 @@ static void grv2_colors(void)
 static void render_grv2(struct osd_bitmap *bitmap,int priority)
 {
 	int i,j;
-	UINT8 *data = memory_region(REGION_GFX3);
-	UINT8 *source,*source2,*temp;
-	UINT8 *line;
-	UINT16 *line16;
-	UINT32 *line32;
-	UINT8 *data_ver=gr_ver;
-	UINT32 ver_data,hor_pos,hor_pos2;
-	UINT16 colors[5];
-	UINT32 fastfill;
+	uint8_t *data = memory_region(REGION_GFX3);
+	uint8_t *source,*source2,*temp;
+	uint8_t *line;
+	uint16_t *line16;
+	uint32_t *line32;
+	uint8_t *data_ver=gr_ver;
+	uint32_t ver_data,hor_pos,hor_pos2;
+	uint16_t colors[5];
+	uint32_t fastfill;
 	int colorflip,colorflip_info;
 	int yflip=0,ypos;
 	int dx=1,xoff=0;
 
 	int second_road = READ_WORD(gr_second_road);
 
-	UINT16 *paldata1 = Machine->gfx[0]->colortable + gr_palette;
-	UINT16 *paldata2 = Machine->gfx[0]->colortable + gr_palette_default;
+	uint16_t *paldata1 = Machine->gfx[0]->colortable + gr_palette;
+	uint16_t *paldata2 = Machine->gfx[0]->colortable + gr_palette_default;
 
 	priority=priority << 11;
 
@@ -2546,7 +2546,7 @@ static void render_grv2(struct osd_bitmap *bitmap,int priority)
 						// fill line
 						for(j=0;j<320;j++)
 						{
-							line16=(UINT16 *)bitmap->line[j]+ypos;
+							line16=(uint16_t *)bitmap->line[j]+ypos;
 							*line16=colors[0];
 						}
 					}
@@ -2587,7 +2587,7 @@ static void render_grv2(struct osd_bitmap *bitmap,int priority)
 
 						for(j=0;j<320;j++)
 						{
-							line16=(UINT16 *)bitmap->line[xoff+j*dx]+ypos;
+							line16=(uint16_t *)bitmap->line[xoff+j*dx]+ypos;
 							if(*source2 <= *source)
 								*line16 = colors[*source];
 							else
@@ -2622,7 +2622,7 @@ static void render_grv2(struct osd_bitmap *bitmap,int priority)
 					{
 						colors[0] = paldata1[ ver_data&0x3f ];
 						// fill line
-						line16 = (UINT16 *)bitmap->line[ypos];
+						line16 = (uint16_t *)bitmap->line[ypos];
 						for(j=0;j<320;j++)
 						{
 							*line16++ = colors[0];
@@ -2631,7 +2631,7 @@ static void render_grv2(struct osd_bitmap *bitmap,int priority)
 					else
 					{
 						// copy line
-						line16 = (UINT16 *)bitmap->line[ypos]+xoff;
+						line16 = (uint16_t *)bitmap->line[ypos]+xoff;
 						ver_data=ver_data & 0x01ff;		//???
 						colorflip_info = READ_WORD(&gr_flip[ver_data<<1]);
 
@@ -2780,7 +2780,7 @@ static void render_grv2(struct osd_bitmap *bitmap,int priority)
 					{
 						colors[0] = paldata1[ ver_data&0x3f ];
 						// fill line
-						line32 = (UINT32 *)bitmap->line[ypos];
+						line32 = (uint32_t *)bitmap->line[ypos];
 						fastfill = colors[0] + (colors[0] << 8) + (colors[0] << 16) + (colors[0] << 24);
 						for(j=0;j<320;j+=4)
 						{
@@ -2978,7 +2978,7 @@ static void draw_quartet_title_screen( struct osd_bitmap *bitmap,int playfield )
 #ifdef SYS16_DEBUG
 void dump_tilemap(void)
 {
-	const UINT16 *source;
+	const uint16_t *source;
 	int row,col,r,c;
 	int data;
 
@@ -2989,7 +2989,7 @@ void dump_tilemap(void)
 	{
 		for(c=0;c<128;c++)
 		{
-			source = (const UINT16 *)sys16_tileram;
+			source = (const uint16_t *)sys16_tileram;
 			row=r;col=c;
 			if( row<32 ){
 				if( col<64 ){
@@ -3021,7 +3021,7 @@ void dump_tilemap(void)
 	{
 		for(c=0;c<128;c++)
 		{
-			source = (const UINT16 *)sys16_tileram;
+			source = (const uint16_t *)sys16_tileram;
 			row=r;col=c;
 			if( row<32 ){
 				if( col<64 ){
@@ -3053,7 +3053,7 @@ void dump_tilemap(void)
 	{
 		for(c=0;c<64;c++)
 		{
-			source = (const UINT16 *)sys16_textram;
+			source = (const uint16_t *)sys16_textram;
 			data = source[r*64+c];
 			logerror("%4x ",data);
 		}

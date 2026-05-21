@@ -65,10 +65,10 @@ Program RAM                        FFC000-FFFFFF  R/W  D0-D15
 #include "vidhrdw/generic.h"
 
 
-extern UINT8 *toobin_intensity;
-extern UINT8 *toobin_moslip;
+extern uint8_t *toobin_intensity;
+extern uint8_t *toobin_moslip;
 
-static UINT8 *interrupt_scan;
+static uint8_t *interrupt_scan;
 
 
 WRITE_HANDLER( toobin_moslip_w );

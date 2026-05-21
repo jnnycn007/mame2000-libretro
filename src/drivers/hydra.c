@@ -19,11 +19,11 @@
 
 
 extern struct rectangle hydra_mo_area;
-extern UINT32 hydra_mo_priority_offset;
-extern INT32 hydra_pf_xoffset;
+extern uint32_t hydra_mo_priority_offset;
+extern int32_t hydra_pf_xoffset;
 
 
-static UINT8 which_input;
+static uint8_t which_input;
 
 
 WRITE_HANDLER( hydra_playfieldram_w );

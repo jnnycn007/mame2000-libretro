@@ -49,8 +49,8 @@ static int sound_latch[8];
 static int polynome;
 static int thump_frequency;
 
-static INT16 *discharge;
-static INT16 vol_explosion[16];
+static int16_t *discharge;
+static int16_t vol_explosion[16];
 #define EXP(charge,n) (charge ? 0x7fff - discharge[0x7fff-n] : discharge[n])
 
 static INLINE int explosion(int samplerate)
@@ -371,7 +371,7 @@ static INLINE int life(int samplerate)
 }
 
 
-static void asteroid_sound_update(int param, INT16 *buffer, int length)
+static void asteroid_sound_update(int param, int16_t *buffer, int length)
 {
 	int samplerate = Machine->sample_rate;
 
@@ -431,12 +431,12 @@ int asteroid_sh_start(const struct MachineSound *msound)
 {
     int i;
 
-	discharge = (INT16 *)malloc(32768 * sizeof(INT16));
+	discharge = (int16_t *)malloc(32768 * sizeof(int16_t));
 	if( !discharge )
         return 1;
 
     for( i = 0; i < 0x8000; i++ )
-		discharge[0x7fff-i] = (INT16) (0x7fff/exp(1.0*i/4096));
+		discharge[0x7fff-i] = (int16_t) (0x7fff/exp(1.0*i/4096));
 
 	/* initialize explosion volume lookup table */
 	explosion_init();
@@ -519,7 +519,7 @@ WRITE_HANDLER( asteroid_sounds_w )
 
 
 
-static void astdelux_sound_update(int param, INT16 *buffer, int length)
+static void astdelux_sound_update(int param, int16_t *buffer, int length)
 {
 	int samplerate = Machine->sample_rate;
 

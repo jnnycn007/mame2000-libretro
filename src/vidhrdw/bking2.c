@@ -9,12 +9,12 @@
 #include "driver.h"
 #include "vidhrdw/generic.h"
 
-static UINT8 xld1=0;
-static UINT8 xld2=0;
-static UINT8 xld3=0;
-static UINT8 yld1=0;
-static UINT8 yld2=0;
-static UINT8 yld3=0;
+static uint8_t xld1=0;
+static uint8_t xld2=0;
+static uint8_t xld3=0;
+static uint8_t yld1=0;
+static uint8_t yld2=0;
+static uint8_t yld3=0;
 static int msk=0;
 static int ball1_pic;
 static int ball2_pic;
@@ -201,7 +201,7 @@ READ_HANDLER( bking2_pos_r )
 {
 	unsigned char *RAM = memory_region(REGION_CPU1);
 
-	UINT16 pos, x, y;
+	uint16_t pos, x, y;
 
 
 	if (hitclr & 0x04)

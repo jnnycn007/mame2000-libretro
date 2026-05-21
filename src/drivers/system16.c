@@ -1239,14 +1239,14 @@ int gr_bitmap_width;
 
 static void generate_gr_screen(int w,int bitmap_width,int skip,int start_color,int end_color,int source_size)
 {
-	UINT8 *buf;
-	UINT8 *gr = memory_region(REGION_GFX3);
-	UINT8 *grr = NULL;
+	uint8_t *buf;
+	uint8_t *gr = memory_region(REGION_GFX3);
+	uint8_t *grr = NULL;
     int i,j,k;
     int center_offset=0;
 
 
-	buf=(UINT8*)malloc(source_size);
+	buf=(uint8_t*)malloc(source_size);
 	if(buf==NULL) return;
 
 	gr_bitmap_width = bitmap_width;
@@ -1268,8 +1268,8 @@ static void generate_gr_screen(int w,int bitmap_width,int skip,int start_color,i
     // build gr_bitmap
 	for (i=0; i<256; i++)
 	{
-		UINT8 last_bit;
-		UINT8 color_data[4];
+		uint8_t last_bit;
+		uint8_t color_data[4];
 
 		color_data[0]=start_color; color_data[1]=start_color+1;
 		color_data[2]=start_color+2; color_data[3]=start_color+3;
@@ -1278,7 +1278,7 @@ static void generate_gr_screen(int w,int bitmap_width,int skip,int start_color,i
 		{
 			for (k=0; k<8; k++)
 			{
-				UINT8 bit=((buf[0]&0x80)==0)|(((buf[0x4000]&0x80)==0)<<1);
+				uint8_t bit=((buf[0]&0x80)==0)|(((buf[0x4000]&0x80)==0)<<1);
 				if (bit!=last_bit && bit==0 && i>1)
 				{ // color flipped to 0,advance color[0]
 					if (color_data[0]+end_color <= end_color)
@@ -1299,7 +1299,7 @@ static void generate_gr_screen(int w,int bitmap_width,int skip,int start_color,i
 
 		if (grr!=NULL)
 		{ // need mirrored RHS
-			UINT8 *_gr=gr-1;
+			uint8_t *_gr=gr-1;
 			_gr -= skip;
 			for (j=0; j<w-skip; j++)
 			{

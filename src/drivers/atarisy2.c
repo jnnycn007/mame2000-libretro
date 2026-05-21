@@ -130,7 +130,7 @@
 #include "vidhrdw/generic.h"
 
 
-extern UINT8 *atarisys2_slapstic;
+extern uint8_t *atarisys2_slapstic;
 
 
 READ_HANDLER( atarisys2_slapstic_r );
@@ -150,19 +150,19 @@ void atarisys2_vh_screenrefresh(struct osd_bitmap *bitmap, int full_refresh);
 
 
 
-static UINT8 *interrupt_enable;
-static UINT8 *bankselect;
+static uint8_t *interrupt_enable;
+static uint8_t *bankselect;
 
-static INT8 pedal_count;
+static int8_t pedal_count;
 
-static UINT8 has_tms5220;
-static UINT8 tms5220_data;
-static UINT8 tms5220_data_strobe;
+static uint8_t has_tms5220;
+static uint8_t tms5220_data;
+static uint8_t tms5220_data_strobe;
 
-static UINT8 which_adc;
+static uint8_t which_adc;
 
-static UINT8 p2portwr_state;
-static UINT8 p2portrd_state;
+static uint8_t p2portwr_state;
+static uint8_t p2portrd_state;
 
 
 
@@ -325,8 +325,8 @@ static WRITE_HANDLER( bankselect_w )
 
 	int oldword = READ_WORD(&bankselect[offset]);
 	int newword = COMBINE_WORD(oldword, data);
-	UINT8 *RAM = memory_region(REGION_CPU1);
-	UINT8 *base = &RAM[bankoffset[(newword >> 10) & 0x3f]];
+	uint8_t *RAM = memory_region(REGION_CPU1);
+	uint8_t *base = &RAM[bankoffset[(newword >> 10) & 0x3f]];
 
 	WRITE_WORD(&bankselect[offset], newword);
 	if (offset == 0)
@@ -1214,7 +1214,7 @@ static struct MachineDriver machine_driver_paperboy =
 			ATARI_CLOCK_14MHz/8,
 			sound_readmem,sound_writemem,0,0,
 			0,0,
-			atarigen_6502_irq_gen,(UINT32)(1000000000.0/((float)ATARI_CLOCK_20MHz/2/16/16/16/10))
+			atarigen_6502_irq_gen,(uint32_t)(1000000000.0/((float)ATARI_CLOCK_20MHz/2/16/16/16/10))
 		},
 	},
 	60, DEFAULT_REAL_60HZ_VBLANK_DURATION,
@@ -1269,7 +1269,7 @@ static struct MachineDriver machine_driver_a720 =
 			2000000,	/* artifically high to prevent deadlock at startup ATARI_CLOCK_14MHz/8,*/
 			sound_readmem,sound_writemem,0,0,
 			0,0,
-			atarigen_6502_irq_gen,(UINT32)(1000000000.0/((float)ATARI_CLOCK_20MHz/2/16/16/16/10))
+			atarigen_6502_irq_gen,(uint32_t)(1000000000.0/((float)ATARI_CLOCK_20MHz/2/16/16/16/10))
 		},
 	},
 	60, DEFAULT_REAL_60HZ_VBLANK_DURATION,
@@ -1324,7 +1324,7 @@ static struct MachineDriver machine_driver_sprint =
 			ATARI_CLOCK_14MHz/8,
 			sound_readmem,sound_writemem,0,0,
 			0,0,
-			atarigen_6502_irq_gen,(UINT32)(1000000000.0/((float)ATARI_CLOCK_20MHz/2/16/16/16/10))
+			atarigen_6502_irq_gen,(uint32_t)(1000000000.0/((float)ATARI_CLOCK_20MHz/2/16/16/16/10))
 		},
 	},
 	60, DEFAULT_REAL_60HZ_VBLANK_DURATION,
@@ -1386,7 +1386,7 @@ static void rom_decode(void)
 
 static void init_paperboy(void)
 {
-	static const UINT16 compressed_default_eeprom[] =
+	static const uint16_t compressed_default_eeprom[] =
 	{
 		0x0000,0x4300,0x0113,0x0124,0x0150,0x0153,0x0154,0x0100,
 		0x0112,0x01C0,0x0155,0x0143,0x0148,0x0100,0x0112,0x015C,
@@ -1461,7 +1461,7 @@ static void init_a720(void)
 
 static void init_ssprint(void)
 {
-	static const UINT16 compressed_default_eeprom[] =
+	static const uint16_t compressed_default_eeprom[] =
 	{
 		0x0000,0x01FF,0x0E00,0x01FF,0x0100,0x0120,0x0100,0x0120,
 		0x0300,0x0120,0x0500,0x0120,0x01FF,0x0100,0x0140,0x0100,
@@ -1512,7 +1512,7 @@ static void init_ssprint(void)
 
 static void init_csprint(void)
 {
-	static const UINT16 compressed_default_eeprom[] =
+	static const uint16_t compressed_default_eeprom[] =
 	{
 		0x0000,0x01FF,0x0E00,0x0128,0x01D0,0x0127,0x0100,0x0120,
 		0x0300,0x01F7,0x01D0,0x0107,0x0300,0x0120,0x010F,0x01F0,
