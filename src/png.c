@@ -23,25 +23,34 @@
 #include "zlib/zlib.h"
 #include "driver.h"
 #include "png.h"
+#include "endian.h"
 
 extern char build_version[];
 
-/* convert_uint is here so we don't have to deal with byte-ordering issues */
-static UINT32 convert_from_network_order (UINT8 *v)
+/* PNG fields are big-endian on disk regardless of host. */
+static uint32_t convert_from_network_order(uint8_t *v)
 {
-	UINT32 i;
-
-	i = (v[0]<<24) | (v[1]<<16) | (v[2]<<8) | (v[3]);
-	return i;
+    return read_be32(v);
 }
 
 int png_unfilter(struct png_info *p)
 {
 	int i, j, bpp, filter;
-	INT32 prediction, pA, pB, pC, dA, dB, dC;
-	UINT8 *src, *dst;
+	int32_t prediction, pA, pB, pC, dA, dB, dC;
+	uint8_t *src, *dst;
+	size_t image_size;
 
-	if((p->image = (UINT8 *)malloc(p->height*p->rowbytes))==NULL)
+	/* Overflow-safe: ensure height*rowbytes fits in size_t. */
+	if (p->rowbytes &&
+	    (size_t)p->height > ((size_t)-1) / (size_t)p->rowbytes)
+	{
+		logerror("PNG image dimensions overflow in unfilter\n");
+		free(p->fimage);
+		return 0;
+	}
+	image_size = (size_t)p->height * (size_t)p->rowbytes;
+
+	if((p->image = (uint8_t *)malloc(image_size))==NULL)
 	{
 		logerror("Out of memory\n");
 		free(p->fimage);
@@ -103,7 +112,7 @@ int png_unfilter(struct png_info *p)
 
 int png_verify_signature (void *fp)
 {
-	INT8 signature[8];
+	int8_t signature[8];
 
 	if (osd_fread (fp, signature, 8) != 8)
 	{
@@ -123,9 +132,18 @@ int png_inflate_image (struct png_info *p)
 {
 	unsigned long fbuff_size;
 
-	fbuff_size = p->height * (p->rowbytes + 1);
+	/* Overflow-safe: ensure height*(rowbytes+1) fits in fbuff_size. */
+	if (p->rowbytes > 0xFFFFFFFEu ||
+	    (unsigned long)p->height > ((unsigned long)-1) / ((unsigned long)p->rowbytes + 1))
+	{
+		logerror("PNG image dimensions overflow (height=%u, rowbytes=%u)\n",
+		         p->height, p->rowbytes);
+		free(p->zimage);
+		return 0;
+	}
+	fbuff_size = (unsigned long)p->height * ((unsigned long)p->rowbytes + 1);
 
-	if((p->fimage = (UINT8 *)malloc(fbuff_size))==NULL)
+	if((p->fimage = (uint8_t *)malloc(fbuff_size))==NULL)
 	{
 		logerror("Out of memory\n");
 		free(p->zimage);
@@ -147,18 +165,21 @@ int png_read_file(void *fp, struct png_info *p)
 	/* translates color_type to bytes per pixel */
 	const int samples[] = {1, 0, 3, 1, 2, 0, 4};
 
-	UINT32 chunk_length, chunk_type=0, chunk_crc, crc;
-	UINT8 *chunk_data, *temp;
-	UINT8 str_chunk_type[5], v[4];
+	uint32_t chunk_length, chunk_type=0, chunk_crc, crc;
+	uint8_t *chunk_data, *temp;
+	uint8_t str_chunk_type[5], v[4];
 
 	struct idat
 	{
 		struct idat *next;
 		int length;
-		UINT8 *data;
+		uint8_t *data;
 	} *ihead, *pidat;
 
-	if ((ihead = (struct idat *) malloc(sizeof(struct idat))) == 0)
+	/* calloc so 'next' is NULL: if no IDAT chunks ever arrive, the
+	 * 'while (ihead->next)' loop below must terminate immediately
+	 * instead of walking an uninitialized pointer. */
+	if ((ihead = (struct idat *) calloc(1, sizeof(struct idat))) == 0)
 		return 0;
 
 	pidat = ihead;
@@ -170,16 +191,27 @@ int png_read_file(void *fp, struct png_info *p)
 	p->palette = NULL;
 
 	if (png_verify_signature(fp)==0)
+	{
+		free(ihead);
 		return 0;
+	}
 
 	while (chunk_type != PNG_CN_IEND)
 	{
 		if (osd_fread(fp, v, 4) != 4)
+		{
 			logerror("Unexpected EOF in PNG\n");
+			free(ihead);
+			return 0;
+		}
 		chunk_length=convert_from_network_order(v);
 
 		if (osd_fread(fp, str_chunk_type, 4) != 4)
+		{
 			logerror("Unexpected EOF in PNG file\n");
+			free(ihead);
+			return 0;
+		}
 
 		str_chunk_type[4]=0; /* terminate string */
 
@@ -188,15 +220,24 @@ int png_read_file(void *fp, struct png_info *p)
 
 		if (chunk_length)
 		{
-			if ((chunk_data = (UINT8 *)malloc(chunk_length+1))==NULL)
+			/* Avoid 0+1 wrap on a maliciously large length. */
+			if (chunk_length > 0xFFFFFFFEu)
+			{
+				logerror("PNG chunk length overflow\n");
+				free(ihead);
+				return 0;
+			}
+			if ((chunk_data = (uint8_t *)malloc(chunk_length+1))==NULL)
 			{
 				logerror("Out of memory\n");
+				free(ihead);
 				return 0;
 			}
 			if (osd_fread (fp, chunk_data, chunk_length) != chunk_length)
 			{
 				logerror("Unexpected EOF in PNG file\n");
 				free(chunk_data);
+				free(ihead);
 				return 0;
 			}
 
@@ -206,13 +247,20 @@ int png_read_file(void *fp, struct png_info *p)
 			chunk_data = NULL;
 
 		if (osd_fread(fp, v, 4) != 4)
+		{
 			logerror("Unexpected EOF in PNG\n");
+			if (chunk_data) free(chunk_data);
+			free(ihead);
+			return 0;
+		}
 		chunk_crc=convert_from_network_order(v);
 
 		if (crc != chunk_crc)
 		{
 			logerror("CRC check failed while reading PNG chunk %s\n",str_chunk_type);
 			logerror("Found: %08X  Expected: %08X\n",crc,chunk_crc);
+			if (chunk_data) free(chunk_data);
+			free(ihead);
 			return 0;
 		}
 
@@ -221,6 +269,14 @@ int png_read_file(void *fp, struct png_info *p)
 		switch (chunk_type)
 		{
 		case PNG_CN_IHDR:
+			/* IHDR is exactly 13 bytes per the PNG spec; tolerate >=13. */
+			if (chunk_length < 13 || chunk_data == NULL)
+			{
+				logerror("PNG IHDR chunk too short (%u bytes)\n", chunk_length);
+				if (chunk_data) free(chunk_data);
+				free(ihead);
+				return 0;
+			}
 			p->width = convert_from_network_order(chunk_data);
 			p->height = convert_from_network_order(chunk_data+4);
 			p->bit_depth = *(chunk_data+8);
@@ -250,55 +306,72 @@ int png_read_file(void *fp, struct png_info *p)
 			break;
 
 		case PNG_CN_IDAT:
+			if (chunk_data == NULL)
+			{
+				/* zero-length IDAT is legal but contributes nothing */
+				break;
+			}
 			pidat->data = chunk_data;
 			pidat->length = chunk_length;
-			if ((pidat->next = (struct idat *)malloc(sizeof(struct idat))) == 0)
+			if ((pidat->next = (struct idat *)calloc(1, sizeof(struct idat))) == 0)
 				return 0;
 			pidat = pidat->next;
-			pidat->next = 0;
 			p->zlength += chunk_length;
 			break;
 
 		case PNG_CN_tEXt:
+			if (chunk_data != NULL && chunk_length > 0)
 			{
-				UINT8 *text=chunk_data;
-
-				while(*text++);
-				chunk_data[chunk_length]=0;
+				uint8_t *text  = chunk_data;
+				uint8_t *limit = chunk_data + chunk_length;
+				/* Find the keyword/text separator (null byte) without
+				 * walking past the end of the chunk. */
+				while (text < limit && *text)
+					++text;
+				if (text < limit)
+					++text; /* skip the separator */
+				chunk_data[chunk_length]=0; /* writes into the +1 pad byte */
 				logerror("Keyword: %s\n", chunk_data);
 				logerror("Text: %s\n", text);
 			}
-			free(chunk_data);
+			if (chunk_data) free(chunk_data);
 			break;
 
 		case PNG_CN_tIME:
+			if (chunk_data != NULL && chunk_length >= 7)
 			{
-				UINT8 *t=chunk_data;
+				uint8_t *t=chunk_data;
 				logerror("Image last-modification time: %i/%i/%i (%i:%i:%i) GMT\n",
 					((short)(*t) << 8)+ (short)(*(t+1)), *(t+2), *(t+3), *(t+4), *(t+5), *(t+6));
 			}
 
-			free(chunk_data);
+			if (chunk_data) free(chunk_data);
 			break;
 
 		case PNG_CN_gAMA:
-			p->source_gamma	 = convert_from_network_order(chunk_data)/100000.0;
-			logerror( "Source gamma: %f\n",p->source_gamma);
+			if (chunk_data != NULL && chunk_length >= 4)
+			{
+				p->source_gamma	 = convert_from_network_order(chunk_data)/100000.0;
+				logerror( "Source gamma: %f\n",p->source_gamma);
+			}
 
-			free(chunk_data);
+			if (chunk_data) free(chunk_data);
 			break;
 
 		case PNG_CN_pHYs:
-			p->xres = convert_from_network_order(chunk_data);
-			p->yres = convert_from_network_order(chunk_data+4);
-			p->resolution_unit = *(chunk_data+8);
-			logerror("Pixel per unit, X axis: %i\n",p->xres);
-			logerror("Pixel per unit, Y axis: %i\n",p->yres);
-			if (p->resolution_unit)
-				logerror("Unit is meter\n");
-			else
-				logerror("Unit is unknown\n");
-			free(chunk_data);
+			if (chunk_data != NULL && chunk_length >= 9)
+			{
+				p->xres = convert_from_network_order(chunk_data);
+				p->yres = convert_from_network_order(chunk_data+4);
+				p->resolution_unit = *(chunk_data+8);
+				logerror("Pixel per unit, X axis: %i\n",p->xres);
+				logerror("Pixel per unit, Y axis: %i\n",p->yres);
+				if (p->resolution_unit)
+					logerror("Unit is meter\n");
+				else
+					logerror("Unit is unknown\n");
+			}
+			if (chunk_data) free(chunk_data);
 			break;
 
 		case PNG_CN_IEND:
@@ -314,7 +387,7 @@ int png_read_file(void *fp, struct png_info *p)
 			break;
 		}
 	}
-	if ((p->zimage = (UINT8 *)malloc(p->zlength))==NULL)
+	if ((p->zimage = (uint8_t *)malloc(p->zlength))==NULL)
 	{
 		logerror("Out of memory\n");
 		return 0;
@@ -347,11 +420,11 @@ int png_read_file(void *fp, struct png_info *p)
 int png_expand_buffer_8bit (struct png_info *p)
 {
 	int i,j, k;
-	UINT8 *inp, *outp, *outbuf;
+	uint8_t *inp, *outp, *outbuf;
 
 	if (p->bit_depth < 8)
 	{
-		if ((outbuf = (UINT8 *)malloc(p->width*p->height))==NULL)
+		if ((outbuf = (uint8_t *)malloc(p->width*p->height))==NULL)
 		{
 			logerror("Out of memory\n");
 			return 0;
@@ -384,7 +457,7 @@ int png_expand_buffer_8bit (struct png_info *p)
 void png_delete_unused_colors (struct png_info *p)
 {
 	int i, tab[256], pen=0, trns=0;
-	UINT8 ptemp[3*256], ttemp[256];
+	uint8_t ptemp[3*256], ttemp[256];
 
 	memset (tab, 0, 256*sizeof(int));
 	memcpy (ptemp, p->palette, 3*p->num_palette);
