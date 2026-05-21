@@ -88,7 +88,7 @@ extern char *cheatdir;
 void decompose_rom_sample_path(char *rompath, char *samplepath);
 void init_joy_list(void);
 
-extern UINT32 create_path_recursive(char *path);
+extern uint32_t create_path_recursive(char *path);
 	
 #if defined(_3DS)
 void* linearMemAlign(size_t size, size_t alignment);
@@ -607,8 +607,8 @@ void retro_init(void)
 
 void retro_deinit(void)
 {
-   free(IMAMEBASEPATH);
-   free(IMAMESAMPLEPATH);
+   free(IMAMEBASEPATH);   IMAMEBASEPATH   = NULL;
+   free(IMAMESAMPLEPATH); IMAMESAMPLEPATH = NULL;
 #ifdef _3DS
    linearFree(gp2x_screen15);
 #else
@@ -834,29 +834,55 @@ bool retro_load_game(const struct retro_game_info *info)
   }
    printf("SAVE_DIRECTORY: %s\n", retro_save_directory);
 
-   sprintf(core_sys_directory,"%s%cmame2000\0",retro_system_directory,slash);
-   sprintf(core_save_directory,"%s%cmame2000\0",retro_save_directory,slash);
+   snprintf(core_sys_directory, sizeof(core_sys_directory),
+            "%s%cmame2000", retro_system_directory, slash);
+   snprintf(core_save_directory, sizeof(core_save_directory),
+            "%s%cmame2000", retro_save_directory, slash);
    printf("MAME2000_SYS_DIRECTORY: %s\n", core_sys_directory);
    printf("MAME2000_SAVE_DIRECTORY: %s\n", core_save_directory);
 
-   IMAMEBASEPATH = (char *) malloc(1024);
+   /* Re-init safety: free any prior allocation so a second load_game
+    * (e.g. core restart) does not leak. */
+   free(IMAMEBASEPATH);
+   free(IMAMESAMPLEPATH);
+   IMAMEBASEPATH   = (char *) malloc(1024);
    IMAMESAMPLEPATH = (char *) malloc(1024);
-
+   if (!IMAMEBASEPATH || !IMAMESAMPLEPATH)
+   {
+      free(IMAMEBASEPATH);   IMAMEBASEPATH   = NULL;
+      free(IMAMESAMPLEPATH); IMAMESAMPLEPATH = NULL;
+      printf("Failed to allocate path buffers\n");
+      return false;
+   }
 
    int i;
-   strncpy(IMAMEBASEPATH, info->path, 1023);
-   IMAMEBASEPATH[1023] = 0;
-   if (strrchr(IMAMEBASEPATH, slash)) *(strrchr(IMAMEBASEPATH, slash)) = 0;
-   else { IMAMEBASEPATH[0] = '.'; IMAMEBASEPATH[1] = 0; }
-   char baseName[1024];
-   const char *romName = info->path;
-   if (strrchr(info->path, slash)) romName = strrchr(info->path, slash) + 1;
-   memcpy(baseName, romName, strlen(romName) + 1);
-   if (strrchr(baseName, '.')) *(strrchr(baseName, '.')) = 0;
+   {
+      const char *romName;
+      char baseName[1024];
+      char *dot;
 
-   strncpy(IMAMESAMPLEPATH, core_sys_directory, 1023-8);
-   IMAMESAMPLEPATH[1023-8] = 0;
-   strcat(IMAMESAMPLEPATH, "/samples");
+      strncpy(IMAMEBASEPATH, info->path, 1023);
+      IMAMEBASEPATH[1023] = 0;
+      if (strrchr(IMAMEBASEPATH, slash))
+         *(strrchr(IMAMEBASEPATH, slash)) = 0;
+      else
+      {
+         IMAMEBASEPATH[0] = '.';
+         IMAMEBASEPATH[1] = 0;
+      }
+
+      romName = info->path;
+      if (strrchr(info->path, slash))
+         romName = strrchr(info->path, slash) + 1;
+      /* Bounded copy.  Original code did a strlen()-sized memcpy into a
+       * fixed 1024-byte buffer; a pathological filename could stack-smash. */
+      strncpy(baseName, romName, sizeof(baseName) - 1);
+      baseName[sizeof(baseName) - 1] = 0;
+      dot = strrchr(baseName, '.');
+      if (dot)
+         *dot = 0;
+
+      snprintf(IMAMESAMPLEPATH, 1024, "%s/samples", core_sys_directory);
 
    /* do we have a driver for this? */
    for (i = 0; drivers[i] && (game_index == -1); i++)
@@ -873,40 +899,41 @@ bool retro_load_game(const struct retro_game_info *info)
 	   printf("Game \"%s\" not supported\n", baseName);
 	   return false;
    }
+   }
 
    /* parse generic (os-independent) options */
    //parse_cmdline (argc, argv, game_index);
 
    //Set default path
-   nvdir=(char *) malloc(1024);sprintf(nvdir,"%s%c%s\0",core_save_directory,slash,"nvram");
+   nvdir=(char *) malloc(1024);snprintf(nvdir,1024,"%s%c%s",core_save_directory,slash,"nvram");
    i=create_path_recursive(nvdir);
    if(i!=0)printf("error %d creating nvram \"%s\"\n", i,nvdir);
 
-   hidir=(char *) malloc(1024);sprintf(hidir,"%s%c%s\0",core_save_directory,slash,"hi");
+   hidir=(char *) malloc(1024);snprintf(hidir,1024,"%s%c%s",core_save_directory,slash,"hi");
    i=create_path_recursive(hidir);
    if(i!=0)printf("error %d creating hi \"%s\"\n", i,hidir);
 
-   cfgdir=(char *) malloc(1024);sprintf(cfgdir,"%s%c%s\0",core_save_directory,slash,"cfg");
+   cfgdir=(char *) malloc(1024);snprintf(cfgdir,1024,"%s%c%s",core_save_directory,slash,"cfg");
    i=create_path_recursive(cfgdir);
    if(i!=0)printf("error %d creating cfg \"%s\"\n", i,cfgdir);
 
-   screenshotdir=(char *) malloc(1024);sprintf(screenshotdir,"%s%c%s\0",core_save_directory,slash,"snap");
+   screenshotdir=(char *) malloc(1024);snprintf(screenshotdir,1024,"%s%c%s",core_save_directory,slash,"snap");
    i=create_path_recursive(screenshotdir);
    if(i!=0)printf("error %d creating snap \"%s\"\n", i,screenshotdir);
 
-   memcarddir=(char *) malloc(1024);sprintf(memcarddir,"%s%c%s\0",core_save_directory,slash,"memcard");
+   memcarddir=(char *) malloc(1024);snprintf(memcarddir,1024,"%s%c%s",core_save_directory,slash,"memcard");
    i=create_path_recursive(memcarddir);
    if(i!=0)printf("error %d creating memcard \"%s\"\n", i,memcarddir);
 
-   stadir=(char *) malloc(1024);sprintf(stadir,"%s%c%s\0",core_sys_directory,slash,"sta");
+   stadir=(char *) malloc(1024);snprintf(stadir,1024,"%s%c%s",core_sys_directory,slash,"sta");
    i=create_path_recursive(stadir);
    if(i!=0)printf("error %d creating sta \"%s\"\n", i,stadir);
 
-   artworkdir=(char *) malloc(1024);sprintf(artworkdir,"%s%c%s\0",core_sys_directory,slash,"artwork");
+   artworkdir=(char *) malloc(1024);snprintf(artworkdir,1024,"%s%c%s",core_sys_directory,slash,"artwork");
    i=create_path_recursive(artworkdir);
    if(i!=0)printf("error %d creating artwork \"%s\"\n", i,artworkdir);
 
-   cheatdir=(char *) malloc(1024);sprintf(cheatdir,"%s%c%s\0",core_sys_directory,slash,"cheat");
+   cheatdir=(char *) malloc(1024);snprintf(cheatdir,1024,"%s%c%s",core_sys_directory,slash,"cheat");
    i=create_path_recursive(cheatdir);
    if(i!=0)printf("error %d creating cheat \"%s\"\n", i,cheatdir);
 
