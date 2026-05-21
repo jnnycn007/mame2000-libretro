@@ -26,13 +26,13 @@
 /* protection data types */
 struct protection_data
 {
-	UINT16	reset_sequence[3];
-	UINT16	data_sequence[100];
+	uint16_t	reset_sequence[3];
+	uint16_t	data_sequence[100];
 };
 static const struct protection_data *prot_data;
-static UINT16 prot_result;
-static UINT16 prot_sequence[3];
-static UINT8 prot_index;
+static uint16_t prot_result;
+static uint16_t prot_sequence[3];
+static uint8_t prot_index;
 
 
 /* speedup installation macros */
@@ -42,7 +42,7 @@ static UINT8 prot_index;
 	wms_speedup_spin[0] = spin1; \
 	wms_speedup_spin[1] = offs1; \
 	wms_speedup_spin[2] = offs2; \
-	wms_speedup_base = (UINT8*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_16bit);
+	wms_speedup_base = (uint8_t*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_16bit);
 	
 #define INSTALL_SPEEDUP_1_MIXEDBITS(addr, pc, spin1, offs1, offs2) \
 	wms_speedup_pc = (pc); \
@@ -50,7 +50,7 @@ static UINT8 prot_index;
 	wms_speedup_spin[0] = spin1; \
 	wms_speedup_spin[1] = offs1; \
 	wms_speedup_spin[2] = offs2; \
-	wms_speedup_base = (UINT8*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_mixedbits);
+	wms_speedup_base = (uint8_t*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_mixedbits);
 	
 #define INSTALL_SPEEDUP_1_32BIT(addr, pc, spin1, offs1, offs2) \
 	wms_speedup_pc = (pc); \
@@ -58,7 +58,7 @@ static UINT8 prot_index;
 	wms_speedup_spin[0] = spin1; \
 	wms_speedup_spin[1] = offs1; \
 	wms_speedup_spin[2] = offs2; \
-	wms_speedup_base = (UINT8*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_32bit);
+	wms_speedup_base = (uint8_t*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_1_32bit);
 	
 #define INSTALL_SPEEDUP_3(addr, pc, spin1, spin2, spin3) \
 	wms_speedup_pc = (pc); \
@@ -66,40 +66,40 @@ static UINT8 prot_index;
 	wms_speedup_spin[0] = spin1; \
 	wms_speedup_spin[1] = spin2; \
 	wms_speedup_spin[2] = spin3; \
-	wms_speedup_base = (UINT8*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_3);
+	wms_speedup_base = (uint8_t*)install_mem_read_handler(0, TOBYTE((addr) & ~0x1f), TOBYTE((addr) | 0x1f), wms_generic_speedup_3);
 	
 
 /* code related variables */
-       UINT8 *	wms_code_rom;
-       UINT8 *	wms_scratch_ram;
+       uint8_t *	wms_code_rom;
+       uint8_t *	wms_scratch_ram;
 
 /* input-related variables */
-static UINT8	term2_analog_select;
+static uint8_t	term2_analog_select;
 
 /* CMOS-related variables */
-       UINT8 *	wms_cmos_ram;
-       UINT32 	wms_cmos_page;
-static UINT8	cmos_w_enable;
+       uint8_t *	wms_cmos_ram;
+       uint32_t 	wms_cmos_page;
+static uint8_t	cmos_w_enable;
 
 /* graphics-related variables */
 extern struct rectangle wms_visible_area;
-extern UINT8 *	wms_gfx_rom;
+extern uint8_t *	wms_gfx_rom;
 extern size_t	wms_gfx_rom_size;
 
 /* update-related variables */
-extern UINT8	wms_partial_update_offset;
+extern uint8_t	wms_partial_update_offset;
 
 /* sound-related variables */
-static UINT8	sound_type;
+static uint8_t	sound_type;
 
 /* speedup-related variables */
        offs_t 	wms_speedup_pc;
        offs_t 	wms_speedup_offset;
        offs_t 	wms_speedup_spin[3];
-       UINT8 *	wms_speedup_base;
+       uint8_t *	wms_speedup_base;
 
 /* hack-related variables */
-static UINT8 *	t2_hack_mem;
+static uint8_t *	t2_hack_mem;
 
 
 
@@ -257,8 +257,8 @@ static WRITE_HANDLER( term2_hack_w )
  *************************************/
 
 #ifdef MSB_FIRST
-	#define BYTE_XOR_LE(a)  ((UINT8*)((UINT32)(a) ^ 1))
-	#define BIG_DWORD_LE(x) (((UINT32)(x) >> 16) + ((x) << 16))
+	#define BYTE_XOR_LE(a)  ((uint8_t*)((uint32_t)(a) ^ 1))
+	#define BIG_DWORD_LE(x) (((uint32_t)(x) >> 16) + ((x) << 16))
 #else
 	#define BYTE_XOR_LE(a)  (a)
 	#define BIG_DWORD_LE(x) (x)
@@ -266,59 +266,59 @@ static WRITE_HANDLER( term2_hack_w )
 
 
 #ifndef ALIGN_SHORTS
-	#define READ_U16(a)    (*(INT16 *)a)
-	#define WRITE_U16(a,x) (*(INT16 *)a = (x))
+	#define READ_U16(a)    (*(int16_t *)a)
+	#define WRITE_U16(a,x) (*(int16_t *)a = (x))
 #else
 	#ifdef MSB_FIRST
-		#define READ_U16(a)    ((INT16)((*(UINT8 *)a << 8) | *((UINT8 *)a+1)))
-		#define WRITE_U16(a,x) do { *(UINT8 *)a = (x>>8); *((UINT8 *)a+1) = x; } while (0)
+		#define READ_U16(a)    ((int16_t)((*(uint8_t *)a << 8) | *((uint8_t *)a+1)))
+		#define WRITE_U16(a,x) do { *(uint8_t *)a = (x>>8); *((uint8_t *)a+1) = x; } while (0)
 	#else  /* unaligned read and write macros, cpg */
-		#define READ_U16(a)    ((INT16)(*(UINT8 *)a | (*((UINT8 *)a+1) << 8)))
-		#define WRITE_U16(a,x) do { *(UINT8 *)a = x; *((UINT8 *)a+1) = (x>>8); } while (0)
+		#define READ_U16(a)    ((int16_t)(*(uint8_t *)a | (*((uint8_t *)a+1) << 8)))
+		#define WRITE_U16(a,x) do { *(uint8_t *)a = x; *((uint8_t *)a+1) = (x>>8); } while (0)
 	#endif
 #endif
 
 #ifndef ALIGN_INTS
-	#define READ_U32(a)    (*(INT32 *)a)
-	#define WRITE_U32(a,x) (*(INT32 *)a = (x))
+	#define READ_U32(a)    (*(int32_t *)a)
+	#define WRITE_U32(a,x) (*(int32_t *)a = (x))
 #else
 	#ifdef MSB_FIRST
-		#define READ_U32(a) ((INT32)((*(UINT8 *)a << 24) | (*((UINT8 *)a+1) << 16) \
-							| (*((UINT8 *)a+2) << 8) | *((UINT8 *)a+3)))
-		#define WRITE_U32(a,x) do { *(UINT8 *)a = (x>>24); *((UINT8 *)a+1) = (x>>16); \
-							*((UINT8 *)a+2) = (x>>8); *((UINT8 *)a+3) = x; } while (0)
+		#define READ_U32(a) ((int32_t)((*(uint8_t *)a << 24) | (*((uint8_t *)a+1) << 16) \
+							| (*((uint8_t *)a+2) << 8) | *((uint8_t *)a+3)))
+		#define WRITE_U32(a,x) do { *(uint8_t *)a = (x>>24); *((uint8_t *)a+1) = (x>>16); \
+							*((uint8_t *)a+2) = (x>>8); *((uint8_t *)a+3) = x; } while (0)
 	#else  /* unaligned read and write macros, cpg */
-		#define READ_U32(a) ((INT32)(*(UINT8 *)a | (*((UINT8 *)a+1) << 8) \
-							| (*((UINT8 *)a+2) << 16) | (*((UINT8 *)a+3) << 24)))
-		#define WRITE_U32(a,x) do { *(UINT8 *)a = x; *((UINT8 *)a+1) = (x>>8); \
-							*((UINT8 *)a+2) = (x>>16); *((UINT8 *)a+3) = (x>>24); } while (0)
+		#define READ_U32(a) ((int32_t)(*(uint8_t *)a | (*((uint8_t *)a+1) << 8) \
+							| (*((uint8_t *)a+2) << 16) | (*((uint8_t *)a+3) << 24)))
+		#define WRITE_U32(a,x) do { *(uint8_t *)a = x; *((uint8_t *)a+1) = (x>>8); \
+							*((uint8_t *)a+2) = (x>>16); *((uint8_t *)a+3) = (x>>24); } while (0)
 	#endif
 #endif
 
 #define SCRATCH_RAM(offs)		&wms_scratch_ram[TOBYTE((offs) & 0x3fffff)]
 
-#define READ_INT8(REG)			(*(INT8 *)BYTE_XOR_LE(SCRATCH_RAM(REG)))
-#define READ_INT16(REG)			READ_U16(SCRATCH_RAM(REG))
-#define READ_INT32(REG)			BIG_DWORD_LE(READ_U32(SCRATCH_RAM(REG)))
+#define READ_int8_t(REG)			(*(int8_t *)BYTE_XOR_LE(SCRATCH_RAM(REG)))
+#define READ_int16_t(REG)			READ_U16(SCRATCH_RAM(REG))
+#define READ_int32_t(REG)			BIG_DWORD_LE(READ_U32(SCRATCH_RAM(REG)))
 
-#define WRITE_INT8(REG,DATA)	(*(INT8 *)BYTE_XOR_LE(SCRATCH_RAM(REG)) = (DATA))
-#define WRITE_INT16(REG,DATA)	WRITE_U16(SCRATCH_RAM(REG), DATA)
-#define WRITE_INT32(REG,DATA)	WRITE_U32(SCRATCH_RAM(REG), BIG_DWORD_LE(DATA))
+#define WRITE_int8_t(REG,DATA)	(*(int8_t *)BYTE_XOR_LE(SCRATCH_RAM(REG)) = (DATA))
+#define WRITE_int16_t(REG,DATA)	WRITE_U16(SCRATCH_RAM(REG), DATA)
+#define WRITE_int32_t(REG,DATA)	WRITE_U32(SCRATCH_RAM(REG), BIG_DWORD_LE(DATA))
 
 #define BURN_TIME(INST_CNT)		tms34010_ICount -= INST_CNT
 
 /* General speed up loop body */
 #define DO_SPEEDUP_LOOP(X, LOC, OFFS1, OFFS2, A8SIZE, A7SIZE)	\
 {																\
-	UINT32 a0 = LOC;											\
-	UINT32 a2;													\
-	UINT32 a4 = 0;                               				\
-	 INT32 a1 = 0x80000000;										\
-	 INT32 a5 = 0x80000000;										\
-	while ((a2 = READ_INT32(a0)) != 0 && tms34010_ICount > 0)	\
+	uint32_t a0 = LOC;											\
+	uint32_t a2;													\
+	uint32_t a4 = 0;                               				\
+	 int32_t a1 = 0x80000000;										\
+	 int32_t a5 = 0x80000000;										\
+	while ((a2 = READ_int32_t(a0)) != 0 && tms34010_ICount > 0)	\
 	{															\
-		INT32 a8 = READ_##A8SIZE(a2 + OFFS1);					\
-		INT32 a7 = READ_##A7SIZE(a2 + OFFS2);					\
+		int32_t a8 = READ_##A8SIZE(a2 + OFFS1);					\
+		int32_t a7 = READ_##A7SIZE(a2 + OFFS2);					\
 																\
 		if (a8 > a1)											\
 		{														\
@@ -332,9 +332,9 @@ static WRITE_HANDLER( term2_hack_w )
 		if (a8 < a1)											\
 		{														\
 			BURN_TIME(45);										\
-			WRITE_INT32(a4, a2);								\
-			WRITE_INT32(a0, READ_INT32(a2));					\
-			WRITE_INT32(a2, a0);								\
+			WRITE_int32_t(a4, a2);								\
+			WRITE_int32_t(a0, READ_int32_t(a2));					\
+			WRITE_int32_t(a2, a0);								\
 			a4 = a2;											\
 			continue;											\
 		}														\
@@ -348,9 +348,9 @@ static WRITE_HANDLER( term2_hack_w )
 			continue;											\
 		}														\
 		BURN_TIME(46);											\
-		WRITE_INT32(a4, a2);									\
-		WRITE_INT32(a0, READ_INT32(a2));						\
-		WRITE_INT32(a2, a0);									\
+		WRITE_int32_t(a4, a2);									\
+		WRITE_int32_t(a0, READ_int32_t(a2));						\
+		WRITE_int32_t(a2, a0);									\
 		a4 = a2;												\
 	}															\
 }																\
@@ -364,25 +364,25 @@ static WRITE_HANDLER( term2_hack_w )
  *************************************/
 
 #define T2_FFC08C40																\
-	a5x = (INT32)(READ_INT8(a1+0x2d0));				/* MOVB   *A1(2D0h),A5  */  \
-	WRITE_INT8(a1+0x2d0, a2 & 0xff);				/* MOVB   A2,*A1(2D0h)  */  \
+	a5x = (int32_t)(READ_int8_t(a1+0x2d0));				/* MOVB   *A1(2D0h),A5  */  \
+	WRITE_int8_t(a1+0x2d0, a2 & 0xff);				/* MOVB   A2,*A1(2D0h)  */  \
 	a3x = 0xf0;										/* MOVI   F0h,A3		*/	\
-	a5x = (UINT32)a5x * (UINT32)a3x;				/* MPYU   A3,A5			*/	\
+	a5x = (uint32_t)a5x * (uint32_t)a3x;				/* MPYU   A3,A5			*/	\
 	a5x += 0x1008000;								/* ADDI   1008000h,A5	*/  \
-	a3x = (UINT32)a2  * (UINT32)a3x;				/* MPYU   A2,A3			*/	\
+	a3x = (uint32_t)a2  * (uint32_t)a3x;				/* MPYU   A2,A3			*/	\
 	a3x += 0x1008000;								/* ADDI   1008000h,A3	*/  \
-	a7x = (INT32)(READ_INT16(a1+0x190));			/* MOVE   *A1(190h),A7,0*/	\
-	a6x = (INT32)(READ_INT16(a5x+0x50));			/* MOVE   *A5(50h),A6,0 */	\
+	a7x = (int32_t)(READ_int16_t(a1+0x190));			/* MOVE   *A1(190h),A7,0*/	\
+	a6x = (int32_t)(READ_int16_t(a5x+0x50));			/* MOVE   *A5(50h),A6,0 */	\
 	a7x -= a6x;										/* SUB    A6,A7			*/  \
-	a6x = (INT32)(READ_INT16(a3x+0x50));			/* MOVE   *A3(50h),A6,0 */	\
+	a6x = (int32_t)(READ_int16_t(a3x+0x50));			/* MOVE   *A3(50h),A6,0 */	\
 	a7x += a6x;										/* ADD    A6,A7			*/  \
-	WRITE_INT16(a1+0x190, a7x & 0xffff);			/* MOVE   A7,*A1(190h),0*/	\
-	a5x = READ_INT32(a5x+0xa0);						/* MOVE   *A5(A0h),A5,1 */	\
-	a3x = READ_INT32(a3x+0xa0);						/* MOVE   *A3(A0h),A3,1 */	\
-	a6x = READ_INT32(a1+0x140);						/* MOVE   *A1(140h),A6,1*/	\
-	a6xa7x = (INT64)a6x * a3x / a5x;				/* MPYS   A3,A6			*/  \
+	WRITE_int16_t(a1+0x190, a7x & 0xffff);			/* MOVE   A7,*A1(190h),0*/	\
+	a5x = READ_int32_t(a5x+0xa0);						/* MOVE   *A5(A0h),A5,1 */	\
+	a3x = READ_int32_t(a3x+0xa0);						/* MOVE   *A3(A0h),A3,1 */	\
+	a6x = READ_int32_t(a1+0x140);						/* MOVE   *A1(140h),A6,1*/	\
+	a6xa7x = (int64_t)a6x * a3x / a5x;				/* MPYS   A3,A6			*/  \
 													/* DIVS   A5,A6			*/  \
-	WRITE_INT32(a1+0x140, a6xa7x & 0xffffffff);		/* MOVE   A6,*A1(140h),1*/
+	WRITE_int32_t(a1+0x140, a6xa7x & 0xffffffff);		/* MOVE   A6,*A1(140h),1*/
 
 static READ_HANDLER( term2_speedup_r )
 {
@@ -392,17 +392,17 @@ static READ_HANDLER( term2_speedup_r )
 	}
 	else
 	{
-		UINT32 value1 = READ_WORD(&wms_scratch_ram[TOBYTE(0xaa040)]);
+		uint32_t value1 = READ_WORD(&wms_scratch_ram[TOBYTE(0xaa040)]);
 
 		/* Suspend cpu if it's waiting for an interrupt */
 		if (cpu_get_pc() == 0xffcdc270 && !value1)
 		{
-			INT32 a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a14,b0,b1,b2;
-			INT32 a3x,a5x,a6x,a7x;
-			INT64 a6xa7x;
+			int32_t a0,a1,a2,a3,a4,a5,a6,a7,a8,a9,a10,a14,b0,b1,b2;
+			int32_t a3x,a5x,a6x,a7x;
+			int64_t a6xa7x;
 
 			b1 = 0;			 									/* CLR    B1 */
-			b2 = (INT32)(READ_INT16(0x100F640));				/* MOVE   @100F640h,B2,0 */
+			b2 = (int32_t)(READ_int16_t(0x100F640));				/* MOVE   @100F640h,B2,0 */
 			if (!b2)											/* JREQ   FFC029F0h */
 			{
 				cpu_spinuntil_int();
@@ -422,7 +422,7 @@ static READ_HANDLER( term2_speedup_r )
 				if (b1 < b2)									/* JRLT   FFC07800h */
 				{
 					/* FFC07800 */
-					a4 = (INT32)(READ_INT16(a10+0xc0));			/* MOVE   *A10(C0h),A4,0 */
+					a4 = (int32_t)(READ_int16_t(a10+0xc0));			/* MOVE   *A10(C0h),A4,0 */
 					a4 <<= 16;									/* SLL    10h,A4 */
 				}
 				else
@@ -438,9 +438,9 @@ static READ_HANDLER( term2_speedup_r )
 				goto t2_FFC07DD0;								/* JR     FFC07DD0h */
 
 			t2_FFC078C0:
-				a8  = READ_INT32(a1+0x1c0);						/* MOVE   *A1(1C0h),A8,1 */
-				a7  = READ_INT32(a1+0x1a0);						/* MOVE   *A1(1A0h),A7,1 */
-				a14 = (INT32)(READ_INT16(a1+0x220));			/* MOVE   *A1(220h),A14,0 */
+				a8  = READ_int32_t(a1+0x1c0);						/* MOVE   *A1(1C0h),A8,1 */
+				a7  = READ_int32_t(a1+0x1a0);						/* MOVE   *A1(1A0h),A7,1 */
+				a14 = (int32_t)(READ_int16_t(a1+0x220));			/* MOVE   *A1(220h),A14,0 */
 				if (a14 & 0x6000)								/* BTST   Eh,A14 */
 				{												/* JRNE   FFC07C50h */
 					goto t2_FFC07C50;							/* BTST   Dh,A14 */
@@ -453,15 +453,15 @@ static READ_HANDLER( term2_speedup_r )
 
 				a2 = b1 - 1;									/* MOVE   B1,A2;  DEC    A2 */
 				T2_FFC08C40										/* CALLR  FFC08C40h */
-				a14 = READ_INT32(a1);							/* MOVE   *A1,A14,1 */
-				WRITE_INT32(a0, a14);							/* MOVE   A14,*A0,1 */
-				WRITE_INT32(a14+0x20, a0);						/* MOVE   A0,*A14(20h),1 */
+				a14 = READ_int32_t(a1);							/* MOVE   *A1,A14,1 */
+				WRITE_int32_t(a0, a14);							/* MOVE   A14,*A0,1 */
+				WRITE_int32_t(a14+0x20, a0);						/* MOVE   A0,*A14(20h),1 */
 				a14 = b0 - 0x1e0;								/* MOVE   B0,A14; SUBI   1E0h,A14 */
-				WRITE_INT32(a1+0x20, a14);						/* MOVE   A14,*A1(20h),1 */
-				a9 = READ_INT32(a14);							/* MOVE   *A14,A9,1 */
-				WRITE_INT32(a14, a1);							/* MOVE   A1,*A14,1 */
-				WRITE_INT32(a9+0x20, a1);						/* MOVE   A1,*A9(20h),1 */
-				WRITE_INT32(a1, a9);							/* MOVE   A9,*A1,1 */
+				WRITE_int32_t(a1+0x20, a14);						/* MOVE   A14,*A1(20h),1 */
+				a9 = READ_int32_t(a14);							/* MOVE   *A14,A9,1 */
+				WRITE_int32_t(a14, a1);							/* MOVE   A1,*A14,1 */
+				WRITE_int32_t(a9+0x20, a1);						/* MOVE   A1,*A9(20h),1 */
+				WRITE_int32_t(a1, a9);							/* MOVE   A9,*A1,1 */
 				goto t2_FFC07DD0;								/* JR     FFC07DD0h */
 
 			t2_FFC07AE0:
@@ -472,15 +472,15 @@ static READ_HANDLER( term2_speedup_r )
 
 				a2 = b1 + 1;									/* MOVE   B1,A2; INC    A2 */
 				T2_FFC08C40										/* CALLR  FFC08C40h */
-				a14 = READ_INT32(a1);							/* MOVE   *A1,A14,1 */
-				WRITE_INT32(a0, a14);							/* MOVE   A14,*A0,1 */
-				WRITE_INT32(a14+0x20, a0);						/* MOVE   A0,*A14(20h),1 */
+				a14 = READ_int32_t(a1);							/* MOVE   *A1,A14,1 */
+				WRITE_int32_t(a0, a14);							/* MOVE   A14,*A0,1 */
+				WRITE_int32_t(a14+0x20, a0);						/* MOVE   A0,*A14(20h),1 */
 				a14 = b0;										/* MOVE   B0,A14 */
-				a9 = READ_INT32(a14+0x20);						/* MOVE   *A14(20h),A9,1 */
-				WRITE_INT32(a1, a14);							/* MOVE   A14,*A1,1 */
-				WRITE_INT32(a14+0x20, a1);						/* MOVE   A1,*A14(20h),1 */
-				WRITE_INT32(a9, a1);							/* MOVE   A1,*A9,1 */
-				WRITE_INT32(a1+0x20, a9);						/* MOVE   A9,*A1(20h),1 */
+				a9 = READ_int32_t(a14+0x20);						/* MOVE   *A14(20h),A9,1 */
+				WRITE_int32_t(a1, a14);							/* MOVE   A14,*A1,1 */
+				WRITE_int32_t(a14+0x20, a1);						/* MOVE   A1,*A14(20h),1 */
+				WRITE_int32_t(a9, a1);							/* MOVE   A1,*A9,1 */
+				WRITE_int32_t(a1+0x20, a9);						/* MOVE   A9,*A1(20h),1 */
 				goto t2_FFC07DD0;
 
 			t2_FFC07C50:
@@ -501,14 +501,14 @@ static READ_HANDLER( term2_speedup_r )
 				}
 
 				/* FFC07CC0 */
-				a14 = READ_INT32(a0+0x20);						/* MOVE   *A0(20h),A14,1 */
-				WRITE_INT32(a14, a1);							/* MOVE   A1,*A14,1 */
-				WRITE_INT32(a1+0x20, a14);						/* MOVE   A14,*A1(20h),1 */
-				a14 = READ_INT32(a1);							/* MOVE   *A1,A14,1 */
-				WRITE_INT32(a0, a14);							/* MOVE   A14,*A0,1 */
-				WRITE_INT32(a1, a0);							/* MOVE   A0,*A1,1 */
-				WRITE_INT32(a0 +0x20, a1);						/* MOVE   A1,*A0(20h),1 */
-				WRITE_INT32(a14+0x20, a0);						/* MOVE   A0,*A14(20h),1 */
+				a14 = READ_int32_t(a0+0x20);						/* MOVE   *A0(20h),A14,1 */
+				WRITE_int32_t(a14, a1);							/* MOVE   A1,*A14,1 */
+				WRITE_int32_t(a1+0x20, a14);						/* MOVE   A14,*A1(20h),1 */
+				a14 = READ_int32_t(a1);							/* MOVE   *A1,A14,1 */
+				WRITE_int32_t(a0, a14);							/* MOVE   A14,*A0,1 */
+				WRITE_int32_t(a1, a0);							/* MOVE   A0,*A1,1 */
+				WRITE_int32_t(a0 +0x20, a1);						/* MOVE   A1,*A0(20h),1 */
+				WRITE_int32_t(a14+0x20, a0);						/* MOVE   A0,*A14(20h),1 */
 
 			t2_FFC07DD0:
 				BURN_TIME(50);
@@ -517,7 +517,7 @@ static READ_HANDLER( term2_speedup_r )
 					break;
 				}
 
-				a1 = READ_INT32(a0);							/* MOVE   *A0,A1,1 */
+				a1 = READ_int32_t(a0);							/* MOVE   *A0,A1,1 */
 				if (a10 != a1)									/* CMP    A1,A10 */
 				{
 					goto t2_FFC078C0;							/* JRNE   FFC078C0h */
@@ -553,7 +553,7 @@ static READ_HANDLER( term2_speedup_r )
 
 READ_HANDLER( wms_generic_speedup_1_16bit )
 {
-	UINT16 value = READ_WORD(&wms_speedup_base[offset]);
+	uint16_t value = READ_WORD(&wms_speedup_base[offset]);
 	
 	/* just return if this isn't the offset we're looking for */
 	if (offset != wms_speedup_offset)
@@ -562,7 +562,7 @@ READ_HANDLER( wms_generic_speedup_1_16bit )
 	/* suspend cpu if it's waiting for an interrupt */
 	if (cpu_get_pc() == wms_speedup_pc && !value)
 	{
-		DO_SPEEDUP_LOOP_1(wms_speedup_spin[0], wms_speedup_spin[1], wms_speedup_spin[2], INT16, INT16);
+		DO_SPEEDUP_LOOP_1(wms_speedup_spin[0], wms_speedup_spin[1], wms_speedup_spin[2], int16_t, int16_t);
 	}
 	return value;
 }
@@ -578,7 +578,7 @@ READ_HANDLER( wms_generic_speedup_1_16bit )
 
 READ_HANDLER( wms_generic_speedup_1_mixedbits )
 {
-	UINT16 value = READ_WORD(&wms_speedup_base[offset]);
+	uint16_t value = READ_WORD(&wms_speedup_base[offset]);
 	
 	/* just return if this isn't the offset we're looking for */
 	if (offset != wms_speedup_offset)
@@ -587,7 +587,7 @@ READ_HANDLER( wms_generic_speedup_1_mixedbits )
 	/* suspend cpu if it's waiting for an interrupt */
 	if (cpu_get_pc() == wms_speedup_pc && !value)
 	{
-		DO_SPEEDUP_LOOP_1(wms_speedup_spin[0], wms_speedup_spin[1], wms_speedup_spin[2], INT16, INT32);
+		DO_SPEEDUP_LOOP_1(wms_speedup_spin[0], wms_speedup_spin[1], wms_speedup_spin[2], int16_t, int32_t);
 	}
 	return value;
 }
@@ -603,7 +603,7 @@ READ_HANDLER( wms_generic_speedup_1_mixedbits )
 
 READ_HANDLER( wms_generic_speedup_1_32bit )
 {
-	UINT16 value = READ_WORD(&wms_speedup_base[offset]);
+	uint16_t value = READ_WORD(&wms_speedup_base[offset]);
 	
 	/* just return if this isn't the offset we're looking for */
 	if (offset != wms_speedup_offset)
@@ -612,7 +612,7 @@ READ_HANDLER( wms_generic_speedup_1_32bit )
 	/* suspend cpu if it's waiting for an interrupt */
 	if (cpu_get_pc() == wms_speedup_pc && !value)
 	{
-		DO_SPEEDUP_LOOP_1(wms_speedup_spin[0], wms_speedup_spin[1], wms_speedup_spin[2], INT32, INT32);
+		DO_SPEEDUP_LOOP_1(wms_speedup_spin[0], wms_speedup_spin[1], wms_speedup_spin[2], int32_t, int32_t);
 	}
 	return value;
 }
@@ -627,26 +627,26 @@ READ_HANDLER( wms_generic_speedup_1_32bit )
 
 #define DO_SPEEDUP_LOOP_3(LOC1, LOC2, LOC3)					\
 															\
-	UINT32 temp1,temp2,temp3;								\
+	uint32_t temp1,temp2,temp3;								\
 															\
 	while (tms34010_ICount > 0) 							\
 	{														\
-		temp1 = READ_INT32(LOC1);							\
-		temp2 = READ_INT32(LOC2);							\
-		temp3 = READ_INT32(LOC3);							\
+		temp1 = READ_int32_t(LOC1);							\
+		temp2 = READ_int32_t(LOC2);							\
+		temp3 = READ_int32_t(LOC3);							\
 		if (!temp1 && !temp2 && !temp3)						\
 		{													\
 			cpu_spinuntil_int();							\
 			break;											\
 		}													\
-		DO_SPEEDUP_LOOP(A, LOC1, 0xc0, 0xa0, INT32, INT32);	\
-		DO_SPEEDUP_LOOP(B, LOC2, 0xc0, 0xa0, INT32, INT32);	\
-		DO_SPEEDUP_LOOP(C, LOC3, 0xc0, 0xa0, INT32, INT32);	\
+		DO_SPEEDUP_LOOP(A, LOC1, 0xc0, 0xa0, int32_t, int32_t);	\
+		DO_SPEEDUP_LOOP(B, LOC2, 0xc0, 0xa0, int32_t, int32_t);	\
+		DO_SPEEDUP_LOOP(C, LOC3, 0xc0, 0xa0, int32_t, int32_t);	\
 	}
 
 READ_HANDLER( wms_generic_speedup_3 )
 {
-	UINT16 value = READ_WORD(&wms_speedup_base[offset]);
+	uint16_t value = READ_WORD(&wms_speedup_base[offset]);
 	
 	/* just return if this isn't the offset we're looking for */
 	if (offset != wms_speedup_offset)
@@ -668,7 +668,7 @@ READ_HANDLER( wms_generic_speedup_3 )
  *
  *************************************/
 
-static UINT8 *cvsd_protection_base;
+static uint8_t *cvsd_protection_base;
 static WRITE_HANDLER( cvsd_protection_w )
 {
 	/* because the entire CVSD ROM is banked, we have to make sure that writes */
@@ -682,8 +682,8 @@ static WRITE_HANDLER( cvsd_protection_w )
 static void init_generic(int bpp, int sound, int prot_start, int prot_end, int max_x, int max_y)
 {
 	offs_t gfx_chunk = wms_gfx_rom_size / 4;
-	UINT8 d1, d2, d3, d4, d5, d6;
-	UINT8 *base;
+	uint8_t d1, d2, d3, d4, d5, d6;
+	uint8_t *base;
 	int i;
 	
 	/* set up code ROMs */
@@ -741,7 +741,7 @@ static void init_generic(int bpp, int sound, int prot_start, int prot_end, int m
 			memcpy(&base[0x20000], &base[0x10000], 0x10000);
 			memcpy(&base[0x40000], &base[0x30000], 0x10000);
 			memcpy(&base[0x60000], &base[0x50000], 0x10000);
-			cvsd_protection_base = (UINT8*)install_mem_write_handler(1, prot_start, prot_end, cvsd_protection_w);
+			cvsd_protection_base = (uint8_t*)install_mem_write_handler(1, prot_start, prot_end, cvsd_protection_w);
 			break;
 			
 		case SOUND_ADPCM:
@@ -789,7 +789,7 @@ void init_narc(void)
 
 void init_narc3(void)
 {
-	UINT32 bank, offset;
+	uint32_t bank, offset;
 
 	/* common init */
 	init_generic(8, SOUND_NARC, 0xcdff, 0xce29, 511, 426);
@@ -1017,7 +1017,7 @@ static void init_term2_common(void)
 
 	/* HACK: this prevents the freeze on the movies */
 	/* until we figure whats causing it, this is better than nothing */
-	t2_hack_mem = (UINT8*)install_mem_write_handler(0, TOBYTE(0x010aa0e0),	TOBYTE(0x010aa0ff), term2_hack_w);
+	t2_hack_mem = (uint8_t*)install_mem_write_handler(0, TOBYTE(0x010aa0e0),	TOBYTE(0x010aa0ff), term2_hack_w);
 }
 
 void init_term2(void)
