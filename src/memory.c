@@ -20,26 +20,6 @@
 #include "driver.h"
 #include "osd_cpu.h"
 
-/* SETOPBASE() casts `int pc` to (uint32_t) before shifting so that the
- * right-shift is a logical (zero-fill) shift rather than the
- * implementation-defined arithmetic shift of a signed value, and so
- * that the upper bits of the address are treated as unsigned for the
- * lookup table index.  This is only safe if `int` is at least 32 bits;
- * the static assert below enforces that.  All platforms this codebase
- * has ever targeted (32-bit and 64-bit Unix/Win/console) satisfy this;
- * the check is here so a 16-bit `int` target would fail loudly at
- * compile time rather than silently produce wrong addresses. */
-_Static_assert(sizeof(int) >= 4, "memory.c requires int to be at least 32 bits");
-
-
-#define VERBOSE 0
-
-/* #define MEM_DUMP */
-
-#ifdef MEM_DUMP
-static void mem_dump( void );
-#endif
-
 /* Convenience macros - not in cpuintrf.h because they shouldn't be used by everyone */
 #define ADDRESS_BITS(index) 			(cpuintf[Machine->drv->cpu[index].cpu_type & ~CPU_FLAGS_MASK].address_bits)
 #define ABITS1(index)					(cpuintf[Machine->drv->cpu[index].cpu_type & ~CPU_FLAGS_MASK].abits1)
@@ -261,9 +241,6 @@ static MHELE *get_element( MHELE *element , int ad , int elemask ,
 	/* get new element nunber */
 	ele = *ele_max;
 	(*ele_max)+=banks;
-#ifdef MEM_DUMP
-	logerror("create element %2d(%2d)\n",ele,banks);
-#endif
 	/* set link mark to current element */
 	element[ad] = ele + MH_HARDMAX;
 	/* get next subelement top */
@@ -285,9 +262,6 @@ static void set_element( int cpu , MHELE *celement , int sp , int ep , MHELE typ
 	MHELE *ele;
 	int ss,sb,eb,ee;
 
-#ifdef MEM_DUMP
-	logerror("set_element %8X-%8X = %2X\n",sp,ep,type);
-#endif
 	if( (unsigned int) sp > (unsigned int) ep ) return;
 	do{
 		mask  = mhmask[cpu][edepth];
@@ -658,9 +632,6 @@ int memory_init(void)
 	logerror("used write elements %d/%d , functions %d/%d\n"
 			,wrelement_max,MH_ELEMAX , wrhard_max,MH_HARDMAX );
 
-#ifdef MEM_DUMP
-	mem_dump();
-#endif
 	return 1;	/* ok */
 }
 
@@ -970,33 +941,17 @@ void cpu_setOPbaseoverride (int cpu,opbase_handler function)
 
 void *install_mem_read_handler(int cpu, int start, int end, mem_read_handler handler)
 {
+	int i;
 	MHELE hardware = 0;
-	int abitsmin;
-	int i, hw_set;
-#if VERBOSE
-	logerror("Install new memory read handler:\n");
-	logerror("             cpu: %d\n", cpu);
-	logerror("           start: 0x%08x\n", start);
-	logerror("             end: 0x%08x\n", end);
-#ifdef __LP64__
-	logerror(" handler address: 0x%016lx\n", (unsigned long) handler);
-#else
-	logerror(" handler address: 0x%08x\n", (unsigned int) handler);
-#endif
-#endif
-	abitsmin = ABITSMIN (cpu);
-
+	int abitsmin = ABITSMIN (cpu);
 	/* see if this function is already registered */
-	hw_set = 0;
+	int hw_set = 0;
 	for ( i = 0 ; i < MH_HARDMAX ; i++)
 	{
 		/* record it if it matches */
 		if (( memoryreadhandler[i] == handler ) &&
 			(  memoryreadoffset[i] == start))
 		{
-#if VERBOSE
-			logerror("handler match - use old one\n");
-#endif
 			hardware = i;
 			hw_set = 1;
 		}
@@ -1047,43 +1002,22 @@ void *install_mem_read_handler(int cpu, int start, int end, mem_read_handler han
 		(((unsigned int) start) >> abitsmin) ,
 		(((unsigned int) end) >> abitsmin) ,
 		hardware , readhardware , &rdelement_max );
-#if VERBOSE
-	logerror("Done installing new memory handler.\n");
-	logerror("used read  elements %d/%d , functions %d/%d\n"
-			,rdelement_max,MH_ELEMAX , rdhard_max,MH_HARDMAX );
-#endif
 	return memory_find_base(cpu, start);
 }
 
 void *install_mem_write_handler(int cpu, int start, int end, mem_write_handler handler)
 {
+	int i;
 	MHELE hardware = 0;
-	int abitsmin;
-	int i, hw_set;
-#if VERBOSE
-	logerror("Install new memory write handler:\n");
-	logerror("             cpu: %d\n", cpu);
-	logerror("           start: 0x%08x\n", start);
-	logerror("             end: 0x%08x\n", end);
-#ifdef __LP64__
-	logerror(" handler address: 0x%016lx\n", (unsigned long) handler);
-#else
-	logerror(" handler address: 0x%08x\n", (unsigned int) handler);
-#endif
-#endif
-	abitsmin = ABITSMIN (cpu);
-
+	int abitsmin = ABITSMIN (cpu);
 	/* see if this function is already registered */
-	hw_set = 0;
+	int hw_set = 0;
 	for ( i = 0 ; i < MH_HARDMAX ; i++)
 	{
 		/* record it if it matches */
 		if (( memorywritehandler[i] == handler ) &&
 			(  memorywriteoffset[i] == start))
 		{
-#if VERBOSE
-			logerror("handler match - use old one\n");
-#endif
 			hardware = i;
 			hw_set = 1;
 		}
@@ -1146,11 +1080,6 @@ void *install_mem_write_handler(int cpu, int start, int end, mem_write_handler h
 		(((unsigned int) start) >> abitsmin) ,
 		(((unsigned int) end) >> abitsmin) ,
 		hardware , writehardware , &wrelement_max );
-#if VERBOSE
-	logerror("Done installing new memory handler.\n");
-	logerror("used write elements %d/%d , functions %d/%d\n"
-			,wrelement_max,MH_ELEMAX , wrhard_max,MH_HARDMAX );
-#endif
 	return memory_find_base(cpu, start);
 }
 
@@ -1194,13 +1123,8 @@ static void *install_port_read_handler_common(int cpu, int start, int end,
 		i = 0;
 	}
 	else
-	{
 		i = oldsize / sizeof(struct IOReadPort);
-	}
 
-#ifdef MEM_DUMP
-	logerror("Installing port read handler: cpu %d  slot %X  start %X  end %X\n", cpu, i, start, end);
-#endif
 
 	readport[cpu][i].start = start;
 	readport[cpu][i].end = end;
@@ -1239,13 +1163,7 @@ static void *install_port_write_handler_common(int cpu, int start, int end,
 		i = 0;
 	}
 	else
-	{
 		i = oldsize / sizeof(struct IOWritePort);
-	}
-
-#ifdef MEM_DUMP
-	logerror("Installing port write handler: cpu %d  slot %X  start %X  end %X\n", cpu, i, start, end);
-#endif
 
 	writeport[cpu][i].start = start;
 	writeport[cpu][i].end = end;
@@ -1253,68 +1171,3 @@ static void *install_port_write_handler_common(int cpu, int start, int end,
 
 	return writeport[cpu];
 }
-
-#ifdef MEM_DUMP
-static void mem_dump( void )
-{
-	extern int totalcpu;
-	int cpu;
-	int naddr,addr;
-	MHELE nhw,hw;
-
-	FILE *temp = fopen ("memdump.log", "w");
-
-	if (!temp) return;
-
-	for( cpu = 0 ; cpu < 1 ; cpu++ )
-	{
-		fprintf(temp,"cpu %d read memory \n",cpu);
-		addr = 0;
-		naddr = 0;
-		nhw = 0xff;
-		while( (addr >> mhshift[cpu][0]) <= mhmask[cpu][0] ){
-			hw = cur_mr_element[cpu][addr >> mhshift[cpu][0]];
-			if( hw >= MH_HARDMAX )
-			{	/* 2nd element link */
-				hw = readhardware[((hw-MH_HARDMAX)<<MH_SBITS) + ((addr>>mhshift[cpu][1]) & mhmask[cpu][1])];
-				if( hw >= MH_HARDMAX )
-					hw = readhardware[((hw-MH_HARDMAX)<<MH_SBITS) + (addr & mhmask[cpu][2])];
-			}
-			if( nhw != hw )
-			{
-				if( addr )
-	fprintf(temp,"  %08x(%08x) - %08x = %02x\n",naddr,memoryreadoffset[nhw],addr-1,nhw);
-				nhw = hw;
-				naddr = addr;
-			}
-			addr++;
-		}
-		fprintf(temp,"  %08x(%08x) - %08x = %02x\n",naddr,memoryreadoffset[nhw],addr-1,nhw);
-
-		fprintf(temp,"cpu %d write memory \n",cpu);
-		naddr = 0;
-		addr = 0;
-		nhw = 0xff;
-		while( (addr >> mhshift[cpu][0]) <= mhmask[cpu][0] ){
-			hw = cur_mw_element[cpu][addr >> mhshift[cpu][0]];
-			if( hw >= MH_HARDMAX )
-			{	/* 2nd element link */
-				hw = writehardware[((hw-MH_HARDMAX)<<MH_SBITS) + ((addr>>mhshift[cpu][1]) & mhmask[cpu][1])];
-				if( hw >= MH_HARDMAX )
-					hw = writehardware[((hw-MH_HARDMAX)<<MH_SBITS) + (addr & mhmask[cpu][2])];
-			}
-			if( nhw != hw )
-			{
-				if( addr )
-	fprintf(temp,"  %08x(%08x) - %08x = %02x\n",naddr,memorywriteoffset[nhw],addr-1,nhw);
-				nhw = hw;
-				naddr = addr;
-			}
-			addr++;
-		}
-	fprintf(temp,"  %08x(%08x) - %08x = %02x\n",naddr,memorywriteoffset[nhw],addr-1,nhw);
-	}
-	fclose(temp);
-}
-#endif
-
