@@ -42,6 +42,111 @@ void backdrop_free(void);
 void overlay_remap(void);
 void overlay_draw(struct osd_bitmap *dest,struct osd_bitmap *source);
 
+/* The FM interface structs (YM2151interface, YM3812interface and friends)
+ * all begin { int num; int baseclock; ... }, so this two-field prefix is
+ * enough to read a chip's clock from its sound_interface pointer.  Chips
+ * whose clock/rate field sits at a different offset (C140, VLM5030,
+ * namco_interface) are handled separately by reading the first int. */
+struct fixed_rate_intf { int num; int baseclock; };
+
+/* Some sound sources emit audio at a fixed rate derived from their own
+ * clock rather than at whatever output rate the machine is configured
+ * for; those normally have to be rate-converted before mixing.  When
+ * such a source is the ONLY one with a fixed rate (and there is just
+ * one distinct fixed rate across the whole machine), we can instead run
+ * the entire audio pipeline at that rate, so no conversion happens
+ * inside the core and the samples reach the frontend untouched.
+ *
+ * Returns that rate, or 0 when it cannot be pinned down (no fixed-rate
+ * source, more than one distinct rate, or a fixed-rate source whose
+ * rate we do not compute here), in which case the configured rate is
+ * used as before. */
+static int game_fixed_output_rate(void)
+{
+	int i;
+	int rate = 0;
+
+	for (i = 0; i < MAX_SOUND && Machine->drv->sound[i].sound_type != 0; i++)
+	{
+		const struct fixed_rate_intf *cfg =
+			(const struct fixed_rate_intf *)Machine->drv->sound[i].sound_interface;
+		int chiprate = 0;
+
+		switch (Machine->drv->sound[i].sound_type)
+		{
+#if (HAS_YM2151 || HAS_YM2151_ALT)
+			case SOUND_YM2151:
+				if (cfg) chiprate = cfg->baseclock / 64;
+				break;
+#endif
+#if (HAS_YM3812)
+			case SOUND_YM3812:
+#endif
+#if (HAS_YM3526)
+			case SOUND_YM3526:
+#endif
+#if (HAS_Y8950)
+			case SOUND_Y8950:
+#endif
+#if (HAS_YM2413)
+			case SOUND_YM2413:
+#endif
+#if (HAS_YM3812 || HAS_YM3526 || HAS_Y8950 || HAS_YM2413)
+				if (cfg) chiprate = cfg->baseclock / 72;
+				break;
+#endif
+#if (HAS_C140)
+			/* C140interface: { int frequency; int region; ... }.  Read the
+			 * first int directly rather than through fixed_rate_intf. */
+			case SOUND_C140:
+				if (cfg) chiprate = *(const int *)cfg;
+				break;
+#endif
+#if (HAS_VLM5030)
+			/* VLM5030interface: { int baseclock; ... } */
+			case SOUND_VLM5030:
+				if (cfg) chiprate = (*(const int *)cfg) / 440;
+				break;
+#endif
+#if (HAS_NAMCO)
+			/* namco_interface: { int samplerate; int voices; ... } */
+			case SOUND_NAMCO:
+				if (cfg)
+				{
+					int nc = *(const int *)cfg;
+					if (nc > 0)
+					{
+						/* base rate doubled until it reaches the 192000 internal rate,
+						 * then divided by the 4x oversampling factor */
+						while (nc < 192000) nc *= 2;
+						chiprate = nc / 4;
+					}
+				}
+				break;
+#endif
+			/* Content whose rate is decided at runtime: leave the
+			 * choice to the configured rate. */
+			case SOUND_CUSTOM:
+#if (HAS_SAMPLES)
+			case SOUND_SAMPLES:
+#endif
+				return 0;
+			default:
+				/* Class 1: already runs at the output rate; nothing to pin. */
+				continue;
+		}
+
+		if (chiprate <= 0)
+			return 0;
+		if (rate == 0)
+			rate = chiprate;
+		else if (rate != chiprate)
+			return 0; /* two different fixed rates -> one must still be converted */
+	}
+
+	return rate;
+}
+
 int run_game(int game)
 {
 	int err;
@@ -91,6 +196,18 @@ int run_game(int game)
         }
     }
 	Machine->sample_rate = options.samplerate;
+
+	/* If the game has a single fixed-rate sound source, run the whole
+	 * audio pipeline at that source's rate so it is delivered to the
+	 * frontend without internal rate conversion.  The configured rate
+	 * is then only a hint for the games where this can't apply (no
+	 * fixed-rate source, more than one distinct fixed rate, or a
+	 * source whose rate is decided at runtime). */
+	{
+		int fixed_rate = game_fixed_output_rate();
+		if (fixed_rate > 0)
+			Machine->sample_rate = fixed_rate;
+	}
 
 	/* get orientation right */
 	Machine->orientation = gamedrv->flags & ORIENTATION_MASK;
