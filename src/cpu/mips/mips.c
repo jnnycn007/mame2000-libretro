@@ -1219,11 +1219,11 @@ const char *mips_info( void *context, int regnum )
 	return "";
 }
 
-unsigned mips_dasm( char *buffer, uint32_t pc )
+unsigned mips_dasm( char *buffer, unsigned pc )
 {
 	unsigned ret;
 	change_pc32( pc );
-	sprintf( buffer, "$%08x", cpu_readop32( pc ) );
+	sprintf( buffer, "$%08x", (unsigned int)cpu_readop32( pc ) );
 	ret = 4;
 	change_pc32( NEXTPC );
 	return ret;

@@ -701,13 +701,13 @@ void LoadCheatFile (int merge, char *filename)
 		/* Address */
 		ptr = strtok(NULL, ":");
 		if (!ptr) continue;
-		sscanf(ptr,"%X", &temp_address);
+		{ unsigned int tmp = 0; sscanf(ptr,"%X", &tmp); temp_address = tmp; }
 		temp_address &= cpunum_address_mask(temp_cpu);
 
 		/* data byte */
 		ptr = strtok(NULL, ":");
 		if (!ptr) continue;
-		sscanf(ptr,"%x", &temp_data);
+		{ unsigned int tmp = 0; sscanf(ptr,"%x", &tmp); temp_data = tmp; }
 		temp_data &= 0xff;
 
 #ifdef MESS
@@ -721,7 +721,7 @@ void LoadCheatFile (int merge, char *filename)
 		/* special code */
 		ptr = strtok(NULL, ":");
 		if (!ptr) continue;
-		sscanf(ptr,"%d", &temp_code);
+		{ int tmp = 0; sscanf(ptr,"%d", &tmp); temp_code = tmp; }
 
 		/* Is this a subcheat? */
 		if ((temp_code >= kCheatSpecial_LinkStart) &&
@@ -1270,20 +1270,20 @@ static int32_t EditCheatMenu (struct osd_bitmap *bitmap, int32_t selected, uint8
 		/* address */
 		if (cpunum_address_bits(subcheat->cpu) <= 16)
 		{
-			sprintf (setting[total2], "%04X", subcheat->address);
+			sprintf (setting[total2], "%04X", (unsigned int)subcheat->address);
 		}
 		else
 		{
-			sprintf (setting[total2], "%08X", subcheat->address);
+			sprintf (setting[total2], "%08X", (unsigned int)subcheat->address);
 		}
 		menu_subitem[total2] = setting[total2]; total2++;
 
 		/* value */
-		sprintf (setting[total2], "%d", subcheat->data);
+		sprintf (setting[total2], "%d", (unsigned int)subcheat->data);
 		menu_subitem[total2] = setting[total2]; total2++;
 
 		/* code */
-		sprintf (setting[total2], "%d", subcheat->code);
+		sprintf (setting[total2], "%d", (int)subcheat->code);
 		menu_subitem[total2] = setting[total2]; total2++;
 
 		menu_subitem[total2] = NULL;
@@ -2205,12 +2205,12 @@ static void DisplayWatches (struct osd_bitmap *bitmap)
 				case 1:
 					if (cpunum_address_bits(watches[i].cpu) <= 16)
 					{
-						sprintf (buf2, " (%04x)", watches[i].address);
+						sprintf (buf2, " (%04x)", (unsigned int)watches[i].address);
 						strcat (buf, buf2);
 					}
 					else
 					{
-						sprintf (buf2, " (%08x)", watches[i].address);
+						sprintf (buf2, " (%08x)", (unsigned int)watches[i].address);
 						strcat (buf, buf2);
 					}
 					break;
@@ -2278,11 +2278,11 @@ static int32_t ConfigureWatch (struct osd_bitmap *bitmap, int32_t selected, uint
 	/* address */
 	if (cpunum_address_bits(watches[watchnum].cpu) <= 16)
 	{
-		sprintf (setting[total2], "%04x", watches[watchnum].address);
+		sprintf (setting[total2], "%04x", (unsigned int)watches[watchnum].address);
 	}
 	else
 	{
-		sprintf (setting[total2], "%08x", watches[watchnum].address);
+		sprintf (setting[total2], "%08x", (unsigned int)watches[watchnum].address);
 	}
 	menu_subitem[total2] = setting[total2]; total2++;
 
@@ -2564,12 +2564,12 @@ static int32_t ChooseWatch (struct osd_bitmap *bitmap, int32_t selected)
 
 			if (cpunum_address_bits(watches[i].cpu) <= 16)
 			{
-				sprintf (buf2, "%04x", watches[i].address);
+				sprintf (buf2, "%04x", (unsigned int)watches[i].address);
 				strcat (buf[i], buf2);
 			}
 			else
 			{
-				sprintf (buf2, "%08x", watches[i].address);
+				sprintf (buf2, "%08x", (unsigned int)watches[i].address);
 				strcat (buf[i], buf2);
 			}
 		}
@@ -2636,7 +2636,7 @@ static int32_t DisplayHelpFile (int32_t selected)
 #pragma mark -
 #endif
 
-int32_t cheat_menu(struct osd_bitmap *bitmap, int32_t selected)
+int cheat_menu(struct osd_bitmap *bitmap, int selected)
 {
 	enum {
 		Menu_EnableDisable = 0,
@@ -2651,7 +2651,7 @@ int32_t cheat_menu(struct osd_bitmap *bitmap, int32_t selected)
 	};
 
 	const char *menu_item[10];
-	int32_t sel;
+	int sel;
 	uint8_t total = 0;
 	static int8_t submenu_choice;
 
