@@ -20,6 +20,17 @@
 #include "driver.h"
 #include "osd_cpu.h"
 
+/* SETOPBASE() casts `int pc` to (uint32_t) before shifting so that the
+ * right-shift is a logical (zero-fill) shift rather than the
+ * implementation-defined arithmetic shift of a signed value, and so
+ * that the upper bits of the address are treated as unsigned for the
+ * lookup table index.  This is only safe if `int` is at least 32 bits;
+ * the static assert below enforces that.  All platforms this codebase
+ * has ever targeted (32-bit and 64-bit Unix/Win/console) satisfy this;
+ * the check is here so a 16-bit `int` target would fail loudly at
+ * compile time rather than silently produce wrong addresses. */
+_Static_assert(sizeof(int) >= 4, "memory.c requires int to be at least 32 bits");
+
 
 #define VERBOSE 0
 
