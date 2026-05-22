@@ -693,17 +693,26 @@ void retro_run(void)
       }
    }
 
+   /* Poll input + pick up frontend variable updates BEFORE running
+    * the frame, so the inputs read this turn drive THIS frame's CPU
+    * dispatch (otherwise the game would be running one frame behind
+    * the player -- mame_run_one_frame() reads from key[] / joy_-
+    * pressed[] inside osd_is_key_pressed / osd_is_joy_pressed as
+    * the CPU schedule advances, and those arrays would still hold
+    * last frame's values).  Mirrors mame2003-libretro's retro_run
+    * which puts poll_cb() and the keyboard / joypad sample loop
+    * ahead of the frame as well. */
+   {
+      bool updated = false;
+      update_input();
+      if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
+         update_variables(false);
+   }
+
    /* Run one frame of CPU scheduling.  Returns when the timer system
     * has fired its VBLANK update path through osd_update_video_and_-
     * audio(), which calls hook_video_done() to raise yield_pending. */
    mame_run_one_frame();
-
-   bool updated = false;
-    
-   update_input();
-
-   if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE_UPDATE, &updated) && updated)
-      update_variables(false);
 
    if (should_skip_frame)
       video_cb(NULL, gfx_width, gfx_height, gfx_width * 2);
