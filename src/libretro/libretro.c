@@ -71,6 +71,7 @@ unsigned short *gp2x_screen15;
  * core falls back to the internally-allocated buffer and the normal
  * video_cb path. */
 static unsigned short *gp2x_screen15_owned;  /* the core's malloc'd buffer */
+static size_t          gp2x_screen15_bytes;  /* size of the above in bytes; 0 means unallocated */
 static void           *sw_fb_active_data;    /* non-NULL when SW-FB is in use this frame */
 static size_t          sw_fb_active_pitch;
 extern int gfx_xoffset;
@@ -130,11 +131,46 @@ void gp2x_printf(char* fmt, ...)
    va_end(marker);
 }
 
+/* Allocate (or grow) the core-owned framebuffer to fit the game's
+ * actual resolution.  Replaces the historical upfront 640x480x2
+ * allocation in retro_init() (614,400 bytes regardless of what the
+ * game needs) with on-demand sizing driven by MAME's own video-mode
+ * setup pathway: src/libretro/video.c's select_display_mode() calls
+ * us with the dimensions the driver requested.  Typical horizontal
+ * arcade games run at 256x224 (114,688 bytes -- 81% smaller); the
+ * few drivers that genuinely need 640x480 (vector games via
+ * vector_game + safe_render_path; explicit iOS_fixedRes=3/4) still
+ * get exactly that.
+ *
+ * Grow-only: if a game later increases its visible area or screen_-
+ * reinit() re-enters with larger dimensions, we reallocate.  A
+ * shrink request is honoured by leaving the larger buffer in place
+ * -- cheaper than free/realloc and never wrong (gfx_xoffset/-
+ * gfx_yoffset always centre inside gfx_width x gfx_height, and
+ * blit.c indexes within that). */
 void gp2x_set_video_mode(int bpp,int width,int height)
 {
+   size_t needed;
+
    (void)bpp;
-   (void)width;
-   (void)height;
+
+   if (width <= 0 || height <= 0)
+      return;
+
+   needed = (size_t)width * (size_t)height * 2;
+   if (needed <= gp2x_screen15_bytes)
+      return;  /* current allocation already large enough */
+
+#ifdef _3DS
+   if (gp2x_screen15_owned)
+      linearFree(gp2x_screen15_owned);
+   gp2x_screen15_owned = (unsigned short *) linearMemAlign(needed, 0x80);
+#else
+   free(gp2x_screen15_owned);
+   gp2x_screen15_owned = (unsigned short *) malloc(needed);
+#endif
+   gp2x_screen15       = gp2x_screen15_owned;
+   gp2x_screen15_bytes = gp2x_screen15_owned ? needed : 0;
 }
 
 void gp2x_video_setpalette(void)
@@ -530,12 +566,13 @@ void hook_video_done(void)
 
 void retro_init(void)
 {
-#ifdef _3DS
-   gp2x_screen15 = (unsigned short *) linearMemAlign(640 * 480 * 2, 0x80);
-#else
-   gp2x_screen15 = (unsigned short *) malloc(640 * 480 * 2);
-#endif
-   gp2x_screen15_owned = gp2x_screen15;
+   /* gp2x_screen15 is allocated lazily by gp2x_set_video_mode() once
+    * MAME tells us the game's actual resolution.  See the comment
+    * there for the rationale (avoids the historical fixed 614 KB
+    * allocation regardless of what the game needs). */
+   gp2x_screen15       = NULL;
+   gp2x_screen15_owned = NULL;
+   gp2x_screen15_bytes = 0;
    init_joy_list();
    update_variables(true);
 
@@ -551,12 +588,17 @@ void retro_deinit(void)
     * always restores), free the *owned* buffer rather than the SW-FB
     * pointer to avoid handing a foreign address back to the allocator. */
    gp2x_screen15 = gp2x_screen15_owned;
+   if (gp2x_screen15_owned)
+   {
 #ifdef _3DS
-   linearFree(gp2x_screen15);
+      linearFree(gp2x_screen15_owned);
 #else
-   free(gp2x_screen15);
+      free(gp2x_screen15_owned);
 #endif
+   }
+   gp2x_screen15       = NULL;
    gp2x_screen15_owned = NULL;
+   gp2x_screen15_bytes = 0;
    sw_fb_active_data   = NULL;
 
    libretro_supports_bitmasks = false;
