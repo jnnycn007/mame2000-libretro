@@ -171,11 +171,7 @@ void blitscreen_dirty1_color16(struct osd_bitmap *bitmap)
                     			w = gfx_display_columns - x;
 				for (h = 0; ((h < 16) && ((y + h) < gfx_display_lines)); h++)
 				{
-					int wx;
-					for (wx=0;wx<w;wx++)
-					{
-						address0[wx] = lb0[wx]&0xFFDF;
-					}
+					memcpy(address0, lb0, w * sizeof(unsigned short));
 					lb0 += width;
 					address0 += gfx_width;
 				}
@@ -191,7 +187,7 @@ void blitscreen_dirty1_color16(struct osd_bitmap *bitmap)
 
 void blitscreen_dirty0_color16(struct osd_bitmap *bitmap)
 {
-	int x,y;
+	int y;
 	int width=(bitmap->line[1] - bitmap->line[0])>>1;
 	int columns=gfx_display_columns;
 	unsigned short *lb = ((unsigned short*)(bitmap->line[skiplines])) + skipcolumns;
@@ -199,10 +195,7 @@ void blitscreen_dirty0_color16(struct osd_bitmap *bitmap)
 
 	for (y = 0; y < gfx_display_lines; y++)
 	{
-		for (x = 0; x < columns; x++)
-		{
-			address[x] = lb[x]&0xFFDF;
-		}
+		memcpy(address, lb, columns * sizeof(unsigned short));
 		lb+=width;
 		address+=gfx_width;
 	}
