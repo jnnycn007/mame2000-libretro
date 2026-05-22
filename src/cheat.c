@@ -787,6 +787,7 @@ void LoadCheatFile (int merge, char *filename)
 
 		/* Allocate storage and copy the name */
 		CheatTable[LoadedCheatTotal].name = (char*)malloc(strlen (ptr) + 1);
+		if (CheatTable[LoadedCheatTotal].name == NULL) continue;
 		strcpy (CheatTable[LoadedCheatTotal].name,ptr);
 
 		/* Strip line-ending if needed */
@@ -795,18 +796,20 @@ void LoadCheatFile (int merge, char *filename)
 
 		/* read the "comment" field if there */
 		ptr = strtok(NULL, ":");
+		CheatTable[LoadedCheatTotal].comment = NULL;
 		if (ptr)
 		{
 			/* Allocate storage and copy the comment */
 			CheatTable[LoadedCheatTotal].comment = (char*)malloc(strlen (ptr) + 1);
-			strcpy(CheatTable[LoadedCheatTotal].comment,ptr);
+			if (CheatTable[LoadedCheatTotal].comment != NULL)
+			{
+				strcpy(CheatTable[LoadedCheatTotal].comment,ptr);
 
-			/* Strip line-ending if needed */
-			if (strstr(CheatTable[LoadedCheatTotal].comment,"\n") != NULL)
-				CheatTable[LoadedCheatTotal].comment[strlen(CheatTable[LoadedCheatTotal].comment)-1] = 0;
+				/* Strip line-ending if needed */
+				if (strstr(CheatTable[LoadedCheatTotal].comment,"\n") != NULL)
+					CheatTable[LoadedCheatTotal].comment[strlen(CheatTable[LoadedCheatTotal].comment)-1] = 0;
+			}
 		}
-		else
-			CheatTable[LoadedCheatTotal].comment = NULL;
 
 next:
 		LoadedCheatTotal ++;
@@ -828,13 +831,16 @@ void LoadCheatFiles (void)
 	LoadedCheatTotal = 0;
 
 	/* start off with the default cheat file, cheat.dat */
-	strcpy (str, cheatfile);
+	strncpy (str, cheatfile, sizeof (str) - 1);
+	str[sizeof (str) - 1] = '\0';
 	ptr = strtok (str, ";");
+	if (ptr == NULL) return;	/* empty cheatfile string */
 
 	/* append any additional cheat files */
-	strcpy (database, ptr);
-	strcpy (str, cheatfile);
-	str[strlen (str) + 1] = 0;
+	strncpy (database, ptr, sizeof (database) - 1);
+	database[sizeof (database) - 1] = '\0';
+	strncpy (str, cheatfile, sizeof (str) - 1);
+	str[sizeof (str) - 1] = '\0';
 	pos1 = 0;
 	while (str[pos1])
 	{
@@ -843,11 +849,16 @@ void LoadCheatFiles (void)
 			pos2++;
 		if (pos1 != pos2)
 		{
+			int seglen = pos2 - pos1;
+			if (seglen > (int)sizeof (filename) - 1)
+				seglen = sizeof (filename) - 1;
 			memset (filename, '\0', sizeof(filename));
-			strncpy (filename, &str[pos1], (pos2 - pos1));
+			strncpy (filename, &str[pos1], seglen);
 			LoadCheatFile (1, filename);
 			pos1 = pos2 + 1;
 		}
+		else
+			pos1++;	/* skip consecutive ';' delimiters (was an infinite loop) */
 	}
 }
 
