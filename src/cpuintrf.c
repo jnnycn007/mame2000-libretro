@@ -14,9 +14,12 @@
 #include "state.h"
 #include "hiscore.h"
 
-#ifdef WANT_LIBCO
-extern int libco_quit;
-#endif
+/* Cross-TU yield signal: defined in src/libretro/libretro.c.  hook_-
+ * video_done() sets this to 1 when osd_update_video_and_audio()
+ * finishes delivering a frame, causing cpu_run_step()'s scheduler
+ * loop to exit so retro_run() can resume.  Cleared at the top of
+ * every cpu_run_step() call. */
+extern int yield_pending;
 
 #if (HAS_Z80)
 #include "cpu/z80/z80.h"
@@ -632,51 +635,19 @@ logerror("CPU #%d [%s] wrong ID %d: check enum CPU_... in src/driver.h!\n", i, c
 	timeslice_timer = refresh_timer = vblank_timer = NULL;
 }
 
-void cpu_run(void)
+/***************************************************************************
+
+  Reset routines, shared by cpu_run_init() and the in-loop machine-reset
+  path inside cpu_run_step().  Re-initialises chip state, suspends/-
+  unsuspends CPUs, calls the driver init_machine() and RESETs each CPU
+  core.  Was the body of the historical "reset:" goto-label inside
+  cpu_run().
+
+***************************************************************************/
+static void cpu_run_reset_machine(void)
 {
 	int i;
 
-	/* determine which CPUs need a context switch */
-	for (i = 0; i < totalcpu; i++)
-	{
-		int j, size;
-
-		/* allocate a context buffer for the CPU */
-		size = GETCONTEXT(i,NULL);
-		if( size == 0 )
-		{
-			/* That can't really be true */
-logerror("CPU #%d claims to need no context buffer!\n", i);
-			/*raise( SIGABRT );*/
-		}
-
-		cpu[i].context = malloc( size );
-		if( cpu[i].context == NULL )
-		{
-			/* That's really bad :( */
-logerror("CPU #%d failed to allocate context buffer (%d bytes)!\n", i, size);
-			/*raise( SIGABRT );*/
-		}
-
-		/* Zap the context buffer */
-		memset(cpu[i].context, 0, size );
-
-
-		/* Save if there is another CPU of the same type */
-		cpu[i].save_context = 0;
-
-		for (j = 0; j < totalcpu; j++)
-			if ( i != j && !strcmp(cpunum_core_file(i),cpunum_core_file(j)) )
-				cpu[i].save_context = 1;
-
-		for( j = 0; j < MAX_IRQ_LINES; j++ )
-		{
-			irq_line_state[i * MAX_IRQ_LINES + j] = CLEAR_LINE;
-			irq_line_vector[i * MAX_IRQ_LINES + j] = cpuintf[CPU_TYPE(i)].default_vector;
-		}
-	}
-
-reset:
 	/* read hi scores information from hiscore.dat */
 	hs_open(Machine->gamedrv->name);
 	hs_init();
@@ -704,16 +675,16 @@ reset:
 	have_to_reset = 0;
 	vblank = 0;
 
-logerror("Machine reset\n");
+	logerror("Machine reset\n");
 
 	/* start with interrupts enabled, so the generic routine will work even if */
 	/* the machine doesn't have an interrupt enable port */
-	for (i = 0;i < MAX_CPU;i++)
+	for (i = 0; i < MAX_CPU; i++)
 	{
 		interrupt_enable[i] = 1;
 		interrupt_vector[i] = 0xff;
-        /* Reset any driver hooks into the IRQ acknowledge callbacks */
-        drv_irq_callbacks[i] = NULL;
+		/* Reset any driver hooks into the IRQ acknowledge callbacks */
+		drv_irq_callbacks[i] = NULL;
 	}
 
 	/* do this AFTER the above so init_machine() can use cpu_halt() to hold the */
@@ -730,11 +701,10 @@ logerror("Machine reset\n");
 		RESET(i);
 
 		/* Set the irq callback for the cpu */
-		SETIRQCALLBACK(i,cpu_irq_callbacks[i]);
-
+		SETIRQCALLBACK(i, cpu_irq_callbacks[i]);
 
 		/* save the CPU context if necessary */
-		if (cpu[i].save_context) GETCONTEXT (i, cpu[i].context);
+		if (cpu[i].save_context) GETCONTEXT(i, cpu[i].context);
 
 		/* reset the total number of cycles */
 		cpu[i].totalcycles = 0;
@@ -743,59 +713,131 @@ logerror("Machine reset\n");
 	/* reset the globals */
 	cpu_vblankreset();
 	current_frame = 0;
+}
 
-	/* loop until the user quits */
+
+/***************************************************************************
+
+  Allocate per-CPU context buffers, perform initial reset, and arm the
+  scheduling state.  Call once per game before the first cpu_run_step().
+
+***************************************************************************/
+void cpu_run_init(void)
+{
+	int i;
+
+	/* determine which CPUs need a context switch */
+	for (i = 0; i < totalcpu; i++)
+	{
+		int j, size;
+
+		/* allocate a context buffer for the CPU */
+		size = GETCONTEXT(i, NULL);
+		if (size == 0)
+		{
+			/* That can't really be true */
+			logerror("CPU #%d claims to need no context buffer!\n", i);
+			/*raise( SIGABRT );*/
+		}
+
+		cpu[i].context = malloc(size);
+		if (cpu[i].context == NULL)
+		{
+			/* That's really bad :( */
+			logerror("CPU #%d failed to allocate context buffer (%d bytes)!\n", i, size);
+			/*raise( SIGABRT );*/
+		}
+
+		/* Zap the context buffer */
+		memset(cpu[i].context, 0, size);
+
+
+		/* Save if there is another CPU of the same type */
+		cpu[i].save_context = 0;
+
+		for (j = 0; j < totalcpu; j++)
+			if (i != j && !strcmp(cpunum_core_file(i), cpunum_core_file(j)))
+				cpu[i].save_context = 1;
+
+		for (j = 0; j < MAX_IRQ_LINES; j++)
+		{
+			irq_line_state[i * MAX_IRQ_LINES + j] = CLEAR_LINE;
+			irq_line_vector[i * MAX_IRQ_LINES + j] = cpuintf[CPU_TYPE(i)].default_vector;
+		}
+	}
+
+	cpu_run_reset_machine();
 	usres = 0;
-	while (usres == 0)
+}
+
+
+/***************************************************************************
+
+  Run one frame's worth of CPU scheduling.  Returns when the timer
+  system has fired its VBLANK update path through updatescreen() and
+  osd_update_video_and_audio(), which sets yield_pending via
+  hook_video_done().  Subsequent calls resume the schedule from where
+  the previous frame left off; CPU contexts, timers, and machine state
+  are all preserved in globals/heap across calls.
+
+  Also handles in-game machine_reset() by re-running cpu_run_reset_-
+  machine() inline -- replaces the historical "goto reset" inside
+  cpu_run().
+
+***************************************************************************/
+void cpu_run_step(void)
+{
+	yield_pending = 0;
+
+	while (usres == 0 && !yield_pending)
 	{
 		int cpunum;
-#ifdef WANT_LIBCO
-               if(libco_quit==1)usres=1;
-#endif
+
 		/* was machine_reset() called? */
 		if (have_to_reset)
 		{
 #ifdef MESS
 			if (Machine->drv->stop_machine) (*Machine->drv->stop_machine)();
 #endif
-			goto reset;
+			cpu_run_reset_machine();
+			continue;
 		}
 		profiler_mark(PROFILER_EXTRA);
 
 #if SAVE_STATE_TEST
 		{
-			if( keyboard_pressed_memory(KEYCODE_S) )
+			if (keyboard_pressed_memory(KEYCODE_S))
 			{
 				void *s = state_create(Machine->gamedrv->name);
-				if( s )
+				if (s)
 				{
-					for( cpunum = 0; cpunum < totalcpu; cpunum++ )
+					for (cpunum = 0; cpunum < totalcpu; cpunum++)
 					{
 						activecpu = cpunum;
 						memorycontextswap(activecpu);
 						if (cpu[activecpu].save_context) SETCONTEXT(activecpu, cpu[activecpu].context);
 						/* make sure any bank switching is reset */
 						SET_OP_BASE(activecpu, GETPC(activecpu));
-						if( cpu[activecpu].intf->cpu_state_save )
+						if (cpu[activecpu].intf->cpu_state_save)
 							(*cpu[activecpu].intf->cpu_state_save)(s);
 					}
 					state_close(s);
 				}
 			}
 
-			if( keyboard_pressed_memory(KEYCODE_L) )
+			if (keyboard_pressed_memory(KEYCODE_L))
 			{
 				void *s = state_open(Machine->gamedrv->name);
-				if( s )
+				if (s)
 				{
-					for( cpunum = 0; cpunum < totalcpu; cpunum++ )
+					for (cpunum = 0; cpunum < totalcpu; cpunum++)
 					{
 						activecpu = cpunum;
 						memorycontextswap(activecpu);
 						if (cpu[activecpu].save_context) SETCONTEXT(activecpu, cpu[activecpu].context);
 						/* make sure any bank switching is reset */
 						SET_OP_BASE(activecpu, GETPC(activecpu));
-						if( cpu[activecpu].intf->cpu_state_load )
+						if (cpu[activecpu].intf->cpu_state_load)
 							(*cpu[activecpu].intf->cpu_state_load)(s);
 						/* update the contexts */
 						if (cpu[activecpu].save_context) GETCONTEXT(activecpu, cpu[activecpu].context);
@@ -837,6 +879,18 @@ logerror("Machine reset\n");
 
 		profiler_mark(PROFILER_END);
 	}
+}
+
+
+/***************************************************************************
+
+  Shut down the CPU cores, free per-CPU context buffers, close the
+  hiscore database.  Pair this with cpu_run_init().
+
+***************************************************************************/
+void cpu_run_exit(void)
+{
+	int i;
 
 	/* write hi scores to disk - No scores saving if cheat */
 	hs_close();
@@ -849,20 +903,17 @@ logerror("Machine reset\n");
 	for (i = 0; i < totalcpu; i++)
 	{
 		/* if the CPU core defines an exit function, call it now */
-		if( cpu[i].intf->exit )
+		if (cpu[i].intf->exit)
 			(*cpu[i].intf->exit)();
 
 		/* free the context buffer for that CPU */
-		if( cpu[i].context )
+		if (cpu[i].context)
 		{
-			free( cpu[i].context );
+			free(cpu[i].context);
 			cpu[i].context = NULL;
 		}
 	}
 	totalcpu = 0;
-#ifdef WANT_LIBCO
-               libco_quit=1;
-#endif
 }
 
 

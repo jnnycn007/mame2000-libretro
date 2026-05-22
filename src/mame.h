@@ -106,7 +106,29 @@ struct GameOptions {
 extern struct GameOptions options;
 extern struct RunningMachine *Machine;
 
-int run_game (int game);
+/* Re-entrant game lifecycle.  Replaces the historical monolithic
+ * run_game() which ran a single game to completion inline.
+ *
+ *   mame_start_game(game)  -- drive osd_init, init_machine, vh_open,
+ *      driver vh_start, sound_start, NVRAM load, and cpu_run_init.
+ *      Returns 0 on success, non-zero on failure.  After it returns 0
+ *      the emulator is ready to render frames.
+ *
+ *   mame_run_one_frame()   -- run one frame's worth of CPU
+ *      scheduling.  Returns when the timer system has driven
+ *      osd_update_video_and_audio() through hook_video_done(), which
+ *      sets the cross-TU yield flag (see src/libretro/libretro.c).
+ *      Call this once per retro_run().
+ *
+ *   mame_end_game()        -- reverse the init chain: cpu_run_exit,
+ *      driver vh_stop / sound_stop / NVRAM save / cheat StopCheat /
+ *      save_input_port_settings, vh_close, shutdown_machine,
+ *      osd_exit.  Safe to call even after a partial mame_start_game()
+ *      failure -- the implementation tracks how far init progressed
+ *      and unwinds only what succeeded. */
+int mame_start_game(int game);
+void mame_run_one_frame(void);
+void mame_end_game(void);
 int updatescreen(void);
 void draw_screen(int bitmap_dirty);
 void update_video_and_audio(void);

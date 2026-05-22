@@ -35,7 +35,12 @@ extern int spriteram_size,spriteram_2_size;
 
 int init_machine(void);
 void shutdown_machine(void);
-int run_machine(void);
+/* Re-entrant game lifecycle: see mame.h. */
+int mame_start_game(int game);
+void mame_run_one_frame(void);
+void mame_end_game(void);
+static int run_machine_init(void);
+static void run_machine_exit(void);
 
 void overlay_free(void);
 void backdrop_free(void);
@@ -147,7 +152,7 @@ static int game_fixed_output_rate(void)
 	return rate;
 }
 
-int run_game(int game)
+int mame_start_game(int game)
 {
 	int err;
 
@@ -260,43 +265,53 @@ int run_game(int game)
 	set_pixel_functions();
 
 	/* Do the work*/
-	err = 1;
 	bailing = 0;
 
 	#ifdef MESS
 	if (get_filenames())
-		return err;
+		return 1;
 	#endif
 
-	if (osd_init() == 0)
+	if (osd_init() != 0)
 	{
-		if (init_machine() == 0)
-		{
-			if (run_machine() == 0)
-				err = 0;
-			else if (!bailing)
-			{
-				bailing = 1;
-				printf("Unable to start machine emulation\n");
-			}
+		if (!bailing) { bailing = 1; printf("Unable to initialize system\n"); }
+		return 1;
+	}
 
-			shutdown_machine();
-		}
-		else if (!bailing)
-		{
-			bailing = 1;
-			printf("Unable to initialize machine emulation\n");
-		}
-
+	if (init_machine() != 0)
+	{
+		if (!bailing) { bailing = 1; printf("Unable to initialize machine emulation\n"); }
 		osd_exit();
-	}
-	else if (!bailing)
-	{
-		bailing = 1;
-		printf ("Unable to initialize system\n");
+		return 1;
 	}
 
-	return err;
+	if (run_machine_init() != 0)
+	{
+		if (!bailing) { bailing = 1; printf("Unable to start machine emulation\n"); }
+		run_machine_exit();
+		shutdown_machine();
+		osd_exit();
+		return 1;
+	}
+
+	return 0;
+}
+
+/* Per-frame entry: drive one frame of CPU scheduling.  Each call runs
+ * timer-driven CPU dispatch until osd_update_video_and_audio() sets
+ * the yield flag (or until usres is raised).  Subsequent calls resume
+ * the schedule from where the previous frame left off. */
+void mame_run_one_frame(void)
+{
+	cpu_run_step();
+}
+
+/* Tear down everything mame_start_game() set up, in reverse order. */
+void mame_end_game(void)
+{
+	run_machine_exit();
+	shutdown_machine();
+	osd_exit();
 }
 
 
@@ -637,7 +652,6 @@ static int vh_open(void)
 ***************************************************************************/
 
 int need_to_clear_bitmap;	/* set by the user interface */
-extern unsigned retro_hook_quit;
 
 int updatescreen(void)
 {
@@ -668,7 +682,12 @@ int updatescreen(void)
 
 	if (drv->vh_eof_callback) (*drv->vh_eof_callback)();
 
-	return retro_hook_quit;
+	/* retro_hook_quit is gone with libco: retro_unload_game now drives
+	 * the teardown synchronously via mame_end_game(), so updatescreen()
+	 * no longer needs to propagate an external "quit" signal through
+	 * the timer system.  The only quit path is handle_user_interface()
+	 * returning 1 above, which already short-circuits to return 1. */
+	return 0;
 }
 
 
@@ -708,130 +727,139 @@ void update_video_and_audio(void)
   Returns non zero in case of error.
 
 ***************************************************************************/
-int run_machine(void)
+/* Tracks how far run_machine_init() got, so run_machine_exit() can
+ * unwind only what was actually initialised.  Values:
+ *   0  nothing started
+ *   1  vh_open done (need vh_close + tilemap/sprite/gfxobj_close)
+ *   2  drv->vh_start done (need drv->vh_stop)
+ *   3  sound_start done (need sound_stop)
+ *   4  init_user_interface + cheat done (need save_input_port_settings + StopCheat)
+ *   5  cpu_run_init done (need cpu_run_exit + NVRAM save)
+ */
+static int rm_state = 0;
+
+/* Set up everything required for the per-frame cpu_run_step() to be
+ * called: open the video output, initialise tilemap/sprite/gfxobj,
+ * start the driver's video and audio, free DISPOSE memory regions,
+ * load NVRAM, then arm the CPU scheduler.  Returns 0 on success,
+ * non-zero on failure; on failure rm_state records how far we got
+ * so run_machine_exit() can unwind correctly. */
+static int run_machine_init(void)
 {
-	int res = 1;
+	rm_state = 0;
 
-
-	if (vh_open() == 0)
+	if (vh_open() != 0)
 	{
-		tilemap_init();
-		sprite_init();
-		gfxobj_init();
-		if (drv->vh_start == 0 || (*drv->vh_start)() == 0)      /* start the video hardware */
+		if (!bailing) { bailing = 1; printf("Unable to start video emulation\n"); }
+		return 1;
+	}
+	rm_state = 1;
+
+	tilemap_init();
+	sprite_init();
+	gfxobj_init();
+
+	if (drv->vh_start != 0 && (*drv->vh_start)() != 0)
+	{
+		if (!bailing) { bailing = 1; printf("Unable to start video emulation\n"); }
+		return 1;
+	}
+	rm_state = 2;
+
+	if (sound_start() != 0)
+	{
+		if (!bailing) { bailing = 1; printf("Unable to start audio emulation\n"); }
+		return 1;
+	}
+	rm_state = 3;
+
+	real_scrbitmap = artwork_overlay ? overlay_real_scrbitmap : Machine->scrbitmap;
+
+	/* free memory regions allocated with REGIONFLAG_DISPOSE (typically gfx roms) */
+	{
+		int region;
+		for (region = 0; region < MAX_MEMORY_REGIONS; region++)
 		{
-			if (sound_start() == 0) /* start the audio hardware */
+			if (Machine->memory_region_type[region] & REGIONFLAG_DISPOSE)
 			{
-				int	region;
-
-				real_scrbitmap = artwork_overlay ? overlay_real_scrbitmap : Machine->scrbitmap;
-
-				/* free memory regions allocated with REGIONFLAG_DISPOSE (typically gfx roms) */
-				for (region = 0; region < MAX_MEMORY_REGIONS; region++)
-				{
-					if (Machine->memory_region_type[region] & REGIONFLAG_DISPOSE)
-					{
-						int i;
-
-						/* invalidate contents to avoid subtle bugs */
-						for (i = 0;i < memory_region_length(region);i++)
-							memory_region(region)[i] = rand();
-						free(Machine->memory_region[region]);
-						Machine->memory_region[region] = 0;
-					}
-				}
-
-				if (settingsloaded == 0)
-				{
-					/* if there is no saved config, it must be first time we run this game, */
-					/* so show the disclaimer. */
-					if (!options.skip_disclaimer)
-					{
-						if (showcopyright(real_scrbitmap)) goto userquit;
-					}
-				}
-
-				if (showgamewarnings(real_scrbitmap) == 0)  /* show info about incorrect behaviour (wrong colors etc.) */
-				{
-					/* shut down the leds (work around Allegro hanging bug in the DOS port) */
-					osd_led_w(0,1);
-					osd_led_w(1,1);
-					osd_led_w(2,1);
-					osd_led_w(3,1);
-					osd_led_w(0,0);
-					osd_led_w(1,0);
-					osd_led_w(2,0);
-					osd_led_w(3,0);
-
-					init_user_interface();
-
-					/* disable cheat if no roms */
-					if (!gamedrv->rom) options.cheat = 0;
-
-					if (options.cheat) InitCheat();
-
-					if (drv->nvram_handler)
-					{
-						void *f;
-
-						f = osd_fopen(Machine->gamedrv->name,0,OSD_FILETYPE_NVRAM,0);
-						(*drv->nvram_handler)(f,0);
-						if (f) osd_fclose(f);
-					}
-
-					cpu_run();      /* run the emulation! */
-
-					if (drv->nvram_handler)
-					{
-						void *f;
-
-						if ((f = osd_fopen(Machine->gamedrv->name,0,OSD_FILETYPE_NVRAM,1)) != 0)
-						{
-							(*drv->nvram_handler)(f,1);
-							osd_fclose(f);
-						}
-					}
-
-					if (options.cheat) StopCheat();
-
-					/* save input ports settings */
-					save_input_port_settings();
-				}
-
-userquit:
-				/* the following MUST be done after hiscore_save() otherwise */
-				/* some 68000 games will not work */
-				sound_stop();
-				if (drv->vh_stop) (*drv->vh_stop)();
-				overlay_free();
-				backdrop_free();
-
-				res = 0;
-			}
-			else if (!bailing)
-			{
-				bailing = 1;
-				printf("Unable to start audio emulation\n");
+				int i;
+				/* invalidate contents to avoid subtle bugs */
+				for (i = 0; i < memory_region_length(region); i++)
+					memory_region(region)[i] = rand();
+				free(Machine->memory_region[region]);
+				Machine->memory_region[region] = 0;
 			}
 		}
-		else if (!bailing)
-		{
-			bailing = 1;
-			printf("Unable to start video emulation\n");
-		}
+	}
 
+	/* The libretro build stubs showcopyright() and showgamewarnings() to
+	 * return 0, so the historical "userquit" goto-label inside the
+	 * disclaimer branch is unreachable; the calls are kept here only so
+	 * that a non-libretro build pulling this TU would still get the
+	 * original control flow. */
+	if (settingsloaded == 0 && !options.skip_disclaimer)
+		(void)showcopyright(real_scrbitmap);
+	(void)showgamewarnings(real_scrbitmap);
+
+	/* shut down the leds (work around Allegro hanging bug in the DOS port) */
+	osd_led_w(0, 1); osd_led_w(1, 1); osd_led_w(2, 1); osd_led_w(3, 1);
+	osd_led_w(0, 0); osd_led_w(1, 0); osd_led_w(2, 0); osd_led_w(3, 0);
+
+	init_user_interface();
+
+	/* disable cheat if no roms */
+	if (!gamedrv->rom) options.cheat = 0;
+	if (options.cheat) InitCheat();
+	rm_state = 4;
+
+	if (drv->nvram_handler)
+	{
+		void *f = osd_fopen(Machine->gamedrv->name, 0, OSD_FILETYPE_NVRAM, 0);
+		(*drv->nvram_handler)(f, 0);
+		if (f) osd_fclose(f);
+	}
+
+	cpu_run_init();
+	rm_state = 5;
+	return 0;
+}
+
+/* Reverse-order teardown of run_machine_init(), gated by rm_state so a
+ * mid-init failure unwinds only what succeeded. */
+static void run_machine_exit(void)
+{
+	if (rm_state >= 5)
+	{
+		cpu_run_exit();
+
+		if (drv->nvram_handler)
+		{
+			void *f;
+			if ((f = osd_fopen(Machine->gamedrv->name, 0, OSD_FILETYPE_NVRAM, 1)) != 0)
+			{
+				(*drv->nvram_handler)(f, 1);
+				osd_fclose(f);
+			}
+		}
+	}
+	if (rm_state >= 4)
+	{
+		if (options.cheat) StopCheat();
+		/* save input ports settings */
+		save_input_port_settings();
+	}
+	if (rm_state >= 3) sound_stop();
+	if (rm_state >= 2 && drv->vh_stop) (*drv->vh_stop)();
+	if (rm_state >= 1)
+	{
+		overlay_free();
+		backdrop_free();
 		gfxobj_close();
 		sprite_close();
 		tilemap_close();
 		vh_close();
 	}
-	else if (!bailing)
-	{
-		bailing = 1;
-		printf("Unable to start video emulation\n");
-	}
-
-	return res;
+	rm_state = 0;
 }
 
 

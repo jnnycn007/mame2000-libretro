@@ -15,9 +15,6 @@
 */
 
 #include <fcntl.h>
-#ifndef WANT_LIBCO
-#include <pthread.h>
-#endif
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

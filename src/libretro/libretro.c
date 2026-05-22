@@ -1,8 +1,8 @@
-#ifdef WANT_LIBCO
-#include <libco.h>
-#else
-#include <rthreads/rthreads.h>
-#endif
+/* libco and rthreads are no longer needed: MAME's run_game/cpu_run
+ * have been refactored into a re-entrant per-frame entry point
+ * (mame_run_one_frame, see src/mame.c) that returns up the stack
+ * after each rendered frame, so retro_run drives the emulator
+ * directly without a coroutine or kernel thread. */
 
 #if (HAS_DRZ80 || HAS_CYCLONE)
 #include "frontend_list.h"
@@ -37,19 +37,12 @@ const char *retro_content_directory;
 char core_save_directory[1024];
 char core_sys_directory[1024];
 
-unsigned retro_hook_quit;
-volatile static unsigned audio_done;
-volatile static unsigned video_done;
-volatile static unsigned mame_sleep;
-#ifdef WANT_LIBCO
-int libco_quit=0;
-static cothread_t core_thread;
-static cothread_t main_thread;
-#else
-static sthread_t *run_thread = NULL;
-static scond_t   *libretro_cond = NULL;
-static slock_t   *libretro_mutex = NULL;
-#endif
+/* Cross-TU yield signal: hook_video_done() (called at the tail of
+ * osd_update_video_and_audio() once a frame has been rendered and
+ * delivered to gp2x_screen15) sets this to 1, causing cpu_run_step()
+ * in src/cpuintrf.c to exit its scheduling loop so retro_run() can
+ * resume.  cpu_run_step() clears it on entry. */
+int yield_pending = 0;
 
 unsigned frameskip_type                  = 0;
 unsigned frameskip_threshold             = 0;
@@ -80,7 +73,6 @@ unsigned short *gp2x_screen15;
 static unsigned short *gp2x_screen15_owned;  /* the core's malloc'd buffer */
 static void           *sw_fb_active_data;    /* non-NULL when SW-FB is in use this frame */
 static size_t          sw_fb_active_pitch;
-int thread_done = 0;
 extern int gfx_xoffset;
 extern int gfx_yoffset;
 extern int gfx_width;
@@ -514,90 +506,22 @@ static void update_input(void)
 #undef _B
 }
 
-#ifdef WANT_LIBCO
+/* MAME callbacks invoked from osd_update_audio_stream() (sound.c) and
+ * osd_update_video_and_audio() (video.c) at the tail of each frame's
+ * audio/video output respectively.  In the legacy libco-coroutine and
+ * threaded models these functions used to perform cross-stack
+ * synchronisation to yield control back to retro_run; now that the
+ * emulator returns up the stack naturally, the audio hook is a no-op
+ * and the video hook simply raises yield_pending so cpu_run_step()
+ * exits its scheduling loop. */
 void hook_audio_done(void)
 {
 }
 
 void hook_video_done(void)
 {
-   co_switch(main_thread);
+   yield_pending = 1;
 }
-
-void run_thread_proc(void)
-{
-   run_game(game_index);
-   hook_audio_done();
-   hook_video_done();
-}
-#else
-static void hook_check(void)
-{
-   if (video_done && audio_done)
-   {
-      scond_signal(libretro_cond);
-      if (mame_sleep && !retro_hook_quit)
-         scond_wait(libretro_cond, libretro_mutex);
-      mame_sleep = 1;
-   }
-}
-
-void hook_audio_done(void)
-{
-   slock_lock(libretro_mutex);
-   audio_done = 1;
-   hook_check();
-   slock_unlock(libretro_mutex);
-}
-
-void hook_video_done(void)
-{
-   slock_lock(libretro_mutex);
-   if (video_done) // Audio doesn't seem to be running atm, so fake it ...
-      audio_done = 1;
-   video_done = 1;
-   hook_check();
-   slock_unlock(libretro_mutex);
-}
-
-#ifdef WANT_LIBCO
-void *run_thread_proc(void *v)
-{
-   (void)v;
-
-   run_game(game_index);
-   thread_done = 1;
-   hook_audio_done();
-   hook_video_done();
-
-   return NULL;
-}
-#else
-void run_thread_proc(void *v)
-{
-   run_game(game_index);
-   thread_done = 1;
-   hook_audio_done();
-   hook_video_done();
-}
-#endif
-
-static void lock_mame(void)
-{
-   slock_lock(libretro_mutex);
-   while (!audio_done || !video_done)
-      scond_wait(libretro_cond, libretro_mutex);
-   slock_unlock(libretro_mutex);
-}
-
-static void unlock_mame(void)
-{
-   slock_lock(libretro_mutex);
-   mame_sleep = 0;
-   scond_signal(libretro_cond);
-   slock_unlock(libretro_mutex);
-}
-#endif
 
 void retro_init(void)
 {
@@ -607,10 +531,6 @@ void retro_init(void)
    gp2x_screen15 = (unsigned short *) malloc(640 * 480 * 2);
 #endif
    gp2x_screen15_owned = gp2x_screen15;
-#ifndef WANT_LIBCO
-   libretro_cond  = scond_new();
-   libretro_mutex = slock_new();
-#endif
    init_joy_list();
    update_variables(true);
 
@@ -633,10 +553,6 @@ void retro_deinit(void)
 #endif
    gp2x_screen15_owned = NULL;
    sw_fb_active_data   = NULL;
-#ifndef WANT_LIBCO
-   scond_free(libretro_cond);
-   slock_free(libretro_mutex);
-#endif
 
    libretro_supports_bitmasks = false;
    frameskip_type             = 0;
@@ -677,9 +593,6 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
 {
    
    float aspect_ratio = Machine->orientation & ORIENTATION_SWAP_XY? ( (float) 3 / (float) 4) : ( (float) 4/ (float) 3);
-#ifndef WANT_LIBCO
-   lock_mame();
-#endif
    struct retro_game_geometry g = {
      emulated_width,
       emulated_height,
@@ -715,13 +628,7 @@ void retro_run(void)
     * gfx_width.  The format must be RGB565; if the frontend gives us a
     * different one (e.g. when it would have to convert internally) we
     * pass.  These constraints make the optimisation conservative -- a
-    * mismatched frontend just sees the existing slow path.
-    *
-    * Only attempted for libco builds; the threaded mode runs the
-    * emulator on a separate kernel thread that we can't reach with the
-    * frontend environ callback from here without adding cross-thread
-    * synchronisation we don't currently have. */
-#ifdef WANT_LIBCO
+    * mismatched frontend just sees the existing slow path. */
    sw_fb_active_data = NULL;
    if (gfx_width > 0 && gfx_height > 0 && gp2x_screen15_owned != NULL)
    {
@@ -744,17 +651,11 @@ void retro_run(void)
          gp2x_screen15      = (unsigned short *)fb.data;
       }
    }
-#endif
 
-#ifdef WANT_LIBCO
-   if(libco_quit==0)co_switch(core_thread);
-   else  printf("running dead emulator");
-#else
-   lock_mame();
-
-//   if (thread_done)
-//      environ_cb(RETRO_ENVIRONMENT_SHUTDOWN, NULL);
-#endif
+   /* Run one frame of CPU scheduling.  Returns when the timer system
+    * has fired its VBLANK update path through osd_update_video_and_-
+    * audio(), which calls hook_video_done() to raise yield_pending. */
+   mame_run_one_frame();
 
    bool updated = false;
     
@@ -779,13 +680,11 @@ void retro_run(void)
    /* Restore the core-owned buffer for the next frame so allocation
     * lifetimes stay sane regardless of whether the frontend grants a
     * buffer again next time. */
-#ifdef WANT_LIBCO
    if (sw_fb_active_data != NULL)
    {
       gp2x_screen15     = gp2x_screen15_owned;
       sw_fb_active_data = NULL;
    }
-#endif
 
    if (samples_per_frame)
    {
@@ -801,13 +700,6 @@ void retro_run(void)
          audio_batch_cb(conversion_buffer, samples_per_frame);
       }
    }
-
-   audio_done = 0;
-   video_done = 0;
-
-#ifndef WANT_LIBCO
-   unlock_mame();
-#endif
 
    /* If frameskip/timing settings have changed,
     * update frontend audio latency
@@ -1152,15 +1044,12 @@ bool retro_load_game(const struct retro_game_info *info)
 
    decompose_rom_sample_path(IMAMEBASEPATH, IMAMESAMPLEPATH);
 
-   mame_sleep = 1;
-
-#ifdef WANT_LIBCO
-   main_thread = co_active();
-   core_thread = co_create(0x10000, run_thread_proc);
-   co_switch(core_thread);
-#else
-   run_thread = sthread_create(run_thread_proc, NULL);
-#endif
+   /* Drive MAME's per-game init chain synchronously: osd_init,
+    * init_machine, run_machine_init (which calls cpu_run_init at its
+    * tail).  After this returns 0 the emulator is ready to render
+    * frames; the first retro_run() call will deliver frame 0. */
+   if (mame_start_game(game_index) != 0)
+      return false;
 
    retro_set_audio_buff_status_cb();
    return true;
@@ -1168,29 +1057,11 @@ bool retro_load_game(const struct retro_game_info *info)
 
 void retro_unload_game(void)
 {
-#ifdef WANT_LIBCO
-if(libco_quit==0){
-   printf("ask for quit!\n");
-   libco_quit=1;
-   co_switch(core_thread);
-}
-else printf("esc pressed quit!\n");
-   co_delete(core_thread);
-#else
-   slock_lock(libretro_mutex);
-   // make sure we escape the copyright warning and game warning loops
-   key[KEY_ESC] = 1;
-   retro_hook_quit = 1;
-   mame_sleep = 0;
-   scond_signal(libretro_cond);
-   slock_unlock(libretro_mutex);
-
-   if (run_thread)
-      sthread_join(run_thread);
-
-   run_thread      = NULL;
-   retro_hook_quit = 0;
-#endif
+   /* Reverse the init chain: cpu_run_exit (via run_machine_exit) then
+    * shutdown_machine, osd_exit.  All driven synchronously from the
+    * libretro main thread now that there is no background coroutine
+    * or kernel thread to wind down. */
+   mame_end_game();
 }
 
 unsigned retro_get_region(void)

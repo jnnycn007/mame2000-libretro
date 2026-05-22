@@ -303,7 +303,15 @@ __attribute__ ((__aligned__ (32)))
 extern struct cpu_interface cpuintf[];
 
 void cpu_init(void);
-void cpu_run(void);
+/* Re-entrant CPU scheduling.  cpu_run_init() allocates per-CPU
+ * context buffers and primes machine state; each cpu_run_step()
+ * runs one frame's worth of timer-driven CPU dispatch and returns
+ * when osd_update_video_and_audio()'s yield hook fires (or when
+ * usres is set); cpu_run_exit() tears down.  Replaces the historical
+ * monolithic cpu_run() that ran the entire game inline. */
+void cpu_run_init(void);
+void cpu_run_step(void);
+void cpu_run_exit(void);
 
 /* optional watchdog */
 WRITE_HANDLER( watchdog_reset_w );
