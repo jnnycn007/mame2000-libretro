@@ -893,7 +893,7 @@ int	neogeo_memcard_load(int number)
     char name[16];
     void *f;
 
-    sprintf(name, "MEMCARD.%03d", number);
+    snprintf(name, sizeof(name), "MEMCARD.%03d", number);
     if ((f=osd_fopen(0, name, OSD_FILETYPE_MEMCARD,0))!=0)
     {
         osd_fread(f,neogeo_memcard,0x800);
@@ -910,7 +910,7 @@ void	neogeo_memcard_save(void)
 
     if (memcard_number!=-1)
     {
-        sprintf(name, "MEMCARD.%03d", memcard_number);
+        snprintf(name, sizeof(name), "MEMCARD.%03d", memcard_number);
         if ((f=osd_fopen(0, name, OSD_FILETYPE_MEMCARD,1))!=0)
         {
             osd_fwrite(f,neogeo_memcard,0x800);
@@ -936,7 +936,10 @@ int neogeo_memcard_create(int number)
     char name[16];
     void *f1, *f2;
 
-    sprintf(name, "MEMCARD.%03d", number);
+    /* Initialise the fresh card to zero rather than writing the
+     * uninitialised stack contents straight to disk. */
+    memset(buf, 0, sizeof(buf));
+    snprintf(name, sizeof(name), "MEMCARD.%03d", number);
     if ((f1=osd_fopen(0, name, OSD_FILETYPE_MEMCARD,0))==0)
     {
         if ((f2=osd_fopen(0, name, OSD_FILETYPE_MEMCARD,1))!=0)
