@@ -302,22 +302,19 @@ int mame_start_game(int game)
  * the yield flag (or until usres is raised).  Subsequent calls resume
  * the schedule from where the previous frame left off.
  *
- * When the MAME menu is up (setup_menu or on-screen display, reached
- * via IPT_UI_CONFIGURE = RetroPad START+SELECT) the game CPU is
- * paused: gamepad presses drive only menu navigation, not the game's
- * own input ports.  This matches the historical libco pause-loop in
- * handle_user_interface() which spun update_video_and_audio() without
- * calling cpu_execute().  Without this gate the same D-pad/B press
- * would feed both the menu (via input_ui_pressed reading key[]) and
- * the game (via memory-mapped input port reads inside cpu_execute()),
- * so navigating the menu would also move the player around.  Audio
- * goes silent while paused since the sound chips do not advance; the
- * bitmap re-renders the last live frame each tick, with the menu
- * drawn over it. */
+ * When the MAME menu is up the game CPU is paused via the cross-TU
+ * pause_action hook (src/cpuintrf.c): mame_pause(1) in src/usrintrf.c
+ * installs pause_action_generic() as the per-frame body and we call
+ * it here instead of cpu_run_step(), so cpu_execute() never runs
+ * while the menu is on screen.  This mirrors mame2003-libretro's
+ * mame_frame() in src/cpuexec.c.  Without this gate the same D-pad/B
+ * press feeds both the menu (input_ui_pressed -> key[]) and the game
+ * (memory-mapped input port reads inside cpu_execute()), so menu
+ * navigation would also drive the player. */
 void mame_run_one_frame(void)
 {
-	if (setup_active() || onscrd_active())
-		updatescreen();
+	if (pause_action)
+		pause_action();
 	else
 		cpu_run_step();
 }
@@ -671,8 +668,16 @@ int need_to_clear_bitmap;	/* set by the user interface */
 
 int updatescreen(void)
 {
-	/* update sound */
-	sound_update();
+	/* Substitute silence for sound_update() while the game is paused:
+	 * pause_action_generic() (running on behalf of mame_run_one_frame())
+	 * skips cpu_run_step(), so the sound chips have not advanced and
+	 * the mixer/streams chain would just re-emit the last live frame's
+	 * residual audio every tick -- audible as a buzz under the menu.
+	 * Mirror mame2003-libretro's src/mame.c:1324-1325. */
+	if (pause_action)
+		osd_update_silent_stream();
+	else
+		sound_update();
 
 	if (osd_skip_this_frame() == 0)
 	{

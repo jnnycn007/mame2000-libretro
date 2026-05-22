@@ -162,7 +162,12 @@ int screen_reinit(void)
 
 static retro_video_refresh_t video_cb;
 static retro_audio_sample_t audio_cb;
-static retro_audio_sample_batch_t audio_batch_cb;
+/* Non-static so src/libretro/sound.c's osd_update_silent_stream() can
+ * dispatch a frame of silence directly when pause_action is set, the
+ * way mame2003-libretro's osd_update_silent_stream calls audio_batch_-
+ * cb itself from inside updatescreen().  retro_run()'s tail dispatch
+ * is gated on pause_action so we never double-deliver. */
+retro_audio_sample_batch_t audio_batch_cb;
 static retro_environment_t environ_cb;
 static retro_input_poll_t input_poll_cb;
 static retro_input_state_t input_state_cb;
@@ -686,7 +691,18 @@ void retro_run(void)
       sw_fb_active_data = NULL;
    }
 
-   if (samples_per_frame)
+   /* Audio dispatch.  When pause_action is set, osd_update_silent_-
+    * stream() (called from updatescreen() while we were paused)
+    * already delivered a frame of silence via audio_batch_cb -- skip
+    * the dispatch here to avoid double-delivery.  This matches
+    * mame2003-libretro, where audio always flows through the OSD
+    * callbacks (osd_update_audio_stream when running, osd_update_-
+    * silent_stream when paused) and retro_run never dispatches
+    * directly.  In mame2000 we keep retro_run's tail dispatch for
+    * the running case because osd_update_audio_stream() only fills
+    * samples_buffer; the libretro-side delivery has historically
+    * happened here. */
+   if (samples_per_frame && !pause_action)
    {
       if (usestereo)
          audio_batch_cb(samples_buffer, samples_per_frame);

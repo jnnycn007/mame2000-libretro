@@ -3002,6 +3002,7 @@ if (Machine->gamedrv->flags & GAME_COMPUTER)
 			/* tell updatescreen() to clean after us */
 			need_to_clear_bitmap = 1;
 		}
+		mame_pause(1);
 	}
 	if (setup_selected != 0) setup_selected = setup_menu(bitmap, setup_selected);
 
@@ -3014,6 +3015,7 @@ if (Machine->gamedrv->flags & GAME_COMPUTER)
 			/* tell updatescreen() to clean after us */
 			need_to_clear_bitmap = 1;
 		}
+		mame_pause(1);
 	}
 	if (osd_selected != 0) osd_selected = on_screen_display(bitmap, osd_selected);
 
@@ -3109,7 +3111,35 @@ if (Machine->gamedrv->flags & GAME_COMPUTER)
 		osd_sound_enable(1);
 	}
 
+	/* Auto-clear the pause hook when neither the setup menu nor the
+	 * on-screen display is up.  Mirrors mame2003-libretro's auto-resume
+	 * at the tail of handle_user_interface(): the IPT_UI_CONFIGURE /
+	 * IPT_UI_ON_SCREEN_DISPLAY edge handlers above set pause_action,
+	 * setup_menu()/on_screen_display() eventually zero setup_selected/-
+	 * osd_selected when the user navigates back out, and this tail
+	 * resumes the game CPU on the next mame_run_one_frame() tick. */
+	if (pause_action && !setup_active() && !onscrd_active())
+		mame_pause(0);
+
 	return 0;
+}
+
+
+/* Pause/resume hook for the MAME UI.  pause_action_generic() is the
+ * frame body installed while paused: mame_run_one_frame() will call
+ * it instead of cpu_run_step(), so the game CPU does not advance but
+ * updatescreen() still runs every frame to render and animate the
+ * menu overlay.  mame_pause() flips the global between that body and
+ * NULL.  Mirrors mame2003-libretro/src/mame2003/mame2003.c lines
+ * 430-444. */
+void pause_action_generic(void)
+{
+	updatescreen();
+}
+
+void mame_pause(int pause)
+{
+	pause_action = pause ? pause_action_generic : NULL;
 }
 
 

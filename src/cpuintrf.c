@@ -21,6 +21,19 @@
  * every cpu_run_step() call. */
 extern int yield_pending;
 
+/* Game-pause hook, mirroring mame2003-libretro's mechanism (src/cpu-
+ * exec.c:354).  When non-NULL, the game CPU is suspended: mame_run_-
+ * one_frame() calls pause_action() instead of cpu_run_step(), and
+ * updatescreen() substitutes osd_update_silent_stream() for sound_-
+ * update().  Set/cleared via mame_pause() in src/usrintrf.c whenever
+ * the MAME menu (IPT_UI_CONFIGURE) or on-screen display (IPT_UI_-
+ * ON_SCREEN_DISPLAY) opens/closes, so the same gamepad press cannot
+ * simultaneously drive menu navigation and the player's input ports
+ * (which would happen if cpu_execute() kept running underneath the
+ * menu overlay).  Defined here so it sits next to the other CPU-loop
+ * scheduling state. */
+void (*pause_action)(void) = NULL;
+
 #if (HAS_Z80)
 #include "cpu/z80/z80.h"
 #endif

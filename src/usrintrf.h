@@ -44,6 +44,15 @@ int handle_user_interface(struct osd_bitmap *bitmap);
 int onscrd_active(void);
 int setup_active(void);
 
+/* Pause / resume the game CPU.  When pause is non-zero, installs the
+ * generic per-frame pause body in pause_action (declared extern in
+ * src/cpuintrf.h); mame_run_one_frame() then drives updatescreen()
+ * directly instead of cpu_run_step().  Called from handle_user_-
+ * interface() on the IPT_UI_CONFIGURE / IPT_UI_ON_SCREEN_DISPLAY
+ * edges; the same function auto-resumes (mame_pause(0)) at its tail
+ * once both menu states have closed. */
+void mame_pause(int pause);
+
 void CLIB_DECL usrintf_showmessage(const char *text,...);
 void CLIB_DECL usrintf_showmessage_secs(int seconds, const char *text,...);
 

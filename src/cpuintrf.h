@@ -313,6 +313,13 @@ void cpu_run_init(void);
 void cpu_run_step(void);
 void cpu_run_exit(void);
 
+/* Game-pause hook (defined in src/cpuintrf.c).  See mame_pause() in
+ * src/usrintrf.h for the public setter.  When non-NULL, mame_run_-
+ * one_frame() calls pause_action() instead of cpu_run_step(), and
+ * updatescreen() picks osd_update_silent_stream() over sound_-
+ * update().  Mirrors mame2003-libretro's pause_action global. */
+extern void (*pause_action)(void);
+
 /* optional watchdog */
 WRITE_HANDLER( watchdog_reset_w );
 READ_HANDLER( watchdog_reset_r );

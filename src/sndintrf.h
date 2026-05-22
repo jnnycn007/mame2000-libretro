@@ -287,6 +287,13 @@ void sound_stop(void);
 void sound_update(void);
 void sound_reset(void);
 
+/* Libretro-side silent-audio helper (src/libretro/sound.c).
+ * Substitute for sound_update() while pause_action is set;
+ * delivers a frame of zeros via audio_batch_cb so the frontend
+ * receives a clean silent batch instead of the residual mixer
+ * output looping under a paused emulator. */
+void osd_update_silent_stream(void);
+
 /* returns name of the sound system */
 const char *sound_name(const struct MachineSound *msound);
 /* returns number of chips, or 0 if the sound type doesn't support multiple instances */
