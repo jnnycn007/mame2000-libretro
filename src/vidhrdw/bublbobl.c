@@ -61,10 +61,13 @@ void bublbobl_vh_screenrefresh(struct osd_bitmap *bitmap,int full_refresh)
 
 	for (offs = 0;offs < bublbobl_objectram_size;offs += 4)
     {
-		/* skip empty sprites */
-		/* this is dword aligned so the uint32_t * cast shouldn't give problems */
-		/* on any architecture */
-		if (*(uint32_t *)(&bublbobl_objectram[offs]) == 0)
+		/* skip empty sprites - byte-by-byte zero check is endian- and
+		 * alignment-agnostic, and free vs. the original uint32_t cast
+		 * (which was UB by the C standard, and could fault on ARMv5). */
+		if (bublbobl_objectram[offs    ] == 0 &&
+		    bublbobl_objectram[offs + 1] == 0 &&
+		    bublbobl_objectram[offs + 2] == 0 &&
+		    bublbobl_objectram[offs + 3] == 0)
 			continue;
 
 		gfx_num = bublbobl_objectram[offs + 1];
