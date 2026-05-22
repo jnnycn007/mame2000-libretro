@@ -300,10 +300,26 @@ int mame_start_game(int game)
 /* Per-frame entry: drive one frame of CPU scheduling.  Each call runs
  * timer-driven CPU dispatch until osd_update_video_and_audio() sets
  * the yield flag (or until usres is raised).  Subsequent calls resume
- * the schedule from where the previous frame left off. */
+ * the schedule from where the previous frame left off.
+ *
+ * When the MAME menu is up (setup_menu or on-screen display, reached
+ * via IPT_UI_CONFIGURE = RetroPad START+SELECT) the game CPU is
+ * paused: gamepad presses drive only menu navigation, not the game's
+ * own input ports.  This matches the historical libco pause-loop in
+ * handle_user_interface() which spun update_video_and_audio() without
+ * calling cpu_execute().  Without this gate the same D-pad/B press
+ * would feed both the menu (via input_ui_pressed reading key[]) and
+ * the game (via memory-mapped input port reads inside cpu_execute()),
+ * so navigating the menu would also move the player around.  Audio
+ * goes silent while paused since the sound chips do not advance; the
+ * bitmap re-renders the last live frame each tick, with the menu
+ * drawn over it. */
 void mame_run_one_frame(void)
 {
-	cpu_run_step();
+	if (setup_active() || onscrd_active())
+		updatescreen();
+	else
+		cpu_run_step();
 }
 
 /* Tear down everything mame_start_game() set up, in reverse order. */
