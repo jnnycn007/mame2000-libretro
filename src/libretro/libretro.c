@@ -70,6 +70,16 @@ static int stereo_enabled                = true;
 
 int game_index = -1;
 unsigned short *gp2x_screen15;
+/* Software-framebuffer fast path: when the frontend grants us a buffer of
+ * exactly the right size/pitch/format for this frame, point gp2x_screen15
+ * at it so blit.c writes the frame straight into frontend memory; the
+ * matching video_cb call then becomes a zero-copy "data already there"
+ * signal.  When no buffer is granted (or the geometry doesn't match) the
+ * core falls back to the internally-allocated buffer and the normal
+ * video_cb path. */
+static unsigned short *gp2x_screen15_owned;  /* the core's malloc'd buffer */
+static void           *sw_fb_active_data;    /* non-NULL when SW-FB is in use this frame */
+static size_t          sw_fb_active_pitch;
 int thread_done = 0;
 extern int gfx_xoffset;
 extern int gfx_yoffset;
@@ -594,6 +604,7 @@ void retro_init(void)
 #else
    gp2x_screen15 = (unsigned short *) malloc(640 * 480 * 2);
 #endif
+   gp2x_screen15_owned = gp2x_screen15;
 #ifndef WANT_LIBCO
    libretro_cond  = scond_new();
    libretro_mutex = slock_new();
@@ -609,11 +620,17 @@ void retro_deinit(void)
 {
    free(IMAMEBASEPATH);   IMAMEBASEPATH   = NULL;
    free(IMAMESAMPLEPATH); IMAMESAMPLEPATH = NULL;
+   /* If a SW-FB happens to still be patched in (shouldn't, retro_run
+    * always restores), free the *owned* buffer rather than the SW-FB
+    * pointer to avoid handing a foreign address back to the allocator. */
+   gp2x_screen15 = gp2x_screen15_owned;
 #ifdef _3DS
    linearFree(gp2x_screen15);
 #else
    free(gp2x_screen15);
 #endif
+   gp2x_screen15_owned = NULL;
+   sw_fb_active_data   = NULL;
 #ifndef WANT_LIBCO
    scond_free(libretro_cond);
    slock_free(libretro_mutex);
@@ -679,6 +696,54 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
 void retro_run(void)
 {
    int i, j;
+
+   /* Software-framebuffer fast path.
+    *
+    * Before the emulator runs the next frame, ask the frontend for a
+    * buffer matching this frame's geometry and our pixel format.  If
+    * granted, point gp2x_screen15 at it for the duration of the frame:
+    * blit.c then writes directly into the frontend's memory and the
+    * video_cb call that follows is a zero-copy signal.  When no
+    * buffer is granted (or the geometry doesn't match exactly) we keep
+    * using the core-owned buffer and the existing video_cb path.
+    *
+    * Geometry must match exactly per the libretro spec: width, height
+    * and pitch as returned by the frontend, and the byte pitch must
+    * equal gfx_width * 2 because blit.c does its row arithmetic from
+    * gfx_width.  The format must be RGB565; if the frontend gives us a
+    * different one (e.g. when it would have to convert internally) we
+    * pass.  These constraints make the optimisation conservative -- a
+    * mismatched frontend just sees the existing slow path.
+    *
+    * Only attempted for libco builds; the threaded mode runs the
+    * emulator on a separate kernel thread that we can't reach with the
+    * frontend environ callback from here without adding cross-thread
+    * synchronisation we don't currently have. */
+#ifdef WANT_LIBCO
+   sw_fb_active_data = NULL;
+   if (gfx_width > 0 && gfx_height > 0 && gp2x_screen15_owned != NULL)
+   {
+      struct retro_framebuffer fb;
+      fb.data         = NULL;
+      fb.width        = gfx_width;
+      fb.height       = gfx_height;
+      fb.pitch        = 0;
+      fb.format       = RETRO_PIXEL_FORMAT_RGB565;
+      fb.access_flags = RETRO_MEMORY_ACCESS_WRITE;
+      fb.memory_flags = 0;
+
+      if (environ_cb(RETRO_ENVIRONMENT_GET_CURRENT_SOFTWARE_FRAMEBUFFER, &fb)
+          && fb.data != NULL
+          && fb.format == RETRO_PIXEL_FORMAT_RGB565
+          && fb.pitch  == (size_t)gfx_width * 2)
+      {
+         sw_fb_active_data  = fb.data;
+         sw_fb_active_pitch = fb.pitch;
+         gp2x_screen15      = (unsigned short *)fb.data;
+      }
+   }
+#endif
+
 #ifdef WANT_LIBCO
    if(libco_quit==0)co_switch(core_thread);
    else  printf("running dead emulator");
@@ -700,6 +765,17 @@ void retro_run(void)
       video_cb(NULL, gfx_width, gfx_height, gfx_width * 2);
    else
       video_cb(gp2x_screen15, gfx_width, gfx_height, gfx_width * 2);
+
+   /* Restore the core-owned buffer for the next frame so allocation
+    * lifetimes stay sane regardless of whether the frontend grants a
+    * buffer again next time. */
+#ifdef WANT_LIBCO
+   if (sw_fb_active_data != NULL)
+   {
+      gp2x_screen15     = gp2x_screen15_owned;
+      sw_fb_active_data = NULL;
+   }
+#endif
 
    if (samples_per_frame)
    {
