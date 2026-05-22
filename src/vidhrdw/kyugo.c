@@ -74,7 +74,7 @@ WRITE_HANDLER( kyugo_gfxctrl_w )
 if (data & 0x9e)
 {
 	char baf[40];
-	sprintf(baf,"%02x",data);
+	sprintf(baf,"%02x",(unsigned int)data);
 	usrintf_showmessage(baf);
 }
 }

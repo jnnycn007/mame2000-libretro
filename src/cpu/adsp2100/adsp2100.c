@@ -1609,7 +1609,7 @@ const char *adsp2100_info( void *context, int regnum )
 
 unsigned adsp2100_dasm(char *buffer, unsigned pc)
 {
-	sprintf(buffer, "$%06X", RWORD_PGM(pc));
+	sprintf(buffer, "$%06X", (unsigned int)RWORD_PGM(pc));
 	return 1;
 }
 
@@ -1656,7 +1656,7 @@ const char *adsp2105_info(void *context, int regnum)
 
 unsigned adsp2105_dasm(char *buffer, unsigned pc)
 {
-	sprintf(buffer, "$%06X", RWORD_PGM(pc));
+	sprintf(buffer, "$%06X", (unsigned int)RWORD_PGM(pc));
 	return 1;
 }
 

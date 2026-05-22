@@ -1107,7 +1107,7 @@ const char *m6801_info(void *context, int regnum)
 }
 unsigned m6801_dasm(char *buffer, unsigned pc)
 {
-	sprintf( buffer, "$%02X", cpu_readmem16(pc) );
+	sprintf( buffer, "$%02X", (unsigned int)cpu_readmem16(pc) );
 	return 1;
 }
 
@@ -1148,7 +1148,7 @@ const char *m6802_info(void *context, int regnum)
 
 unsigned m6802_dasm(char *buffer, unsigned pc)
 {
-	sprintf( buffer, "$%02X", cpu_readmem16(pc) );
+	sprintf( buffer, "$%02X", (unsigned int)cpu_readmem16(pc) );
 	return 1;
 }
 
@@ -1488,7 +1488,7 @@ const char *m6803_info(void *context, int regnum)
 
 unsigned m6803_dasm(char *buffer, unsigned pc)
 {
-	sprintf( buffer, "$%02X", cpu_readmem16(pc) );
+	sprintf( buffer, "$%02X", (unsigned int)cpu_readmem16(pc) );
 	return 1;
 }
 #endif
@@ -1528,7 +1528,7 @@ const char *m6808_info(void *context, int regnum)
 
 unsigned m6808_dasm(char *buffer, unsigned pc)
 {
-	sprintf( buffer, "$%02X", cpu_readmem16(pc) );
+	sprintf( buffer, "$%02X", (unsigned int)cpu_readmem16(pc) );
 	return 1;
 }
 #endif
@@ -1884,7 +1884,7 @@ WRITE_HANDLER( hd63701_internal_registers_w )
 
 unsigned hd63701_dasm(char *buffer, unsigned pc)
 {
-	sprintf( buffer, "$%02X", cpu_readmem16(pc) );
+	sprintf( buffer, "$%02X", (unsigned int)cpu_readmem16(pc) );
 	return 1;
 }
 #endif
@@ -2219,7 +2219,7 @@ const char *nsc8105_info(void *context, int regnum)
 
 unsigned nsc8105_dasm(char *buffer, unsigned pc)
 {
-	sprintf( buffer, "$%02X", cpu_readmem16(pc) );
+	sprintf( buffer, "$%02X", (unsigned int)cpu_readmem16(pc) );
 	return 1;
 }
 #endif

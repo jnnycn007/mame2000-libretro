@@ -381,7 +381,7 @@ const char *t11_info( void *context, int regnum )
 
 unsigned t11_dasm(char *buffer, unsigned pc)
 {
-	sprintf( buffer, "$%04X", cpu_readmem16lew_word(pc) );
+	sprintf( buffer, "$%04X", (unsigned int)cpu_readmem16lew_word(pc) );
 	return 2;
 }
 

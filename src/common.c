@@ -152,7 +152,7 @@ int readroms(void)
 					/* NS981003: support for "load by CRC" */
 					char crc[9];
 
-					sprintf(crc,"%08x",romp->crc);
+					sprintf(crc,"%08x",(unsigned int)romp->crc);
 					drv = Machine->gamedrv;
 					do
 					{

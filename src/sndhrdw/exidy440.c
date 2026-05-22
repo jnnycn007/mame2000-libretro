@@ -408,7 +408,7 @@ READ_HANDLER( exidy440_sound_command_r )
 WRITE_HANDLER( exidy440_sound_volume_w )
 {
 	if (SOUND_LOG && debuglog)
-		fprintf(debuglog, "Volume %02X=%02X\n", offset, data);
+		fprintf(debuglog, "Volume %02X=%02X\n", (unsigned int)offset, (unsigned int)data);
 
 	/* update the stream */
 	stream_update(sound_stream, 0);

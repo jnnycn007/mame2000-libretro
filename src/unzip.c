@@ -813,7 +813,7 @@ int /* error */ load_zipped_file (const char* zipfile, const char* filename, uns
 
 		ent = &(zip->ent);
 
-		sprintf(crc,"%08x",ent->crc32);
+		sprintf(crc,"%08x",(unsigned int)ent->crc32);
 		if (equal_filename(ent->name, filename) ||
 				(ent->crc32 && !strcmp(crc, filename)))
 		{

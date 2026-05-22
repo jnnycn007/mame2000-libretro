@@ -312,11 +312,11 @@ static WRITE_HANDLER( kageki_csport_w )
 		{
 			// stop samples
 			sample_stop(0);
-			sprintf(mess, "VOICE:%02X STOP", data);
+			sprintf(mess, "VOICE:%02X STOP", (unsigned int)data);
 		} else {
 			// play samples
 			sample_start(0, data, 0);
-			sprintf(mess, "VOICE:%02X PLAY", data);
+			sprintf(mess, "VOICE:%02X PLAY", (unsigned int)data);
 		}
 	//	usrintf_showmessage(mess);
 	}

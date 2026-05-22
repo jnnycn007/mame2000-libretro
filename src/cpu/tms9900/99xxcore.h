@@ -1283,7 +1283,7 @@ const char *TMS99XX_INFO(void *context, int regnum)
 
 unsigned TMS99XX_DASM(char *buffer, unsigned pc)
 {
-	sprintf( buffer, "$%04X", readword(pc) );
+	sprintf( buffer, "$%04X", (unsigned int)readword(pc) );
 	return 2;
 }
 

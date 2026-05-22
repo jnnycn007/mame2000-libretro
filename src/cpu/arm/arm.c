@@ -2785,7 +2785,7 @@ const char *arm_info(void *context, int regnum)
 unsigned arm_dasm(char *buffer, unsigned pc)
 {
 	change_pc26lew(pc);
-	sprintf(buffer, "$%08x", ARM_RDMEM_32(pc));
+	sprintf(buffer, "$%08x", (unsigned int)ARM_RDMEM_32(pc));
 	return 4;
 }
 

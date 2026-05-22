@@ -81,7 +81,7 @@ static WRITE_HANDLER( k88games_5f84_w )
 	if (data & 0xf8)
 	{
 		char buf[40];
-		sprintf(buf,"5f84 = %02x",data);
+		sprintf(buf,"5f84 = %02x",(unsigned int)data);
 		usrintf_showmessage(buf);
 	}
 }
