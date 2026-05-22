@@ -1,5 +1,4 @@
 DEBUG=0
-WANT_LIBCO = 1
 DISABLE_ERROR_LOGGING = 1
 #set later according to platform
 IS_X86 = 0
@@ -68,9 +67,6 @@ ifeq ($(platform), unix)
    SHARED := -shared -Wl,--version-script=link.T -Wl,-no-undefined
 ifneq ($(ARM), 1)
    IS_X86 = 1
-endif
-ifneq ($(WANT_LIBCO), 1)
-	SHARED += -lpthread
 endif
 
 # OS X
@@ -177,10 +173,6 @@ else ifeq ($(platform), qnx)
    CFLAGS += -fPIC 
    PLATCFLAGS += -march=armv7-a -Dstricmp=strcasecmp
    LDFLAGS += -fPIC -shared -Wl,--version-script=link.T
-
-ifneq ($(WANT_LIBCO), 1)
-	SHARED += -lpthread
-endif
 
    CC = qcc -Vgcc_ntoarmv7le
    AR = qcc -Vgcc_ntoarmv7le
@@ -308,7 +300,6 @@ else ifeq ($(platform), emscripten)
    HAVE_RZLIB := 1
    DISABLE_ERROR_LOGGING := 1
    STATIC_LINKING := 1
-   WANT_LIBCO := 0
    CFLAGS += -Wno-int-conversion
 
 # GCW0
