@@ -34,7 +34,7 @@ char *IMAMESAMPLEPATH = NULL;
 
 const char *retro_save_directory;
 const char *retro_system_directory;
-const char *retro_content_directory;
+char       *retro_content_directory;  /* strdup()'d in retro_load_game(); we own it */
 char core_save_directory[1024];
 char core_sys_directory[1024];
 
@@ -633,6 +633,17 @@ void retro_deinit(void)
 {
    free(IMAMEBASEPATH);   IMAMEBASEPATH   = NULL;
    free(IMAMESAMPLEPATH); IMAMESAMPLEPATH = NULL;
+   /* retro_content_directory is the only string here we own (strdup'd
+    * from info->path in retro_load_game).  retro_system_directory /
+    * retro_save_directory either point at frontend-owned memory
+    * returned from RETRO_ENVIRONMENT_GET_*_DIRECTORY (don't free
+    * those) or alias retro_content_directory as a fallback (don't
+    * free those either, the underlying buffer is the one we're about
+    * to free here).  Null all three so nothing dangles. */
+   free(retro_content_directory);
+   retro_content_directory = NULL;
+   retro_system_directory  = NULL;
+   retro_save_directory    = NULL;
    /* If a SW-FB happens to still be patched in (shouldn't, retro_run
     * always restores), free the *owned* buffer rather than the SW-FB
     * pointer to avoid handing a foreign address back to the allocator. */
@@ -910,6 +921,10 @@ bool retro_load_game(const struct retro_game_info *info)
       return false;
    }
 
+  /* Re-init safety: free any prior allocation so a second load_game
+   * (e.g. core restart) does not leak.  Same pattern as IMAMEBASEPATH /
+   * IMAMESAMPLEPATH below. */
+  free(retro_content_directory);
   retro_content_directory = strdup(info->path);
   path_basedir(retro_content_directory);
 
