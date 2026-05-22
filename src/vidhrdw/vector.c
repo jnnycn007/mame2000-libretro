@@ -20,7 +20,6 @@
  * 980203 moved LBO's routines for drawing into a buffer of vertices
  *        from avgdvg.c to this location. Scaling is now initialized
  *        by calling vector_init(...). BW
- * 980202 moved out of msdos.c ASG
  * 980124 added anti-alias line draw routine
  *        modified avgdvg.c and sega.c to support new line draw routine
  *        added two new tables Tinten and Tmerge (for 256 color support)

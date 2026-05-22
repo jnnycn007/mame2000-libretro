@@ -31,9 +31,6 @@ dirtygrid grid2;
 char *dirty_old=grid1;
 char *dirty_new=grid2;
 
-/* in msdos/sound.c */
-//int msdos_update_audio(void);
-
 /* specialized update_screen functions defined in blit.c */
 /* dirty mode 1 (VIDEO_SUPPORTS_DIRTY) */
 void blitscreen_dirty1_color8(struct osd_bitmap *bitmap);
@@ -768,7 +765,6 @@ void osd_get_pen(int pen,unsigned char *red, unsigned char *green, unsigned char
 
 static void update_screen_dummy(struct osd_bitmap *bitmap)
 {
-	logerror("msdos/video.c: undefined update_screen() function for %d x %d!\n",xmultiply,ymultiply);
 }
 
 static INLINE void pan_display(void)
@@ -823,10 +819,6 @@ void osd_update_video_and_audio(struct osd_bitmap *bitmap)
 {
 	int i;
 	int have_to_clear_bitmap = 0;
-
-
-	/* update audio */
-	//msdos_update_audio();
 
 	if (bitmap->depth == 8)
 	{
@@ -1054,15 +1046,9 @@ void osd_pause(int paused)
 	int i;
 
 	if (paused)
-	{
-		//app_MuteSound();
 		brightness_paused_adjust = 0.65;
-	}
 	else
-	{
-		//app_DemuteSound();
 		brightness_paused_adjust = 1.0;
-	}
 
 	for (i = 0;i < screen_colors;i++)
 		dirtycolor[i] = 1;

@@ -13,12 +13,8 @@ extern int gfx_width;
 extern int gfx_height;
 extern int skiplines;
 extern int skipcolumns;
-extern retro_video_refresh_t video_cb;
 
-#define SCREEN8 gp2x_screen8
 #define SCREEN16 gp2x_screen15
-#define FLIP_VIDEO
-//#define FLIP_VIDEO video_cb(SCREEN16, gfx_width, gfx_height, width)
 
 #include "minimal.h"
 
@@ -61,8 +57,6 @@ void blitscreen_dirty1_color8(struct osd_bitmap *bitmap)
 		lb += 16 * width;
 		address += 16 * gfx_width;
 	}
-	
-	FLIP_VIDEO;
 }
 
 void blitscreen_dirty0_color8(struct osd_bitmap *bitmap)
@@ -82,8 +76,6 @@ void blitscreen_dirty0_color8(struct osd_bitmap *bitmap)
 		lb+=width;
 		address+=gfx_width;
 	}
-	
-	FLIP_VIDEO;
 }
 
 void blitscreen_dirty1_palettized16(struct osd_bitmap *bitmap)
@@ -123,8 +115,6 @@ void blitscreen_dirty1_palettized16(struct osd_bitmap *bitmap)
 		lb += 16 * width;
 		address += 16 * gfx_width;
 	}
-	
-	FLIP_VIDEO;
 }
 
 void blitscreen_dirty0_palettized16(struct osd_bitmap *bitmap)
@@ -144,8 +134,6 @@ void blitscreen_dirty0_palettized16(struct osd_bitmap *bitmap)
 		lb+=width;
 		address+=gfx_width;
 	}
-	
-	FLIP_VIDEO;
 }
 
 void blitscreen_dirty1_color16(struct osd_bitmap *bitmap)
@@ -181,8 +169,6 @@ void blitscreen_dirty1_color16(struct osd_bitmap *bitmap)
 		lb += 16 * width;
 		address += 16 * gfx_width;
 	}
-	
-	FLIP_VIDEO;
 }
 
 void blitscreen_dirty0_color16(struct osd_bitmap *bitmap)
@@ -199,6 +185,4 @@ void blitscreen_dirty0_color16(struct osd_bitmap *bitmap)
 		lb+=width;
 		address+=gfx_width;
 	}
-	
-	FLIP_VIDEO;
 }

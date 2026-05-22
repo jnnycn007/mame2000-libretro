@@ -2,7 +2,6 @@
  * Configuration routines.
  *
  * 19971219 support for mame.cfg by Valerio Verrando
- * 19980402 moved out of msdos.c (N.S.), generalized routines (BW)
  * 19980917 added a "-cheatfile" option (misc) in MAME.CFG      JCK
  */
 

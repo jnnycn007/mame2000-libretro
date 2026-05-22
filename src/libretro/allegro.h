@@ -131,9 +131,3 @@
 #define JOY_TYPE_WINGWARRIOR 21
 #define JOY_TYPE_IFSEGA_ISA 22
 #define JOY_TYPE_IFSEGA_PCI 23
-
-#define GFX_AUTO 0
-#define GFX_VESA1 1
-#define GFX_VESA2B 2
-#define GFX_VESA2L 3
-#define GFX_VESA3 4
