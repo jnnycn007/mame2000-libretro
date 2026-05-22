@@ -74,8 +74,6 @@ extern void gp2x_sound_play(void *buff, int len);
 extern void gp2x_video_flip(void);
 extern void gp2x_video_flip_single(void);
 extern void gp2x_video_setpalette(void);
-extern unsigned long gp2x_joystick_read(int n);
-extern unsigned long gp2x_joystick_press (int n);
 extern void gp2x_sound_volume(int left, int right);
 extern void gp2x_sound_thread_mute(void);
 extern void gp2x_sound_thread_start(int len);

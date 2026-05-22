@@ -118,7 +118,6 @@ unsigned short gp2x_palette[512];
 int gp2x_pal_50hz=0;
 int global_fps = 1;
 int rotate_controls = 0;
-int num_of_joys = 2;
 int soundcard;
 int attenuation = 0;
 
@@ -175,11 +174,6 @@ void gp2x_set_video_mode(int bpp,int width,int height)
 
 void gp2x_video_setpalette(void)
 {
-}
-
-unsigned long gp2x_joystick_read(int n)
-{
-   (void)n;
 }
 
 int osd_init(void)

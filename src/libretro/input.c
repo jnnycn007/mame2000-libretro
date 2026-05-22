@@ -138,49 +138,6 @@ const struct KeyboardInfo *osd_get_key_list(void)
 
 int key[KEY_MAX] = {0};
 
-static void updatekeyboard(void)
-{	
-
-	//key[KEY_O]=ExKey1 & GP2X_LEFT;
-	//key[KEY_K]=ExKey1 & GP2X_RIGHT;
-
-	//key[KEY_1]=((ExKey1 & GP2X_START) && (!(ExKey1 & GP2X_SELECT)));
-	//key[KEY_2]=((ExKey2 & GP2X_START) && (!(ExKey2 & GP2X_SELECT)));
-	//key[KEY_3]=((ExKey3 & GP2X_START) && (!(ExKey3 & GP2X_SELECT)));
-	//key[KEY_4]=((ExKey4 & GP2X_START) && (!(ExKey4 & GP2X_SELECT)));
-	//key[KEY_5]=((!(ExKey1 & GP2X_START)) && (ExKey1 & GP2X_SELECT));
-	//key[KEY_6]=((!(ExKey2 & GP2X_START)) && (ExKey2 & GP2X_SELECT));
-	//key[KEY_7]=((!(ExKey3 & GP2X_START)) && (ExKey3 & GP2X_SELECT));
-	//key[KEY_8]=((!(ExKey4 & GP2X_START)) && (ExKey4 & GP2X_SELECT));
-
-	/* Start A == Start Button */
-	key[KEY_1]=( (ExKey1 & GP2X_START) && !(ExKey1 & GP2X_SELECT) && !(ExKey1 & GP2X_UP) && !(ExKey1 & GP2X_RIGHT) && !(ExKey1 & GP2X_DOWN) );
-	/* Start B == Joystick UP + Start Button */
-	key[KEY_2]=( ( (ExKey1 & GP2X_START) && !(ExKey1 & GP2X_SELECT) && (ExKey1 & GP2X_UP) && !(ExKey1 & GP2X_RIGHT) && !(ExKey1 & GP2X_DOWN) ) || (ExKey2 & GP2X_START));
-	/* Start C == Joystick RIGHT + Start Button */
-	key[KEY_3]=( ( (ExKey1 & GP2X_START) && !(ExKey1 & GP2X_SELECT) && !(ExKey1 & GP2X_UP) && (ExKey1 & GP2X_RIGHT) && !(ExKey1 & GP2X_DOWN) ) || (ExKey3 & GP2X_START));
-	/* Start D == Joystick DOWN + Start Button */
-	key[KEY_4]=( ( (ExKey1 & GP2X_START) && !(ExKey1 & GP2X_SELECT) && !(ExKey1 & GP2X_UP) && !(ExKey1 & GP2X_RIGHT) && (ExKey1 & GP2X_DOWN) ) || (ExKey4 & GP2X_START));
-	/* Coin A == Select Button */
-	key[KEY_5]=( !(ExKey1 & GP2X_START) && (ExKey1 & GP2X_SELECT) && !(ExKey1 & GP2X_UP) && !(ExKey1 & GP2X_RIGHT) && !(ExKey1 & GP2X_DOWN) );
-	/* Coin B == Select Button + Joystick UP */	
-	key[KEY_6]=( ( !(ExKey1 & GP2X_START) && (ExKey1 & GP2X_SELECT) && (ExKey1 & GP2X_UP) && !(ExKey1 & GP2X_RIGHT) && !(ExKey1 & GP2X_DOWN) ) || (ExKey2 & GP2X_SELECT));
-	/* Coin C == Select Button + Joystick RIGHT */
-	key[KEY_7]=( ( !(ExKey1 & GP2X_START) && (ExKey1 & GP2X_SELECT) && !(ExKey1 & GP2X_UP) && (ExKey1 & GP2X_RIGHT) && !(ExKey1 & GP2X_DOWN) ) || (ExKey3 & GP2X_SELECT));
-	/* Coin D == Select Button + Joystick DOWN */
-	key[KEY_8]=( ( !(ExKey1 & GP2X_START) && (ExKey1 & GP2X_SELECT) && !(ExKey1 & GP2X_UP) && !(ExKey1 & GP2X_RIGHT) && (ExKey1 & GP2X_DOWN) ) || (ExKey4 & GP2X_SELECT));
-
-	key[KEY_TAB]=(ExKey1 & GP2X_START) && (ExKey1 & GP2X_SELECT);
-	key[KEY_ENTER]=(ExKey1 & GP2X_B);
-
-	key[KEY_ESC]=((ExKey1 & GP2X_L) && (ExKey1 & GP2X_R) && (ExKey1 & GP2X_START));
-
-//sq Disable multiple key press combinations. Causes issues with iCade. Hangover from GP2X port.
-//sq	key[KEY_P]=((ExKey1 & GP2X_L) && (ExKey1 & GP2X_R) && (!(ExKey1 & GP2X_START)));
-//sq    key[KEY_F11]=(((ExKey1 & GP2X_L) && (ExKey1 & GP2X_START)) || ((ExKey1 & GP2X_R) && (ExKey1 & GP2X_SELECT)));
-//sq    key[KEY_LSHIFT]=((ExKey1 & GP2X_L) && (ExKey1 & GP2X_START));
-}
-
 int osd_is_key_pressed(int keycode)
 {
 	if (keycode >= KEY_MAX) return 0;
@@ -340,38 +297,17 @@ const struct JoystickInfo *osd_get_joy_list(void)
 	return joylist;
 }
 
-static int is_joy_button_pressed (int button, int ExKey)
-{
-	switch (button)
-	{
-		case 0: return ExKey & GP2X_B; break;
-		case 1: return ExKey & GP2X_X; break;
-		case 2: return ExKey & GP2X_A; break;
-		case 3: return ExKey & GP2X_Y; break;
-		case 4: return ExKey & GP2X_L; break;
-		case 5: return ExKey & GP2X_R; break;
-		default: break;
-	}
-	return 0; 
-}
-
-
+/* Active per-player digital direction queries used by osd_analogjoy_-
+ * read() / osd_trak_read().  Both still source from ExKey1..4 which
+ * the libretro update_input() path no longer populates -- analog
+ * input is therefore non-functional today, but the API surface stays
+ * (the GP2X-era keymap derivation + the always-zero readers were
+ * separate code paths).  Wiring real RETRO_DEVICE_ANALOG input into
+ * these is a follow-up. */
 #define JOY_LEFT_PRESSED(x)(is_joy_axis_pressed(0,1, (x==0?ExKey1:(x==1?ExKey2:(x==2?ExKey3:ExKey4)))))
 #define JOY_RIGHT_PRESSED(x)( is_joy_axis_pressed(0,2, (x==0?ExKey1:(x==1?ExKey2:(x==2?ExKey3:ExKey4)))))
 #define JOY_UP_PRESSED(x)( is_joy_axis_pressed(1,1, (x==0?ExKey1:(x==1?ExKey2:(x==2?ExKey3:ExKey4)))))
 #define JOY_DOWN_PRESSED(x)( is_joy_axis_pressed(1,2, (x==0?ExKey1:(x==1?ExKey2:(x==2?ExKey3:ExKey4)))))
-
-/*
-#define JOY_LEFT_PRESSED(x) is_joy_axis_pressed(0,1,ExKey1)
-#define JOY_RIGHT_PRESSED(x) is_joy_axis_pressed(0,2,ExKey1)
-#define JOY_UP_PRESSED(x) is_joy_axis_pressed(1,1,ExKey1)
-#define JOY_DOWN_PRESSED(x) is_joy_axis_pressed(1,2,ExKey1)
-*/
-
-#define JOY_LEFT_PRESSED2 is_joy_axis_pressed(0,1,ExKey1)
-#define JOY_RIGHT_PRESSED2 is_joy_axis_pressed(0,2,ExKey1)
-#define JOY_UP_PRESSED2 is_joy_axis_pressed(1,1,ExKey1)
-#define JOY_DOWN_PRESSED2 is_joy_axis_pressed(1,2,ExKey1)
 
 static int is_joy_axis_pressed (int axis, int dir, int ExKey)
 {
@@ -428,35 +364,15 @@ int osd_is_joy_pressed(int joycode)
 	return joy_pressed[joycode];
 }
 
-static void poll_joystick(void)
-{
-	extern int num_of_joys;
-
-	switch (num_of_joys)
-	{
-		case 4: ExKey4=gp2x_joystick_read(3);
-		case 3: ExKey3=gp2x_joystick_read(2);
-		case 2: ExKey2=gp2x_joystick_read(1);
-		case 1: ExKey1=gp2x_joystick_read(0); break;
-		default:
-			ExKey1=gp2x_joystick_read(0);
-			ExKey2=ExKey1;
-			if(ExKey2&GP2X_START) ExKey2^=GP2X_START;
-			if(ExKey2&GP2X_SELECT) ExKey2^=GP2X_SELECT;
-			ExKey3=ExKey2;
-			ExKey4=ExKey2;
-			break;
-	}
-}
-
+/* Called every frame from src/inptport.c's update_input_ports().
+ * Intentionally a no-op in the libretro build: input polling is
+ * driven through input_poll_cb() inside update_input() in
+ * src/libretro/libretro.c at the top of retro_run(), so the OSD
+ * doesn't need to do anything here.  Stub kept (rather than removed
+ * from the ABI) because osdepend.h declares it and inptport.c
+ * unconditionally calls it. */
 void osd_poll_joysticks(void)
 {
-	//sched_yield();//???
-
-	//updatekeyboard();
-
-	//if (joystick > JOY_TYPE_NONE)
-		//poll_joystick();
 }
 
 short pos_analog_x[4];
