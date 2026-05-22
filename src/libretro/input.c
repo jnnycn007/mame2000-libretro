@@ -610,32 +610,3 @@ void osd_customize_inputport_defaults(struct ipd *defaults)
 void osd_led_w(int led,int on) {
 }
 
-
-
-void msdos_init_input (void)
-{
-	int i;
-	
-	/* Initialize keyboard to not pressed */
-	for (i = 0;i < KEY_MAX;i++)
-	{
-		key[i]=0;
-	}	
-
-	if (joystick == JOY_TYPE_NONE)
-		logerror("Joystick not found\n");
-	else
-		logerror("Installed %s %s\n","Joystick", "GP2X");
-
-	init_joy_list();
-
-	if (use_mouse)
-		use_mouse = 1;
-	else
-		use_mouse = 0;
-}
-
-
-void msdos_shutdown_input(void)
-{
-}
