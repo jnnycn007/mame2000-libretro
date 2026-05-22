@@ -410,6 +410,12 @@ static int seq_read_ver_8(void* f, InputSeq* seq)
 		return -1;
 
 	len = w;
+	/* Reject sequences longer than the fixed-size InputSeq buffer.  A
+	 * crafted .cfg file claiming len = 65535 would otherwise write 65535
+	 * InputCodes past the end of the caller's stack-allocated InputSeq
+	 * array (SEQ_MAX = 16). */
+	if (len > SEQ_MAX)
+		return -1;
 	seq_set_0(seq);
 	for(j=0;j<len;++j)
 	{

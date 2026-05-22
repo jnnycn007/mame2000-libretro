@@ -298,10 +298,12 @@ static int seq_partial_read(void* f, InputSeq* seq, unsigned* pos, unsigned len,
 	{
 		if (*pos)
 		{
+			if (*pos >= SEQ_MAX) return -1;
 			(*seq)[*pos] = CODE_OR;
 			++*pos;
 		}
 
+		if (*pos >= SEQ_MAX) return -1;
 		(*seq)[*pos] = code;
 		++*pos;
 
@@ -317,6 +319,7 @@ static int seq_partial_read(void* f, InputSeq* seq, unsigned* pos, unsigned len,
 			if (code == CODE_NONE)
 				break;
 
+			if (*pos >= SEQ_MAX) return -1;
 			(*seq)[*pos] = code;
 			++*pos;
 		}
