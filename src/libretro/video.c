@@ -47,6 +47,18 @@ void blitscreen_dirty0_palettized16(struct osd_bitmap *bitmap);
 static void update_screen_dummy(struct osd_bitmap *bitmap);
 void (*update_screen)(struct osd_bitmap *bitmap) = update_screen_dummy;
 
+/* Bitmap-direct fast path.  When the running game's blit would be a
+ * pure memcpy (no palette LUT, no rotation, no offsetting, no
+ * cropping) we can skip the blit entirely and hand the MAME screen
+ * bitmap straight to the libretro frontend.  osd_update_video_and_audio
+ * decides per-frame whether the preconditions hold, sets these
+ * globals, and skips update_screen() if it does.  retro_run reads
+ * these globals to choose which pointer/pitch to pass to video_cb.
+ * Reset to NULL at the start of every frame so a previous frame's
+ * decision never leaks into the next one. */
+const void *mame2000_direct_frame_data  = 0;
+size_t      mame2000_direct_frame_pitch = 0;
+
 static int video_depth,video_fps;
 static int modifiable_palette;
 static int screen_colors;
@@ -892,8 +904,36 @@ void osd_update_video_and_audio(struct osd_bitmap *bitmap)
 		}
 	}
 
-		/* copy the bitmap to screen memory */
-		update_screen(bitmap);
+		/* Decide whether this frame can take the bitmap-direct path.
+		 * Preconditions reflect the assumption that the existing
+		 * color16 blit is now a pure row-by-row memcpy with no
+		 * conversion: if the MAME scrbitmap's visible area exactly
+		 * matches the libretro frame size and is at offset (0,0),
+		 * the memcpy is redundant and we can deliver the bitmap
+		 * pointer to the frontend instead.  The bitmap's row stride
+		 * is wider than the visible width (osd_alloc_bitmap rounds
+		 * width up to a quadword and pads with `safety` pixels on
+		 * each side); libretro's video_cb accepts an arbitrary
+		 * pitch, so passing the bitmap stride here is correct. */
+		if (   video_depth          == 16
+		    && !modifiable_palette
+		    && !vector_game
+		    && gfx_xoffset          == 0
+		    && gfx_yoffset          == 0
+		    && skiplines            == 0
+		    && skipcolumns          == 0
+		    && gfx_display_columns  == gfx_width
+		    && gfx_display_lines    == gfx_height)
+		{
+			mame2000_direct_frame_data  = bitmap->line[0];
+			mame2000_direct_frame_pitch = bitmap->line[1] - bitmap->line[0];
+		}
+		else
+		{
+			mame2000_direct_frame_data  = 0;
+			/* copy the bitmap to screen memory */
+			update_screen(bitmap);
+		}
 
 		if (have_to_clear_bitmap)
 			osd_clearbitmap(bitmap);

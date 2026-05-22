@@ -20,10 +20,12 @@ time from the game's preferred depth and palette mode:
                               (16-bit pen -> RGB565)
 
   DIRECT16    -  GAME_REQUIRES_16BIT && !VIDEO_MODIFIES_PALETTE
-                -> blitscreen_dirty?_color16
-                -> per pixel: bitmap[i] & 0xFFDF      (cheapest: a mask)
-                The mask clears bit 5 (the LSB of green); it is a
-                vestige of the RGB555 era kept defensively.
+                -> blitscreen_dirty?_color16 used as a fallback only.
+                The blit is a pure row-by-row memcpy; the fast path in
+                video.c skips it entirely and hands the MAME scrbitmap
+                pointer straight to video_cb, giving real zero-copy
+                delivery when the visible area exactly matches the
+                libretro frame size (the typical case).
 
   VECTOR      -  VIDEO_TYPE_VECTOR
                 -> dynamically-sized bitmap from the vector renderer
@@ -38,10 +40,18 @@ both improvements can stack.
 
 The software-framebuffer fast path added in retro_run lets the active
 blit write directly into the frontend's framebuffer when granted,
-removing one full-frame copy in the libretro pipeline.  This applies
-equally to all four buckets: COLOR8_LUT and PAL16_LUT save the LUT
-result straight to the frontend; DIRECT16/VECTOR save the masked pen
-straight to the frontend.
+removing one full-frame copy in the libretro pipeline.  COLOR8_LUT
+and PAL16_LUT save the LUT result straight to the frontend; VECTOR
+saves the bitmap straight to the frontend.
+
+DIRECT16 has an additional bitmap-direct fast path: when the bitmap's
+visible area equals the libretro frame size and is at offset (0,0),
+video.c skips the blit and retro_run hands the scrbitmap pointer to
+video_cb with the bitmap's row stride as pitch.  This bypasses the
+intermediate gp2x_screen15 entirely and is unconditional zero-copy --
+the only DIRECT16 frames that still go through the (now mask-less)
+blit are user-panned frames and frames whose visible area is a strict
+subset of the bitmap.
 
 OPTIONS THAT AFFECT DEPTH
 ----------------------------------------------------------------------

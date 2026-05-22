@@ -85,6 +85,8 @@ extern int gfx_xoffset;
 extern int gfx_yoffset;
 extern int gfx_width;
 extern int gfx_height;
+extern const void *mame2000_direct_frame_data;
+extern size_t      mame2000_direct_frame_pitch;
 extern int usestereo;
 extern int samples_per_frame;
 extern short *samples_buffer;
@@ -763,6 +765,14 @@ void retro_run(void)
 
    if (should_skip_frame)
       video_cb(NULL, gfx_width, gfx_height, gfx_width * 2);
+   else if (mame2000_direct_frame_data != 0)
+      /* Bitmap-direct fast path: the just-finished frame skipped the
+       * blit and recorded the MAME scrbitmap pointer for us to deliver.
+       * The bitmap stride is wider than the visible width (osd_alloc_-
+       * bitmap pads each row with safety pixels and rounds the width
+       * up to a quadword); video_cb accepts the stride as the pitch. */
+      video_cb(mame2000_direct_frame_data, gfx_width, gfx_height,
+               mame2000_direct_frame_pitch);
    else
       video_cb(gp2x_screen15, gfx_width, gfx_height, gfx_width * 2);
 
