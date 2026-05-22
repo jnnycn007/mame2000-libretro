@@ -904,6 +904,60 @@ void osd_update_video_and_audio(struct osd_bitmap *bitmap)
 		}
 	}
 
+		/* Decide whether to drop the current frame BEFORE doing any
+		 * blit-equivalent work, so a skipped frame costs only the
+		 * bookkeeping below.  Previously this decision lived at the
+		 * bottom of the function (after update_screen had already
+		 * run), which meant every frame paid the full blit cost
+		 * regardless of whether retro_run was about to discard it
+		 * with video_cb(NULL, ...).  The decision is purely a
+		 * function of frameskip_type, frameskip_counter and the
+		 * libretro audio-buffer hints reported by the frontend;
+		 * none of those are touched by update_screen, so moving
+		 * the block earlier is equivalent. */
+		should_skip_frame = 0;
+		if ((frameskip_type > 0) &&
+		    retro_audio_buff_active)
+		{
+			int skip_frame;
+
+			switch (frameskip_type)
+			{
+			case 1: /* auto */
+				skip_frame = retro_audio_buff_underrun;
+				break;
+			case 2: /* threshold */
+				skip_frame = (retro_audio_buff_occupancy < frameskip_threshold);
+				break;
+			default:
+				skip_frame = 0;
+				break;
+			}
+
+			if (skip_frame)
+			{
+				if(frameskip_counter < frameskip_interval)
+				{
+					should_skip_frame = 1;
+					frameskip_counter++;
+				}
+				else
+					frameskip_counter = 0;
+			}
+			else
+				frameskip_counter = 0;
+		}
+
+		if (should_skip_frame)
+		{
+			/* Frame will be dropped: retro_run sees should_skip_frame
+			 * first and calls video_cb(NULL, ...), so neither the
+			 * blit's output (gp2x_screen15) nor the bitmap-direct
+			 * pointer is read.  Skip both to save a full memcpy or
+			 * pointer probe.  Zero the direct-frame state for
+			 * hygiene; the next non-skipped frame sets it afresh. */
+			mame2000_direct_frame_data  = 0;
+		}
 		/* Decide whether this frame can take the bitmap-direct path.
 		 * Preconditions reflect the assumption that the existing
 		 * color16 blit is now a pure row-by-row memcpy with no
@@ -915,7 +969,7 @@ void osd_update_video_and_audio(struct osd_bitmap *bitmap)
 		 * width up to a quadword and pads with `safety` pixels on
 		 * each side); libretro's video_cb accepts an arbitrary
 		 * pitch, so passing the bitmap stride here is correct. */
-		if (   video_depth          == 16
+		else if (   video_depth          == 16
 		    && !modifiable_palette
 		    && !vector_game
 		    && gfx_xoffset          == 0
@@ -951,41 +1005,6 @@ void osd_update_video_and_audio(struct osd_bitmap *bitmap)
 
 	/* Check for PGUP, PGDN and pan screen */
 	pan_display();
-
-	should_skip_frame = 0;
-	/* Check whether current frame should
-	 * be skipped */
-	if ((frameskip_type > 0) &&
-	    retro_audio_buff_active)
-	{
-		int skip_frame;
-
-		switch (frameskip_type)
-		{
-		case 1: /* auto */
-			skip_frame = retro_audio_buff_underrun;
-			break;
-		case 2: /* threshold */
-			skip_frame = (retro_audio_buff_occupancy < frameskip_threshold);
-			break;
-		default:
-			skip_frame = 0;
-			break;
-		}
-
-		if (skip_frame)
-		{
-			if(frameskip_counter < frameskip_interval)
-			{
-				should_skip_frame = 1;
-				frameskip_counter++;
-			}
-			else
-				frameskip_counter = 0;
-		}
-		else
-			frameskip_counter = 0;
-	}
 
    hook_video_done();
 }
