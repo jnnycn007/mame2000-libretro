@@ -32,6 +32,17 @@ char slash = '/';
 char *IMAMEBASEPATH = NULL;
 char *IMAMESAMPLEPATH = NULL;
 
+/* Path buffer length for the per-game MAME work-directory paths
+ * built by joining one of the 1024-byte core_save_directory /
+ * core_sys_directory buffers with a short subdirectory suffix
+ * ("samples", "nvram", "hi", "cfg", "snap", "memcard", "sta",
+ * "artwork", "cheat" -- longest is 7 chars).  Set above 1024 so
+ * the compiler can see the snprintf("%s%c%s", core_*_directory,
+ * slash, suffix) construction fits without truncation; the older
+ * value of 1024 generated nine -Wformat-truncation warnings
+ * because the source could itself be up to 1023 chars + nul. */
+#define PATH_BUF_SIZE 1280
+
 const char *retro_save_directory;
 const char *retro_system_directory;
 char       *retro_content_directory;  /* strdup()'d in retro_load_game(); we own it */
@@ -962,8 +973,8 @@ bool retro_load_game(const struct retro_game_info *info)
     * (e.g. core restart) does not leak. */
    free(IMAMEBASEPATH);
    free(IMAMESAMPLEPATH);
-   IMAMEBASEPATH   = (char *) malloc(1024);
-   IMAMESAMPLEPATH = (char *) malloc(1024);
+   IMAMEBASEPATH   = (char *) malloc(PATH_BUF_SIZE);
+   IMAMESAMPLEPATH = (char *) malloc(PATH_BUF_SIZE);
    if (!IMAMEBASEPATH || !IMAMESAMPLEPATH)
    {
       free(IMAMEBASEPATH);   IMAMEBASEPATH   = NULL;
@@ -978,8 +989,8 @@ bool retro_load_game(const struct retro_game_info *info)
       char baseName[1024];
       char *dot;
 
-      strncpy(IMAMEBASEPATH, info->path, 1023);
-      IMAMEBASEPATH[1023] = 0;
+      strncpy(IMAMEBASEPATH, info->path, PATH_BUF_SIZE - 1);
+      IMAMEBASEPATH[PATH_BUF_SIZE - 1] = 0;
       if (strrchr(IMAMEBASEPATH, slash))
          *(strrchr(IMAMEBASEPATH, slash)) = 0;
       else
@@ -999,7 +1010,7 @@ bool retro_load_game(const struct retro_game_info *info)
       if (dot)
          *dot = 0;
 
-      snprintf(IMAMESAMPLEPATH, 1024, "%s/samples", core_sys_directory);
+      snprintf(IMAMESAMPLEPATH, PATH_BUF_SIZE, "%s/samples", core_sys_directory);
 
    /* do we have a driver for this? */
    for (i = 0; drivers[i] && (game_index == -1); i++)
@@ -1022,35 +1033,35 @@ bool retro_load_game(const struct retro_game_info *info)
    //parse_cmdline (argc, argv, game_index);
 
    //Set default path
-   nvdir=(char *) malloc(1024);snprintf(nvdir,1024,"%s%c%s",core_save_directory,slash,"nvram");
+   nvdir=(char *) malloc(PATH_BUF_SIZE);snprintf(nvdir,PATH_BUF_SIZE,"%s%c%s",core_save_directory,slash,"nvram");
    i=create_path_recursive(nvdir);
    if(i!=0)printf("error %d creating nvram \"%s\"\n", i,nvdir);
 
-   hidir=(char *) malloc(1024);snprintf(hidir,1024,"%s%c%s",core_save_directory,slash,"hi");
+   hidir=(char *) malloc(PATH_BUF_SIZE);snprintf(hidir,PATH_BUF_SIZE,"%s%c%s",core_save_directory,slash,"hi");
    i=create_path_recursive(hidir);
    if(i!=0)printf("error %d creating hi \"%s\"\n", i,hidir);
 
-   cfgdir=(char *) malloc(1024);snprintf(cfgdir,1024,"%s%c%s",core_save_directory,slash,"cfg");
+   cfgdir=(char *) malloc(PATH_BUF_SIZE);snprintf(cfgdir,PATH_BUF_SIZE,"%s%c%s",core_save_directory,slash,"cfg");
    i=create_path_recursive(cfgdir);
    if(i!=0)printf("error %d creating cfg \"%s\"\n", i,cfgdir);
 
-   screenshotdir=(char *) malloc(1024);snprintf(screenshotdir,1024,"%s%c%s",core_save_directory,slash,"snap");
+   screenshotdir=(char *) malloc(PATH_BUF_SIZE);snprintf(screenshotdir,PATH_BUF_SIZE,"%s%c%s",core_save_directory,slash,"snap");
    i=create_path_recursive(screenshotdir);
    if(i!=0)printf("error %d creating snap \"%s\"\n", i,screenshotdir);
 
-   memcarddir=(char *) malloc(1024);snprintf(memcarddir,1024,"%s%c%s",core_save_directory,slash,"memcard");
+   memcarddir=(char *) malloc(PATH_BUF_SIZE);snprintf(memcarddir,PATH_BUF_SIZE,"%s%c%s",core_save_directory,slash,"memcard");
    i=create_path_recursive(memcarddir);
    if(i!=0)printf("error %d creating memcard \"%s\"\n", i,memcarddir);
 
-   stadir=(char *) malloc(1024);snprintf(stadir,1024,"%s%c%s",core_sys_directory,slash,"sta");
+   stadir=(char *) malloc(PATH_BUF_SIZE);snprintf(stadir,PATH_BUF_SIZE,"%s%c%s",core_sys_directory,slash,"sta");
    i=create_path_recursive(stadir);
    if(i!=0)printf("error %d creating sta \"%s\"\n", i,stadir);
 
-   artworkdir=(char *) malloc(1024);snprintf(artworkdir,1024,"%s%c%s",core_sys_directory,slash,"artwork");
+   artworkdir=(char *) malloc(PATH_BUF_SIZE);snprintf(artworkdir,PATH_BUF_SIZE,"%s%c%s",core_sys_directory,slash,"artwork");
    i=create_path_recursive(artworkdir);
    if(i!=0)printf("error %d creating artwork \"%s\"\n", i,artworkdir);
 
-   cheatdir=(char *) malloc(1024);snprintf(cheatdir,1024,"%s%c%s",core_sys_directory,slash,"cheat");
+   cheatdir=(char *) malloc(PATH_BUF_SIZE);snprintf(cheatdir,PATH_BUF_SIZE,"%s%c%s",core_sys_directory,slash,"cheat");
    i=create_path_recursive(cheatdir);
    if(i!=0)printf("error %d creating cheat \"%s\"\n", i,cheatdir);
 
