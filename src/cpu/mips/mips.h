@@ -163,9 +163,18 @@ extern int mips_ICount;
 #define CF_RFE ( 16 )
 
 #ifdef MSB_FIRST
-#define READ_LONG(a)		  (READ_WORD(a+2)<<16)|READ_WORD(a)
+#define READ_LONG(a)          (READ_WORD((uint8_t *)(a)+2)<<16)|READ_WORD(a)
+#else
+#ifdef ALIGN_INTS
+/* On strict-align hosts, build the 32-bit value from two READ_WORD()
+ * calls (which are themselves byte-by-byte when ALIGN_SHORTS is set).
+ * MIPS instructions are always 4-aligned so this can't matter for the
+ * legitimate code path, but the C standard says the cast itself is UB
+ * regardless of the runtime alignment of (a). */
+#define READ_LONG(a)          ((uint32_t)READ_WORD(a) | ((uint32_t)READ_WORD((uint8_t *)(a)+2) << 16))
 #else
 #define READ_LONG(a)          (*(uint32_t *)(a))
+#endif
 #endif
 
 #define cpu_readop32(A)     READ_LONG(&OP_ROM[A])
