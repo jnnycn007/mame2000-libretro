@@ -124,7 +124,4 @@ int /* error */ checksum_zipped_file (const char *zipfile, const char *filename,
 
 void unzip_cache_clear(void);
 
-/* public globals */
-extern int	gUnzipQuiet;	/* flag controls error messages */
-
 #endif

@@ -22,8 +22,6 @@ See drivers\starwars.c for notes
 #define LDB           0x40
 #define LDA           0x80
 
-#define MATHDEBUG 0
-
 static int MPA; /* PROM address counter */
 static int BIC; /* Block index counter  */
 
@@ -82,11 +80,6 @@ void run_mbox(void)
 		IP15_8 = PROM_STR[MPA];
 		IP7    = PROM_AM[MPA];
 		IP6_0  = PROM_MAS[MPA];
-
-#if(MATHDEBUG==1)
-printf("\n(MPA:%x), Strobe: %x, IP7: %d, IP6_0:%x\n",MPA, IP15_8, IP7, IP6_0);
-printf("(BIC: %x), A: %x, B: %x, C: %x, ACC: %x\n",BIC,A,B,C,ACC);
-#endif
 
 		/* Construct the current RAM address */
 		if (IP7==0)
@@ -176,9 +169,6 @@ printf("(BIC: %x), A: %x, B: %x, C: %x, ACC: %x\n",BIC,A,B,C,ACC);
 
 READ_HANDLER( prng_r )
 {
-#if(MATHDEBUG==1)
-printf("prng\n");
-#endif
 	PRN = (int)((PRN+0x2364)^2); /* This is a total bodge for now, but it works!*/
 	return (PRN & 0xff);	/* ASG 971002 -- limit to a byte; the 6809 code cares */
 }
@@ -186,18 +176,12 @@ printf("prng\n");
 /********************************************************/
 WRITE_HANDLER( prngclr_w )
 {
-#if(MATHDEBUG==1)
-printf("prngclr\n");
-#endif
 	PRN=0;
 }
 
 /********************************************************/
 WRITE_HANDLER( mw0_w )
 {
-#if(MATHDEBUG==1)
-printf("mw0: %x\n",data);
-#endif
 	MPA=(data<<2); /* Set starting PROM address */
 	run_mbox();   /* and run the Mathbox */
 }
@@ -206,9 +190,6 @@ printf("mw0: %x\n",data);
 /* BIC - write high bit */
 WRITE_HANDLER( mw1_w )
 {
-#if(MATHDEBUG==1)
-printf("mw1: %x\n",data);
-#endif
 	BIC = (BIC & 0x00ff) | ((data & 0x01)<<8);
 }
 
@@ -216,9 +197,6 @@ printf("mw1: %x\n",data);
 /* BIC - write low byte */
 WRITE_HANDLER( mw2_w )
 {
-#if(MATHDEBUG==1)
-printf("mw2: %x\n",data);
-#endif
 	BIC = (BIC & 0x0100) | data;
 }
 

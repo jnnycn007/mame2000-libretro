@@ -3,7 +3,6 @@
 #include "driver.h"
 #include "ui_text.h" /* LBO 042400 */
 #include "artwork.h"
-#include "port_wrapper.h"
 
 extern int safe_render_path;
 extern int iOS_fixedRes;

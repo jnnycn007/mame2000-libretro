@@ -8,10 +8,6 @@
 #include <assert.h>
 #include "zlib/zlib.h"
 
-/* public globals */
-int	gUnzipQuiet = 0;		/* flag controls error messages */
-
-
 #define ERROR_CORRUPT "The zipfile seems to be corrupt, please check it"
 #define ERROR_FILESYSTEM "Your filesystem seems to be corrupt, please check it"
 #define ERROR_UNSUPPORTED "The format of this zipfile is not supported, please recompress it"
@@ -22,10 +18,7 @@ int	gUnzipQuiet = 0;		/* flag controls error messages */
 #endif
 
 /* Print a error message */
-void errormsg(const char* extmsg, const char* usermsg, const char* zipname) {
-	/* Output to the user with no internal detail */
-	if (!gUnzipQuiet)
-		printf("Error in zipfile %s\n%s\n", zipname, usermsg);
+static void errormsg(const char* extmsg, const char* usermsg, const char* zipname) {
 	/* Output to log file with all informations */
 	logerror("Error in zipfile %s: %s\n", zipname, extmsg);
 }
@@ -820,8 +813,6 @@ int /* error */ load_zipped_file (const char* zipfile, const char* filename, uns
 			*length = ent->uncompressed_size;
 			*buf = (unsigned char*)malloc( *length );
 			if (!*buf) {
-				if (!gUnzipQuiet)
-					printf("load_zipped_file(): Unable to allocate %d bytes of RAM\n",*length);
 				cache_closezip(zip);
 				return -1;
 			}

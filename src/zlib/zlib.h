@@ -204,17 +204,7 @@ typedef gz_header FAR *gz_headerp;
 
 #define Z_NULL  0  /* for initializing zalloc, zfree, opaque */
 
-#define zlib_version zlibVersion()
-/* for compatibility with versions < 1.0.2 */
-
-                        /* basic functions */
-
-ZEXTERN const char * ZEXPORT zlibVersion OF((void));
-/* The application can compare zlibVersion and ZLIB_VERSION for consistency.
-   If the first character differs, the library code actually used is
-   not compatible with the zlib.h header file used by the application.
-   This check is automatically made by deflateInit and inflateInit.
- */
+/* basic functions */
 
 /*
 ZEXTERN int ZEXPORT deflateInit OF((z_streamp strm, int level));
@@ -232,8 +222,6 @@ ZEXTERN int ZEXPORT deflateInit OF((z_streamp strm, int level));
 
      deflateInit returns Z_OK if success, Z_MEM_ERROR if there was not
    enough memory, Z_STREAM_ERROR if level is not a valid compression level,
-   Z_VERSION_ERROR if the zlib library version (zlib_version) is incompatible
-   with the version assumed by the caller (ZLIB_VERSION).
    msg is set to null if there is no error message.  deflateInit does not
    perform any compression: this will be done by deflate().
 */
@@ -970,7 +958,6 @@ ZEXTERN uLong ZEXPORT zlibCompileFlags OF((void));
      11: 0 (reserved)
 
     One-time table building (smaller code, but not thread-safe if true):
-     12: BUILDFIXED -- build static block decoding tables when needed
      13: DYNAMIC_CRC_TABLE -- build CRC calculation tables when needed
      14,15: 0 (reserved)
 

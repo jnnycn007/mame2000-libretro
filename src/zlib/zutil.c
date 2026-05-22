@@ -23,12 +23,6 @@ const char * const z_errmsg[10] = {
 "incompatible version",/* Z_VERSION_ERROR (-6) */
 ""};
 
-
-const char * ZEXPORT zlibVersion()
-{
-    return ZLIB_VERSION;
-}
-
 uLong ZEXPORT zlibCompileFlags()
 {
     uLong flags;
@@ -66,9 +60,6 @@ uLong ZEXPORT zlibCompileFlags()
 #endif
 #ifdef ZLIB_WINAPI
     flags += 1 << 10;
-#endif
-#ifdef BUILDFIXED
-    flags += 1 << 12;
 #endif
 #ifdef DYNAMIC_CRC_TABLE
     flags += 1 << 13;
