@@ -284,6 +284,21 @@ void hs_open (const char *name)
 					mem_range->start_value = hexstr2num (&pBuf);
 					mem_range->end_value = hexstr2num (&pBuf);
 
+					/* Reject malformed entries before we use them.
+					 * A crafted hiscore.dat could otherwise supply a
+					 * gigantic num_bytes (causing malloc/fread of up
+					 * to 4 GiB inside hs_load) or an out-of-range cpu
+					 * index (OOB read of Machine->drv->cpu[] inside
+					 * MEMORY_READ / MEMORY_WRITE).  64 KiB is much
+					 * more than any real high-score region. */
+					if (mem_range->cpu >= (uint32_t)cpu_gettotalcpu() ||
+						mem_range->num_bytes == 0 ||
+						mem_range->num_bytes > 0x10000)
+					{
+						free(mem_range);
+						continue;
+					}
+
 					mem_range->next = NULL;
 					{
 						struct mem_range *last = state.mem_range;
