@@ -16,6 +16,7 @@
 #include "osdepend.h"
 #include "driver.h"
 #include "allegro.h"
+#include "minimal.h"
 #include <file/file_path.h>
 
 #ifndef RETROK_TILDE
@@ -391,6 +392,17 @@ static void update_input(void)
 {
 #define RK(port,key)     input_state_cb(port, RETRO_DEVICE_KEYBOARD, 0,RETROK_##key)
 #define JS(port, button) joypad_bits & (1 << RETRO_DEVICE_ID_JOYPAD_##button)
+	/* Per-player digital direction bits, in the same GP2X bitmask
+	 * format the OSD analog/trakball readers expect.  Defined in
+	 * src/libretro/input.c at file scope; one variable per port.
+	 * joy_analog_x/y[] are the per-port normalised analog stick
+	 * positions, range -1.0 .. 1.0, consumed by osd_analogjoy_read()
+	 * and osd_trak_read(). */
+	extern unsigned long ExKey1, ExKey2, ExKey3, ExKey4;
+	extern float joy_analog_x[4], joy_analog_y[4];
+	static unsigned long *const exkey_for_player[4] = {
+		&ExKey1, &ExKey2, &ExKey3, &ExKey4
+	};
 	int i, j, c = 0;
 	input_poll_cb();
 	
@@ -404,6 +416,8 @@ static void update_input(void)
 	for (i = 0; i < 4; i++)
 	{
 		int16_t joypad_bits;
+		int16_t analog_x, analog_y;
+		unsigned long ex_bits = 0;
 		
 		if (libretro_supports_bitmasks)
 			joypad_bits = input_state_cb(i, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_MASK);
@@ -428,6 +442,47 @@ static void update_input(void)
 		joy_pressed[c++] = JS(i, R);
 
 		key[KEY_TAB] |= JS(i, R2);
+
+		/* Feed the OSD analog/trakball readers.
+		 *
+		 * Two parallel paths inside osd_analogjoy_read() / osd_trak_-
+		 * read(): the "stick is moved" branch snaps the reported value
+		 * to joy_analog_x[player] * 128 (or *30 for trakball), and the
+		 * "stick is centred but a direction is held" branch ramps the
+		 * accumulator by +/-5 per call.  Both need feeding from libretro:
+		 *
+		 *   - joy_analog_x/y[i] from RETRO_DEVICE_ANALOG / ANALOG_LEFT,
+		 *     normalised to the -1.0 .. +1.0 range the OSD code's
+		 *     "* 128.0" / "* 30" arithmetic expects.  Y is negated at
+		 *     the assignment so the *-128 the OSD code already applies
+		 *     produces RetroArch's positive-down convention downstream.
+		 *
+		 *   - ExKey1..4 (dispatched by player index via the static
+		 *     pointer table above) carry the per-port digital direction
+		 *     bits in the GP2X_UP/DOWN/LEFT/RIGHT bitmask format that
+		 *     is_joy_axis_pressed() decodes.  Synthesised here from the
+		 *     same JS() reads we already did for joy_pressed[] -- a
+		 *     single source of truth keeps digital state coherent
+		 *     whether the game queries via joy_pressed[] or via the
+		 *     analog reader's digital-fallback path.
+		 *
+		 * Frontend deadzone (RetroArch's per-port stick deadzone, or
+		 * any equivalent on other frontends) is already applied before
+		 * input_state_cb returns -- we don't add a second one. */
+		analog_x = input_state_cb(i, RETRO_DEVICE_ANALOG,
+		                          RETRO_DEVICE_INDEX_ANALOG_LEFT,
+		                          RETRO_DEVICE_ID_ANALOG_X);
+		analog_y = input_state_cb(i, RETRO_DEVICE_ANALOG,
+		                          RETRO_DEVICE_INDEX_ANALOG_LEFT,
+		                          RETRO_DEVICE_ID_ANALOG_Y);
+		joy_analog_x[i] =  (float)analog_x / 32768.0f;
+		joy_analog_y[i] = -(float)analog_y / 32768.0f;
+
+		if (JS(i, LEFT))  ex_bits |= GP2X_LEFT;
+		if (JS(i, RIGHT)) ex_bits |= GP2X_RIGHT;
+		if (JS(i, UP))    ex_bits |= GP2X_UP;
+		if (JS(i, DOWN))  ex_bits |= GP2X_DOWN;
+		*exkey_for_player[i] = ex_bits;
 	}
 
 	key[KEY_A] =RK(0, a);
@@ -792,6 +847,8 @@ bool retro_load_game(const struct retro_game_info *info)
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT,   "Coins" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,    "Start" },
       { 0, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2,     "OSD Menu" },
+      { 0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Analog X" },
+      { 0, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_Y, "Analog Y" },
 
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "D-Pad Left" },
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "D-Pad Up" },
@@ -806,6 +863,8 @@ bool retro_load_game(const struct retro_game_info *info)
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT,   "Coins" },
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,    "Start" },
       { 1, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2,     "OSD Menu" },
+      { 1, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Analog X" },
+      { 1, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_Y, "Analog Y" },
 
       { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "D-Pad Left" },
       { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "D-Pad Up" },
@@ -820,6 +879,8 @@ bool retro_load_game(const struct retro_game_info *info)
       { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT,   "Coins" },
       { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,    "Start" },
       { 2, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2,     "OSD Menu" },
+      { 2, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Analog X" },
+      { 2, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_Y, "Analog Y" },
 
       { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_LEFT,  "D-Pad Left" },
       { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_UP,    "D-Pad Up" },
@@ -834,6 +895,8 @@ bool retro_load_game(const struct retro_game_info *info)
       { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_SELECT,   "Coins" },
       { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_START,    "Start" },
       { 3, RETRO_DEVICE_JOYPAD, 0, RETRO_DEVICE_ID_JOYPAD_R2,     "OSD Menu" },
+      { 3, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_X, "Analog X" },
+      { 3, RETRO_DEVICE_ANALOG, RETRO_DEVICE_INDEX_ANALOG_LEFT, RETRO_DEVICE_ID_ANALOG_Y, "Analog Y" },
 
       { 0, 0, 0, 0, NULL },
    };
