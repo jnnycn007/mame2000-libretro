@@ -7,7 +7,7 @@
 
 ****************************************************************************/
 #include "driver.h"
-#include "endian.h"
+#include "osd_endian.h"
 
 /* from mame.c */
 extern int bitmap_dirty;

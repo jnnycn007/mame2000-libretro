@@ -9,7 +9,7 @@
 
 #include "driver.h"
 #include "osinline.h"
-#include "endian.h"
+#include "osd_endian.h"
 #include <math.h>
 
 

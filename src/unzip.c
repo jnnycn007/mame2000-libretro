@@ -1,6 +1,6 @@
 #include "unzip.h"
 #include "mame.h"
-#include "endian.h"
+#include "osd_endian.h"
 
 #include <stdlib.h>
 #include <string.h>

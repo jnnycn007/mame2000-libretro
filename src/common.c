@@ -8,7 +8,7 @@
 
 #include "driver.h"
 #include "png.h"
-#include "endian.h"
+#include "osd_endian.h"
 
 /* These globals are only kept on a machine basis - LBO 042898 */
 unsigned int dispensed_tickets;

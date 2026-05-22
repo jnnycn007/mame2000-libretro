@@ -23,7 +23,7 @@
 #include "zlib/zlib.h"
 #include "driver.h"
 #include "png.h"
-#include "endian.h"
+#include "osd_endian.h"
 
 extern char build_version[];
 
