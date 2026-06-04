@@ -1130,6 +1130,54 @@ static INLINE void common_drawgfxzoom( struct osd_bitmap *dest_bmp,const struct 
 	if (transparency == TRANSPARENCY_COLOR)
 		transparent_color = Machine->pens[transparent_color];
 
+	/* PEN_TABLE -> PEN downgrade when no per-pen shadow/transparent
+	 * remap is in effect.
+	 *
+	 * TRANSPARENCY_PEN_TABLE differs from TRANSPARENCY_PEN only in
+	 * that the per-pixel `gfx_drawmode_table[c]` dispatch can do
+	 * three things rather than one:
+	 *
+	 *   DRAWMODE_NONE    -> pixel is transparent
+	 *   DRAWMODE_SOURCE  -> pixel writes pal[c] (same as PEN)
+	 *   DRAWMODE_SHADOW  -> pixel writes palette_shadow_table[dest[x]]
+	 *
+	 * If every pen this particular sprite uses is DRAWMODE_SOURCE,
+	 * the per-pixel switch is just busywork producing the
+	 * TRANSPARENCY_PEN output anyway: load c, look up gfx_drawmode_-
+	 * table[c], branch into the SOURCE arm, write pal[c].  Downgrade
+	 * the transparency type to PEN (or PEN_RAW for the _RAW variant)
+	 * so the simpler code path below runs without the switch.  Saves
+	 * one indirect load + one mispredictable branch per drawn pixel
+	 * inside the inner loop.
+	 *
+	 * Safety: gfx->pen_usage[code] is a 32-bit mask of which pens
+	 * appear in this sprite cell.  It was precomputed at gfxdecode
+	 * time (drawgfx.c:108-122) and is NULL only when
+	 * color_granularity > 32 (i.e. the sprite uses more than 32
+	 * distinct pens, in which case we can't enumerate them cheaply
+	 * and must take the slow path).  We require ALL used pens to be
+	 * DRAWMODE_SOURCE -- if any is DRAWMODE_NONE or DRAWMODE_SHADOW
+	 * we must preserve the slow path because the visible output
+	 * would otherwise differ. */
+	if ((transparency == TRANSPARENCY_PEN_TABLE
+	  || transparency == TRANSPARENCY_PEN_TABLE_RAW) && gfx->pen_usage)
+	{
+		unsigned int pens = gfx->pen_usage[code];
+		int all_source = 1;
+		unsigned int p;
+		for (p = 0; p < 32; p++)
+		{
+			if ((pens & (1u << p)) && gfx_drawmode_table[p] != DRAWMODE_SOURCE)
+			{
+				all_source = 0;
+				break;
+			}
+		}
+		if (all_source)
+			transparency = (transparency == TRANSPARENCY_PEN_TABLE_RAW)
+				? TRANSPARENCY_PEN_RAW
+				: TRANSPARENCY_PEN;
+	}
 
 	/*
 	scalex and scaley are 16.16 fixed point numbers
