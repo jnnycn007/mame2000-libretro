@@ -791,6 +791,27 @@ static INLINE void FM_CALC_CH( FM_CH *CH )
 {
 	uint32_t eg_out1,eg_out2,eg_out3,eg_out4;  //envelope output
 
+	/* Silent-channel skip: when all 4 slots have evs==0 (envelope frozen)
+	 * AND evc>=EG_OFF (counter at end-of-release, max attenuation), the
+	 * channel contributes nothing.  This state is reached from
+	 * FM_EG_Release / FM_EG_SR (envelope-off transitions) and from
+	 * FMResetChannel (chip reset).  PG counters are still advanced so the
+	 * chip state is preserved against future key-on events; only the EG
+	 * recompute and OP_OUT lookups are skipped.  Safe across all FM_CH
+	 * users (YM2151/2203/2608/2610/2612): SSG-EG hold states set evs=0
+	 * with evc<EG_OFF, which the second guard correctly excludes. */
+	if (CH->SLOT[SLOT1].evs == 0 && CH->SLOT[SLOT1].evc >= EG_OFF &&
+	    CH->SLOT[SLOT2].evs == 0 && CH->SLOT[SLOT2].evc >= EG_OFF &&
+	    CH->SLOT[SLOT3].evs == 0 && CH->SLOT[SLOT3].evc >= EG_OFF &&
+	    CH->SLOT[SLOT4].evs == 0 && CH->SLOT[SLOT4].evc >= EG_OFF)
+	{
+		CH->SLOT[SLOT1].Cnt += CH->SLOT[SLOT1].Incr;
+		CH->SLOT[SLOT2].Cnt += CH->SLOT[SLOT2].Incr;
+		CH->SLOT[SLOT3].Cnt += CH->SLOT[SLOT3].Incr;
+		CH->SLOT[SLOT4].Cnt += CH->SLOT[SLOT4].Incr;
+		return;
+	}
+
 	/* Phase Generator */
 #if FM_LFO_SUPPORT
 	int32_t pms = lfo_pmd * CH->pms / LFO_RATE;
