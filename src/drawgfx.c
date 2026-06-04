@@ -197,7 +197,7 @@ static INLINE void blockmove_NtoN_transpen_noremap8(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -209,7 +209,7 @@ static INLINE void blockmove_NtoN_transpen_noremap8(
 
 #ifdef ALIGN_INTS /* GSL 980108 read/write nonaligned dword routine for ARM processor etc */
 
-		if ((long)dstdata & 3)
+		if ((uintptr_t)dstdata & 3)
 		{
 			while (dstdata <= end - 4)
 			{
@@ -324,7 +324,7 @@ static INLINE void blockmove_NtoN_transpen_noremap_flipx8(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -2542,7 +2542,7 @@ DECLARE(blockmove_8toN_transpen,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -2602,7 +2602,7 @@ DECLARE(blockmove_8toN_transpen_flipx,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -2664,7 +2664,7 @@ DECLARE(blockmove_8toN_transpen_pri,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -2760,7 +2760,7 @@ DECLARE(blockmove_8toN_transpen_pri_flipx,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -2854,7 +2854,7 @@ DECLARE(blockmove_8toN_transpen_raw,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -2914,7 +2914,7 @@ DECLARE(blockmove_8toN_transpen_raw_flipx,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -2973,7 +2973,7 @@ DECLARE(blockmove_8toN_transmask,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -3030,7 +3030,7 @@ DECLARE(blockmove_8toN_transmask_flipx,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -3089,7 +3089,7 @@ DECLARE(blockmove_8toN_transmask_pri,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -3182,7 +3182,7 @@ DECLARE(blockmove_8toN_transmask_pri_flipx,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -3273,7 +3273,7 @@ DECLARE(blockmove_8toN_transmask_raw,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
@@ -3330,7 +3330,7 @@ DECLARE(blockmove_8toN_transmask_raw_flipx,(
 	while (srcheight)
 	{
 		end = dstdata + srcwidth;
-		while (((long)srcdata & 3) && dstdata < end)	/* longword align */
+		while (((uintptr_t)srcdata & 3) && dstdata < end)	/* longword align */
 		{
 			int col;
 
