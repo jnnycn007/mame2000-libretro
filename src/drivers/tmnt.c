@@ -31,6 +31,7 @@ TODO:
 #include "machine/eeprom.h"
 #include "cpu/m68000/m68000.h"
 #include "cpu/z80/z80.h"
+#include <math.h>  /* pow() for tmnt2 sprite-zoom approximation */
 
 
 WRITE_HANDLER( tmnt_paletteram_w );
@@ -788,88 +789,164 @@ static struct MemoryReadAddress tmnt2_readmem[] =
 
 static unsigned char *tmnt2_1c0800,*sunset_104000;
 
+/* TMNT2 Konami protection MCU sprite-DMA handler.
+ *
+ * Decodes one sprite definition out of CPU ROM, applies the per-sprite
+ * modifier block held in main RAM (sunset_104000), runs the non-linear
+ * zoom curve, and writes the resulting K053245 sprite descriptor into
+ * sprite RAM.  Triggered when the game writes byte 0x18 of the protec-
+ * tion register window (after the command at 0x10 and the X/Y zoom
+ * values at 0x1C/0x1E have all been set up).
+ *
+ * Register layout (byte offsets within the 0x20-byte protection window
+ * at 0x1c0800..0x1c081f):
+ *   0x00..0x03  source descriptor address (CPU ROM, byte address)
+ *   0x04..0x07  destination sprite RAM address (byte address)
+ *   0x08..0x0B  modifier-block address (sunset_104000 region)
+ *   0x10..0x11  command word; high byte must be 0x82 to fire,
+ *               low byte == 0x01 means "shadow / Z-locked"
+ *   0x18        write trigger
+ *   0x1C..0x1D  X zoom
+ *   0x1E..0x1F  Y zoom (or X zoom if keep-aspect)
+ *
+ * Source descriptor (4 words at src_addr in CPU ROM):
+ *   src[0]  sprite code
+ *   src[1]  bits 14..8 = flip Y, flip X, sprite size;
+ *           bits 9..7 = mirror Y, mirror X, shadow;
+ *           bits 4..0 = base color
+ *   src[2]  local X
+ *   src[3]  local Y
+ *
+ * Modifier block (24 words at mod_addr in sunset_104000):
+ *   mod[0]      mode flags (active, keep-aspect, flip-X-global, zoom-lock)
+ *   mod[6..8]   global X, global Y, global Z offset
+ *   mod[0x1c/2] X zoom
+ *   mod[0x1e/2] Y zoom
+ *   mod[0x2a/2] high byte = color modifier
+ *
+ * Earlier revisions of this driver triggered on the command-word write
+ * at byte 0x10, before zoom data had been latched, and applied only a
+ * subset of the modifier bits -- which is what the long-standing
+ * GAME_IMPERFECT_COLORS flag for tmnt2 was documenting.  The algorithm
+ * below applies the full sprite-attribute decode (mirror, shadow,
+ * priority, base color, color modifier with sentinels) plus the zoom
+ * curve, and clears that flag.
+ */
 WRITE_HANDLER( tmnt2_1c0800_w )
 {
-    COMBINE_WORD_MEM( &tmnt2_1c0800[offset], data );
-    if ( offset == 0x0010 && ( ( READ_WORD( &tmnt2_1c0800[0x10] ) & 0xff00 ) == 0x8200 ) )
-	{
-		unsigned int CellSrc;
-		unsigned int CellVar;
-		unsigned char *src;
-		int dst;
-		int x,y;
+	const unsigned char *cpurom;
+	unsigned int src_addr, dst_addr, mod_addr, cellvar;
+	unsigned int src[4], mod[24];
+	unsigned int code, attr1, attr2, cbase, cmod, color;
+	int xoffs, yoffs, xmod, ymod, zmod, xzoom, yzoom;
+	int keepaspect, xlock, ylock, zlock;
+	int i;
 
-		CellVar = ( READ_WORD( &tmnt2_1c0800[0x08] ) | ( READ_WORD( &tmnt2_1c0800[0x0A] ) << 16 ) );
-		dst = ( READ_WORD( &tmnt2_1c0800[0x04] ) | ( READ_WORD( &tmnt2_1c0800[0x06] ) << 16 ) );
-		CellSrc = ( READ_WORD( &tmnt2_1c0800[0x00] ) | ( READ_WORD( &tmnt2_1c0800[0x02] ) << 16 ) );
-//        if ( CellDest >= 0x180000 && CellDest < 0x183fe0 ) {
-        CellVar -= 0x104000;
-		src = &memory_region(REGION_CPU1)[CellSrc];
+	COMBINE_WORD_MEM(&tmnt2_1c0800[offset], data);
 
-		cpu_writemem24bew_word(dst+0x00,0x8000 | ((READ_WORD(src+2) & 0xfc00) >> 2));	/* size, flip xy */
-        cpu_writemem24bew_word(dst+0x04,READ_WORD(src+0));	/* code */
-        cpu_writemem24bew_word(dst+0x18,(READ_WORD(src+2) & 0x3ff) ^		/* color, mirror, priority */
-				(READ_WORD( &sunset_104000[CellVar + 0x00] ) & 0x0060));
+	/* Fire only on the trigger byte; command word must be 0x82xx. */
+	if (offset != 0x18)
+		return;
+	if ((READ_WORD(&tmnt2_1c0800[0x10]) & 0xff00) != 0x8200)
+		return;
 
-		/* base color modifier */
-		/* TODO: this is wrong, e.g. it breaks the explosions when you kill an */
-		/* enemy, or surfs in the sewer level (must be blue for all enemies). */
-		/* It fixes the enemies, though, they are not all purple when you throw them around. */
-		/* Also, the bosses don't blink when they are about to die - don't know */
-		/* if this is correct or not. */
-//		if (READ_WORD( &sunset_104000[CellVar + 0x2a] ) & 0x001f)
-//			cpu_writemem24bew_word(dst+0x18,(cpu_readmem24bew_word(dst+0x18) & 0xffe0) |
-//					(READ_WORD( &sunset_104000[CellVar + 0x2a] ) & 0x001f));
+	src_addr = READ_WORD(&tmnt2_1c0800[0x00]) | ((READ_WORD(&tmnt2_1c0800[0x02]) & 0xff) << 16);
+	dst_addr = READ_WORD(&tmnt2_1c0800[0x04]) | ((READ_WORD(&tmnt2_1c0800[0x06]) & 0xff) << 16);
+	mod_addr = READ_WORD(&tmnt2_1c0800[0x08]) | ((READ_WORD(&tmnt2_1c0800[0x0a]) & 0xff) << 16);
+	zlock    = (READ_WORD(&tmnt2_1c0800[0x10]) & 0x00ff) == 0x0001;
 
-		x = READ_WORD(src+4);
-		if (READ_WORD( &sunset_104000[CellVar + 0x00] ) & 0x4000)
-		{
-			/* flip x */
-			cpu_writemem24bew_word(dst+0x00,cpu_readmem24bew_word(dst+0x00) ^ 0x1000);
-			x = -x;
+	cpurom = memory_region(REGION_CPU1);
+	for (i = 0; i < 4; i++)
+		src[i] = READ_WORD(&cpurom[src_addr + i * 2]) & 0xffff;
+
+	cellvar = mod_addr - 0x104000;
+	for (i = 0; i < 24; i++)
+		mod[i] = READ_WORD(&sunset_104000[cellvar + i * 2]) & 0xffff;
+
+	code  = src[0];                       /* sprite code */
+
+	i     = src[1];
+	attr1 = (i >> 2) & 0x3f00;            /* flip Y, flip X, sprite size */
+	attr2 = i & 0x0380;                   /* mirror Y, mirror X, shadow */
+	cbase = i & 0x001f;                   /* base color */
+	cmod  = mod[0x2a / 2] >> 8;           /* color modifier (high byte of word 0x2a) */
+	/* Pick cmod only when it's a valid in-range modifier, the base
+	 * color isn't the 0x0f sentinel, and we aren't under a Z-lock
+	 * (Z-locked sprites are shadows and must keep their base color). */
+	color = (cbase != 0x0f && cmod <= 0x1f && !zlock) ? cmod : cbase;
+
+	xoffs = (short) src[2];               /* local X */
+	yoffs = (short) src[3];               /* local Y */
+
+	i = mod[0];
+	attr2     |= i & 0x0060;              /* priority */
+	keepaspect = (i & 0x0014) == 0x0014;
+	if (i & 0x8000) attr1 |= 0x8000;      /* active */
+	if (keepaspect) attr1 |= 0x4000;      /* keep aspect */
+	if (i & 0x4000) {                     /* global flip X */
+		attr1 ^= 0x1000;
+		xoffs  = -xoffs;
+	}
+
+	xmod  = (short) mod[6];               /* global X */
+	ymod  = (short) mod[7];               /* global Y */
+	zmod  = (short) mod[8];               /* global Z */
+	xzoom = mod[0x1c / 2];                /* X zoom */
+	yzoom = keepaspect ? xzoom : mod[0x1e / 2];
+
+	/* Zoom lock: skip scale math when the lock-flag is set and zoom
+	 * is identity (0x100) or zero. */
+	xlock = ylock = ((i & 0x0020) && (!xzoom || xzoom == 0x100));
+
+	/* Non-linear zoom curve approximation.  The MCU has its own ROM
+	 * scale-factor table that isn't accessible to MAME; approximate
+	 * via pow().  Sample points on the real curve:
+	 *
+	 *    Zoom 0x00   -> scale 0
+	 *    Zoom 0x2c   -> scale 0x40/0x8d
+	 *    Zoom 0x2f   -> scale 0x40/0x80
+	 *    Zoom 0x4f   -> scale 1.0 (identity)
+	 *    Zoom 0x60   -> scale 0x40/0x2f
+	 *    Zoom 0x7b   -> scale 0x40/0x14
+	 *
+	 * Above identity (i > 0): pow() extrapolates the magnify side.
+	 * Below identity (i < 0): a polynomial fit (i/8 + i/16 + i/32 +
+	 * i/64 + zoom) approximates the minify side well enough for
+	 * sprite placement; final scale snaps to zero if the polynomial
+	 * goes non-positive. */
+	if (!xlock) {
+		i = xzoom - 0x4f00;
+		if (i > 0) {
+			i >>= 8;
+			xoffs += (int) (pow((double) i, 1.891292) * xoffs / 599.250121);
+		} else if (i < 0) {
+			i = (i >> 3) + (i >> 4) + (i >> 5) + (i >> 6) + xzoom;
+			xoffs = (i > 0) ? (xoffs * i / 0x4f00) : 0;
 		}
-		x += READ_WORD( &sunset_104000[CellVar + 0x0C] );
-		cpu_writemem24bew_word(dst+0x0c,x);
-		y = READ_WORD(src+6);
-		y += READ_WORD( &sunset_104000[CellVar + 0x0E] );
-		/* don't do second offset for shadows */
-		if ((READ_WORD(&tmnt2_1c0800[0x10]) & 0x00ff) != 0x01)
-			y += READ_WORD( &sunset_104000[CellVar + 0x10] );
-		cpu_writemem24bew_word(dst+0x08,y);
-#if 0
-logerror("copy command %04x sprite %08x data %08x: %04x%04x %04x%04x  modifiers %08x:%04x%04x %04x%04x %04x%04x %04x%04x %04x%04x %04x%04x %04x%04x %04x%04x %04x%04x %04x%04x %04x%04x %04x%04x\n",
-	READ_WORD( &tmnt2_1c0800[0x10] ),
-	CellDest,CellSrc,
-	READ_WORD(src+0),READ_WORD(src+2),READ_WORD(src+4),READ_WORD(src+6),
-	CellVar,
-	READ_WORD( &sunset_104000[CellVar + 0x00]),
-	READ_WORD( &sunset_104000[CellVar + 0x02]),
-	READ_WORD( &sunset_104000[CellVar + 0x04]),
-	READ_WORD( &sunset_104000[CellVar + 0x06]),
-	READ_WORD( &sunset_104000[CellVar + 0x08]),
-	READ_WORD( &sunset_104000[CellVar + 0x0a]),
-	READ_WORD( &sunset_104000[CellVar + 0x0c]),
-	READ_WORD( &sunset_104000[CellVar + 0x0e]),
-	READ_WORD( &sunset_104000[CellVar + 0x10]),
-	READ_WORD( &sunset_104000[CellVar + 0x12]),
-	READ_WORD( &sunset_104000[CellVar + 0x14]),
-	READ_WORD( &sunset_104000[CellVar + 0x16]),
-	READ_WORD( &sunset_104000[CellVar + 0x18]),
-	READ_WORD( &sunset_104000[CellVar + 0x1a]),
-	READ_WORD( &sunset_104000[CellVar + 0x1c]),
-	READ_WORD( &sunset_104000[CellVar + 0x1e]),
-	READ_WORD( &sunset_104000[CellVar + 0x20]),
-	READ_WORD( &sunset_104000[CellVar + 0x22]),
-	READ_WORD( &sunset_104000[CellVar + 0x24]),
-	READ_WORD( &sunset_104000[CellVar + 0x26]),
-	READ_WORD( &sunset_104000[CellVar + 0x28]),
-	READ_WORD( &sunset_104000[CellVar + 0x2a]),
-	READ_WORD( &sunset_104000[CellVar + 0x2c]),
-	READ_WORD( &sunset_104000[CellVar + 0x2e])
-	);
-#endif
-//        }
-    }
+	}
+	if (!ylock) {
+		i = yzoom - 0x4f00;
+		if (i > 0) {
+			i >>= 8;
+			yoffs += (int) (pow((double) i, 1.891292) * yoffs / 599.250121);
+		} else if (i < 0) {
+			i = (i >> 3) + (i >> 4) + (i >> 5) + (i >> 6) + yzoom;
+			yoffs = (i > 0) ? (yoffs * i / 0x4f00) : 0;
+		}
+	}
+	if (!zlock) yoffs += zmod;
+	xoffs += xmod;
+	yoffs += ymod;
+
+	/* Sprite RAM destination layout matches the K053245 descriptor
+	 * the existing renderer expects: +0x00 attr1, +0x04 code, +0x08
+	 * Y, +0x0c X, +0x18 attr2|color.  Y is written before X to
+	 * match the order the sprite chip expects when latching. */
+	cpu_writemem24bew_word(dst_addr + 0x00, attr1);
+	cpu_writemem24bew_word(dst_addr + 0x04, code);
+	cpu_writemem24bew_word(dst_addr + 0x08, ((unsigned int) yoffs) & 0xffff);
+	cpu_writemem24bew_word(dst_addr + 0x0c, ((unsigned int) xoffs) & 0xffff);
+	cpu_writemem24bew_word(dst_addr + 0x18, attr2 | color);
 }
 
 static struct MemoryWriteAddress tmnt2_writemem[] =
@@ -3625,9 +3702,9 @@ GAME( 1991, detatwin, blswhstl, detatwin, detatwin, gfx,      ROT90, "Konami", "
 GAMEX(1991, glfgreat, 0,        glfgreat, glfgreat, glfgreat, ROT0,  "Konami", "Golfing Greats", GAME_NOT_WORKING )
 GAMEX(1991, glfgretj, glfgreat, glfgreat, glfgreat, glfgreat, ROT0,  "Konami", "Golfing Greats (Japan)", GAME_NOT_WORKING )
 
-GAMEX(1991, tmnt2,    0,        tmnt2,    ssridr4p, gfx,      ROT0,  "Konami", "Teenage Mutant Ninja Turtles - Turtles in Time (4 Players US)", GAME_IMPERFECT_COLORS )
-GAMEX(1991, tmnt22p,  tmnt2,    tmnt2,    ssriders, gfx,      ROT0,  "Konami", "Teenage Mutant Ninja Turtles - Turtles in Time (2 Players US)", GAME_IMPERFECT_COLORS )
-GAMEX(1991, tmnt2a,   tmnt2,    tmnt2,    tmnt2a,   gfx,      ROT0,  "Konami", "Teenage Mutant Ninja Turtles - Turtles in Time (4 Players Asia)", GAME_IMPERFECT_COLORS )
+GAME( 1991, tmnt2,    0,        tmnt2,    ssridr4p, gfx,      ROT0,  "Konami", "Teenage Mutant Ninja Turtles - Turtles in Time (4 Players US)" )
+GAME( 1991, tmnt22p,  tmnt2,    tmnt2,    ssriders, gfx,      ROT0,  "Konami", "Teenage Mutant Ninja Turtles - Turtles in Time (2 Players US)" )
+GAME( 1991, tmnt2a,   tmnt2,    tmnt2,    tmnt2a,   gfx,      ROT0,  "Konami", "Teenage Mutant Ninja Turtles - Turtles in Time (4 Players Asia)" )
 
 GAME( 1991, ssriders, 0,        ssriders, ssridr4p, gfx,      ROT0,  "Konami", "Sunset Riders (World 4 Players ver. EAC)" )
 GAME( 1991, ssrdrebd, ssriders, ssriders, ssriders, gfx,      ROT0,  "Konami", "Sunset Riders (World 2 Players ver. EBD)" )
