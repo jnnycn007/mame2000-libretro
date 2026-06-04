@@ -1,5 +1,3 @@
-#define YM2610B_WARNING
-
 /* YM2608 rhythm data is PCM ,not an ADPCM */
 #define YM2608_RHYTHM_PCM
 
@@ -2399,14 +2397,6 @@ void YM2610UpdateOne(int num, int16_t **buffer, int length)
 		if( !LFOIncr ) lfo_amd = lfo_pmd = 0;
 #endif
 	}
-#ifdef YM2610B_WARNING
-#define FM_MSG_YM2610B "YM2610-%d.CH%d is playing,Check whether the type of the chip is YM2610B\n"
-	/* Check YM2610B worning message */
-	if( FM_KEY_IS(&F2610->CH[0].SLOT[3]) )
-		LOG(LOG_WAR,(FM_MSG_YM2610B,num,0));
-	if( FM_KEY_IS(&F2610->CH[3].SLOT[3]) )
-		LOG(LOG_WAR,(FM_MSG_YM2610B,num,3));
-#endif
 	/* update frequency counter */
 	OPN_CALC_FCOUNT( cch[0] );
 	if( (State->mode & 0xc0) ){
