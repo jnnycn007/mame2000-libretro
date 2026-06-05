@@ -74,14 +74,16 @@ static float qsound_frq_ratio;		   /* Frequency ratio */
 /* QSound echo effect state.  The DL-1425 DSP applies a feedback echo
  * to the summed voice contributions (each voice's send level is its
  * register 0xba+ch).  The delay-line ring buffer holds the last N
- * accumulated echo samples; per output sample the DSP averages the
- * two-most-recent ring entries, scales them by the feedback gain, adds
- * the current accumulated voice contribution, writes back to the
- * ring, and mixes the averaged value into the output.  Without the
- * FIR filter (the wet path is filtered, the dry path is not) we mix
- * the averaged echo into both L and R equally; this loses the
- * subtle L-dry/R-wet asymmetry of the real DSP but keeps the
- * stereo image balanced.
+ * echo samples (int16 stored as the high half of a 32-bit accumulator
+ * so unbounded growth through the feedback path is impossible); per
+ * output sample the DSP averages the two-most-recent ring entries,
+ * scales them by the feedback gain, adds the current accumulated
+ * voice contribution, writes the high half back to the ring, and
+ * mixes the averaged value into the output.  Without the FIR filter
+ * (the wet path is filtered, the dry path is not) we mix the
+ * averaged echo into both L and R equally; this loses the subtle
+ * L-dry/R-wet asymmetry of the real DSP but keeps the stereo image
+ * balanced.
  *
  * Register layout:
  *   0x93 -> qsound_echo_feedback   (feedback gain, 16-bit)
@@ -89,7 +91,7 @@ static float qsound_frq_ratio;		   /* Frequency ratio */
  *   0xba+ch -> qsound_channel[ch].echo  (per-voice send level) */
 #define QSOUND_DELAY_BASE_OFFSET 0x554
 #define QSOUND_DELAY_BUFFER_LEN  1024
-static int32_t qsound_echo_buffer[QSOUND_DELAY_BUFFER_LEN];
+static int16_t qsound_echo_buffer[QSOUND_DELAY_BUFFER_LEN];
 static int qsound_echo_pos;        /* current ring read/write position */
 static int qsound_echo_length;     /* current ring length (samples) */
 static int qsound_echo_end_pos;    /* raw value written to reg 0xd9 */
@@ -97,32 +99,41 @@ static int qsound_echo_feedback;   /* feedback gain (16-bit signed) */
 static int qsound_echo_last;       /* previous ring entry (for 2-tap avg) */
 
 /* Apply the echo to a single accumulated voice-input sample, return
- * the echoed output to be mixed into the L/R outputs.  This matches
- * the algorithm in the disassembled DSP program: average the two
- * most recent ring entries, scale the average by the feedback gain
- * and add to the new input, write the result back to the ring, and
- * return the (unfiltered) average. */
-static int32_t qsound_echo_apply(int32_t input)
+ * the echoed output to be mixed into the L/R outputs.  The ring stores
+ * the HIGH 16 bits of the 32-bit feedback sum -- this is what bounds
+ * the feedback path and prevents the ring from saturating into noise
+ * the moment any voice writes a non-zero echo-send register.  Returns
+ * the 2-tap-averaged delay-line value already in int16 range. */
+static int16_t qsound_echo_apply(int32_t input)
 {
-	int32_t old_sample = qsound_echo_buffer[qsound_echo_pos];
+	int32_t old_sample = qsound_echo_buffer[qsound_echo_pos]; /* sign-extend int16 -> int32 */
 	int32_t last       = qsound_echo_last;
 	int32_t new_sample;
 
-	qsound_echo_last = old_sample;
+	qsound_echo_last = (int16_t)old_sample;
 	/* 2-tap moving average over delay-line output */
 	old_sample = (old_sample + last) >> 1;
 
-	/* Add the feedback-attenuated average back to the current
-	 * accumulated voice input, write the result to the delay line
-	 * (scaled down to fit the int32 ring slot range we use). */
-	new_sample = input + ((old_sample * qsound_echo_feedback) >> 14);
-	qsound_echo_buffer[qsound_echo_pos] = new_sample;
+	/* Feedback path: add the feedback-attenuated average back to the
+	 * current accumulated voice input.  old_sample is int16-bounded
+	 * (since we read it from the int16 ring), feedback is int16, so
+	 * the product is bounded ±1G and fits int32. */
+	new_sample = input + ((old_sample * qsound_echo_feedback) << 2);
+	/* Truncate-store the HIGH 16 bits of the int32 sum into the ring.
+	 * This keeps the ring values in int16 range no matter what
+	 * input magnitude the voice loop produced, which is what kept
+	 * the previous int32-ring formulation from working: input here
+	 * is the sum of (vol-scaled-sample * echo-send) across up to
+	 * 16 voices and can comfortably reach hundreds of millions; the
+	 * >>16 dispatches that into the int16 ring slot without taking
+	 * the feedback path into overflow on the next pass. */
+	qsound_echo_buffer[qsound_echo_pos] = (int16_t)(new_sample >> 16);
 
 	qsound_echo_pos++;
 	if (qsound_echo_pos >= qsound_echo_length)
 		qsound_echo_pos = 0;
 
-	return old_sample;
+	return (int16_t)old_sample;
 }
 
 static void qsound_update( int num, int16_t **buffer, int length )
@@ -167,7 +178,7 @@ static void qsound_update( int num, int16_t **buffer, int length )
 		int32_t lacc = 0;
 		int32_t racc = 0;
 		int32_t echo_in = 0;
-		int32_t echo_out;
+		int16_t echo_out;
 		for (i = 0; i < QSOUND_CHANNELS; i++, pC++)
 		{
 			int count, v;
