@@ -11,6 +11,7 @@
 #include <stdarg.h>
 #include <sys/time.h>
 #include <libretro.h>
+#include "libretro_core_options.h"
 #include "mame.h"
 #include "cpuintrf.h"
 #include "osdepend.h"
@@ -368,26 +369,13 @@ static void update_variables(bool first_run)
 
 void retro_set_environment(retro_environment_t cb)
 {
-   static const struct retro_variable vars[] = {
-      { "mame2000-frameskip", "Frameskip ; disabled|auto|threshold" },
-      { "mame2000-frameskip_threshold", "Frameskip Threshold (%); 30|40|50|60" },
-      { "mame2000-frameskip_interval", "Frameskip Interval; 1|2|3|4|5|6|7|8|9" },
-      { "mame2000-skip_disclaimer", "Skip Disclaimer; enabled|disabled" },
-      { "mame2000-show_gameinfo", "Show Game Information; disabled|enabled" },
-      { "mame2000-sample_rate", "Audio Rate (Restart); 22050|11025|22050|32000|44100" },
-      { "mame2000-stereo", "Stereo (Restart); enabled|disabled" },
-      /* QSound output-stage filter.  Visibility is gated below in
-       * retro_load_game to QSound-using drivers only; on other games
-       * this option is hidden from the menu (it has no effect since
-       * the QSound update path isn't called).  Default off because
-       * the FIR adds a per-sample 95-tap convolution that costs
-       * ~15-20% on QSound games during active audio. */
-      { "mame2000-qsound_output_filter", "QSound output filter; disabled|enabled" },
-      { NULL, NULL },
-   };
    environ_cb = cb;
-    
-   cb(RETRO_ENVIRONMENT_SET_VARIABLES, (void*)vars);
+
+   /* Register the core options via the best API the running frontend
+    * supports: v2 (with sublabels and forward-compat categories) when
+    * available, falling back to v1 and finally legacy SET_VARIABLES.
+    * Definitions live in libretro_core_options.h. */
+   libretro_set_core_options(cb);
 }
 
 void retro_set_audio_sample(retro_audio_sample_t cb)
