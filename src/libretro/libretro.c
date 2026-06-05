@@ -95,7 +95,6 @@ extern size_t      mame2000_direct_frame_pitch;
 extern int usestereo;
 extern int samples_per_frame;
 extern short *samples_buffer;
-extern short *conversion_buffer;
 extern int joy_pressed[40];
 extern int key[KEY_MAX];
 extern char *nvdir, *hidir, *cfgdir, *inpdir, *stadir, *memcarddir;
@@ -728,8 +727,6 @@ void retro_get_system_av_info(struct retro_system_av_info *info)
 
 void retro_run(void)
 {
-   int i, j;
-
    /* Software-framebuffer fast path.
     *
     * Before the emulator runs the next frame, ask the frontend for a
@@ -823,21 +820,14 @@ void retro_run(void)
     * directly.  In mame2000 we keep retro_run's tail dispatch for
     * the running case because osd_update_audio_stream() only fills
     * samples_buffer; the libretro-side delivery has historically
-    * happened here. */
+    * happened here.
+    *
+    * samples_buffer is always allocated stereo-sized regardless of
+    * the game's native sound layout; the mixer (mixer.c:mixer_sh_-
+    * update) writes interleaved L/R directly into it -- mono games
+    * duplicate at the clip step.  No conversion needed here. */
    if (samples_per_frame && !pause_action)
-   {
-      if (usestereo)
-         audio_batch_cb(samples_buffer, samples_per_frame);
-      else
-      {
-         for (i = 0, j = 0; i < samples_per_frame; i++)
-         {
-            conversion_buffer[j++] = samples_buffer[i];
-            conversion_buffer[j++] = samples_buffer[i];
-         }
-         audio_batch_cb(conversion_buffer, samples_per_frame);
-      }
-   }
+      audio_batch_cb(samples_buffer, samples_per_frame);
 
    /* If frameskip/timing settings have changed,
     * update frontend audio latency

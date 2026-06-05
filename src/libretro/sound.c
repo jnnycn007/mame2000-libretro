@@ -4,7 +4,6 @@
 
 int samples_per_frame = 0;
 short *samples_buffer;
-short *conversion_buffer;
 int usestereo = 1;
 
 void hook_audio_done(void);
@@ -18,9 +17,16 @@ int osd_start_audio_stream(int stereo)
 
 	if (Machine->sample_rate == 0) return 0;
 
-	samples_buffer = (short *) calloc(samples_per_frame, 2 + usestereo * 2);
-	if (!usestereo) conversion_buffer = (short *) calloc(samples_per_frame, 4);
-	
+	/* samples_buffer is always allocated stereo-sized regardless of
+	 * the game's native sound layout: libretro always consumes stereo
+	 * via audio_batch_cb, and the mixer (mixer.c) writes interleaved
+	 * L/R directly into it -- mono games duplicate the sample into
+	 * both channels at the clip step.  Eliminates the per-frame
+	 * memcpy that used to stage mixer output through a separate
+	 * buffer, and eliminates the mono->stereo conversion loop that
+	 * used to run in retro_run(). */
+	samples_buffer = (short *) calloc(samples_per_frame * 2, sizeof(short));
+
 	return samples_per_frame;
 }
 
@@ -29,11 +35,17 @@ void osd_stop_audio_stream(void)
 	samples_per_frame = 0;
 }
 
+/* The mixer (mixer.c:mixer_sh_update) writes interleaved L/R samples
+ * directly into samples_buffer; this hook just lets the libretro side
+ * know the buffer is ready.  The buffer argument is retained for
+ * compatibility with the documented osdepend.h interface but is now
+ * required to be the same pointer as samples_buffer (asserted only in
+ * debug builds via the implicit aliasing -- the mixer is the sole
+ * caller and passes samples_buffer directly). */
 int osd_update_audio_stream(int16_t *buffer)
 {
-	memcpy(samples_buffer, buffer, samples_per_frame * (usestereo ? 4 : 2));
-   hook_audio_done();
-
+	(void)buffer;
+	hook_audio_done();
 	return samples_per_frame;
 }
 
@@ -62,23 +74,14 @@ extern retro_audio_sample_batch_t audio_batch_cb;
 
 void osd_update_silent_stream(void)
 {
-	int length;
-
 	if (Machine->sample_rate == 0 || samples_buffer == NULL || samples_per_frame <= 0)
 		return;
 
-	length = samples_per_frame * (usestereo ? 4 : 2);
-	if (usestereo)
-	{
-		memset(samples_buffer, 0, length);
-		if (audio_batch_cb) audio_batch_cb(samples_buffer, samples_per_frame);
-	}
-	else
-	{
-		if (conversion_buffer == NULL) return;
-		memset(conversion_buffer, 0, length * 2);
-		if (audio_batch_cb) audio_batch_cb(conversion_buffer, samples_per_frame);
-	}
+	/* samples_buffer is always stereo-sized now -- zero it and
+	 * dispatch directly, no separate mono-path conversion buffer
+	 * needed. */
+	memset(samples_buffer, 0, samples_per_frame * 2 * sizeof(short));
+	if (audio_batch_cb) audio_batch_cb(samples_buffer, samples_per_frame);
 }
 
 /* attenuation in dB */
