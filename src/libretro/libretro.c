@@ -345,6 +345,21 @@ static void update_variables(bool first_run)
     else
         stereo_enabled = true;
 
+    var.value = NULL;
+    var.key = "mame2000-qsound_output_filter";
+
+    /* Default disabled.  This flag lives in src/sound/qsound.c and is
+     * read once per output sample in qsound_update to bypass the FIR
+     * and output-delay processing when zero. */
+    {
+        extern int qsound_output_filter_enabled;
+        if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value
+            && strcmp(var.value, "enabled") == 0)
+            qsound_output_filter_enabled = 1;
+        else
+            qsound_output_filter_enabled = 0;
+    }
+
    /* Reinitialise frameskipping, if required */
    if (!first_run &&
        ((frameskip_type     != prev_frameskip_type)))
@@ -361,6 +376,13 @@ void retro_set_environment(retro_environment_t cb)
       { "mame2000-show_gameinfo", "Show Game Information; disabled|enabled" },
       { "mame2000-sample_rate", "Audio Rate (Restart); 22050|11025|22050|32000|44100" },
       { "mame2000-stereo", "Stereo (Restart); enabled|disabled" },
+      /* QSound output-stage filter.  Visibility is gated below in
+       * retro_load_game to QSound-using drivers only; on other games
+       * this option is hidden from the menu (it has no effect since
+       * the QSound update path isn't called).  Default off because
+       * the FIR adds a per-sample 95-tap convolution that costs
+       * ~15-20% on QSound games during active audio. */
+      { "mame2000-qsound_output_filter", "QSound output filter; disabled|enabled" },
       { NULL, NULL },
    };
    environ_cb = cb;
@@ -1190,6 +1212,31 @@ bool retro_load_game(const struct retro_game_info *info)
     * frames; the first retro_run() call will deliver frame 0. */
    if (mame_start_game(game_index) != 0)
       return false;
+
+   /* Driver-conditional core-option visibility: the QSound output
+    * filter option only makes sense for QSound-using drivers (mostly
+    * the CPS1.5 / CPS Dash family: dino, slammast, punisher, mbombrd,
+    * wof, etc.).  Scan Machine->drv->sound[] for SOUND_QSOUND and
+    * tell the frontend to hide the option in the menu for everything
+    * else.  Uses RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY which is
+    * compatible with the legacy SET_VARIABLES API used above. */
+   {
+      struct retro_core_option_display option_display;
+      int snd_idx;
+      bool qsound_active = false;
+
+      for (snd_idx = 0; snd_idx < MAX_SOUND; snd_idx++)
+      {
+         if (Machine->drv->sound[snd_idx].sound_type == SOUND_QSOUND)
+         {
+            qsound_active = true;
+            break;
+         }
+      }
+      option_display.key     = "mame2000-qsound_output_filter";
+      option_display.visible = qsound_active;
+      environ_cb(RETRO_ENVIRONMENT_SET_CORE_OPTIONS_DISPLAY, &option_display);
+   }
 
    retro_set_audio_buff_status_cb();
    return true;
