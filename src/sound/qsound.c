@@ -73,58 +73,75 @@ static float qsound_frq_ratio;		   /* Frequency ratio */
 
 static void qsound_update( int num, int16_t **buffer, int length )
 {
+	/* Per-sample outer loop: precompute per-voice setup once, then for
+	 * each output sample step through every active voice, accumulating
+	 * its contribution into the L/R output samples.  This structure is
+	 * the natural shape for any "post-process every voice's
+	 * contribution" effect (echo, FIR); the old per-voice-outer
+	 * structure made those harder to add. */
 	int i,j;
-	int rvol, lvol, count;
-	struct qsound_channel *pC=&qsound_channel[0];
-	int8_t * pST;
-	int16_t  *datap[2];
+	int16_t *pOutL;
+	int16_t *pOutR;
+	/* Per-voice state cached for the whole buffer */
+	int32_t lvol[QSOUND_CHANNELS];
+	int32_t rvol[QSOUND_CHANNELS];
+	int8_t *pST[QSOUND_CHANNELS];
 
 	if (Machine->sample_rate == 0) return;
 
-	datap[0] = buffer[0];
-	datap[1] = buffer[1];
-	memset( datap[0], 0x00, length * sizeof(int16_t) );
-	memset( datap[1], 0x00, length * sizeof(int16_t) );
+	pOutL = buffer[0];
+	pOutR = buffer[1];
+	memset(pOutL, 0x00, length * sizeof(int16_t));
+	memset(pOutR, 0x00, length * sizeof(int16_t));
 
-	for (i=0; i < QSOUND_CHANNELS; i++)
+	/* Set up per-voice constants: combined L/R volume scaling and the
+	 * sample-ROM base pointer for this voice's bank.  Inactive voices
+	 * are skipped via the .key flag inside the loop body. */
+	for (i = 0; i < QSOUND_CHANNELS; i++)
 	{
-		if (pC->key)
+		if (qsound_channel[i].key)
 		{
-			int16_t *pOutL=datap[0];
-			int16_t *pOutR=datap[1];
-			pST=qsound_sample_rom+pC->bank;
-			rvol=(pC->rvol*pC->vol)>> 8;
-			lvol=(pC->lvol*pC->vol)>> 8;
-
-			for (j=length-1; j>=0; j--)
-			{
-				count=(pC->offset)>>16;
-				pC->offset &= 0xffff;
-				if (count)
-				{
-					pC->address += count;
-					if (pC->address >= pC->end)
-					{
-						if (!pC->loop)
-						{
-							/* Reached the end of a non-looped sample */
-							pC->key=0;
-							break;
-						}
-						/* Reached the end, restart the loop */
-						pC->address = (pC->end - pC->loop) & 0xffff;
-					}
-					pC->lastdt=pST[pC->address];
-				}
-
-				(*pOutL) += ((pC->lastdt  * lvol) >> 6);
-				(*pOutR) += ((pC->lastdt  * rvol) >> 6);
-				pOutL++;
-				pOutR++;
-				pC->offset += pC->pitch;
-			}
+			lvol[i] = (qsound_channel[i].lvol * qsound_channel[i].vol) >> 8;
+			rvol[i] = (qsound_channel[i].rvol * qsound_channel[i].vol) >> 8;
+			pST[i]  = qsound_sample_rom + qsound_channel[i].bank;
 		}
-		pC++;
+	}
+
+	for (j = 0; j < length; j++)
+	{
+		struct qsound_channel *pC = &qsound_channel[0];
+		int32_t lacc = 0;
+		int32_t racc = 0;
+		for (i = 0; i < QSOUND_CHANNELS; i++, pC++)
+		{
+			int count, v;
+			if (!pC->key)
+				continue;
+			count = (pC->offset) >> 16;
+			pC->offset &= 0xffff;
+			if (count)
+			{
+				pC->address += count;
+				if (pC->address >= pC->end)
+				{
+					if (!pC->loop)
+					{
+						/* Reached the end of a non-looped sample */
+						pC->key = 0;
+						continue;
+					}
+					/* Reached the end, restart the loop */
+					pC->address = (pC->end - pC->loop) & 0xffff;
+				}
+				pC->lastdt = pST[i][pC->address];
+			}
+			v = pC->lastdt;
+			lacc += (v * lvol[i]) >> 6;
+			racc += (v * rvol[i]) >> 6;
+			pC->offset += pC->pitch;
+		}
+		pOutL[j] = lacc;
+		pOutR[j] = racc;
 	}
 }
 
