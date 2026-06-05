@@ -98,6 +98,52 @@ static int qsound_echo_end_pos;    /* raw value written to reg 0xd9 */
 static int qsound_echo_feedback;   /* feedback gain (16-bit signed) */
 static int qsound_echo_last;       /* previous ring entry (for 2-tap avg) */
 
+/* QSound output-stage post-processing: 95-tap FIR filter (designed at
+ * qsound_sh_start as a windowed-sinc lowpass) and 51-tap per-channel
+ * output delay lines.  The DL-1425's output path applies a fixed FIR
+ * to the mixed signal and routes it through a pair of delay lines
+ * with channel-specific offsets; we approximate that here with a
+ * single FIR per channel applied to the L/R mix after the voice loop
+ * and echo, followed by a fixed-delay 51-tap ring per channel.  The
+ * FIR is designed once at startup; the register dispatch arms below
+ * accept writes to the table-position and volume registers so the
+ * "unknown register" fall-through path doesn't fire spuriously, but
+ * since our filter coefficients are fixed-at-startup the writes are
+ * recorded for state-keeping only.  The mode-1 default delay offsets
+ * (46 samples for L, 48 for R) come from the algorithm's
+ * specification and are integer constants, not coefficient data. */
+#define QSOUND_FIR_TAPS  95
+#define QSOUND_DELAY_TAPS 51
+static int16_t qsound_fir_taps[QSOUND_FIR_TAPS];
+
+struct qsound_fir_state
+{
+	int16_t delay_line[QSOUND_FIR_TAPS];
+	int     pos;        /* write position; reads walk backward from here */
+	int     silent_run; /* consecutive zero inputs; when >= TAPS the delay line is fully decayed and the output is provably zero */
+};
+
+struct qsound_delay_state
+{
+	int16_t delay_line[QSOUND_DELAY_TAPS];
+	int     write_pos;
+	int     read_pos;
+	int     delay;      /* desired read-pos lag behind write_pos */
+};
+
+static struct qsound_fir_state   qsound_fir[2];        /* [0]=L, [1]=R */
+static struct qsound_delay_state qsound_delay_out[2];  /* [0]=L, [1]=R */
+
+/* Output-stage post-processing enable flag.  Set by libretro.c from
+ * the core option mame2000-qsound_output_filter (default disabled).
+ * When zero, the FIR + delay calls in qsound_update are skipped and
+ * the per-sample voice mix is written straight to pOutL/pOutR (the
+ * pre-Tier-3 behavior).  The libretro layer also gates the menu
+ * visibility of the core option on whether the active driver uses
+ * SOUND_QSOUND, so the option only surfaces in the menu for the
+ * games where it has an effect. */
+int qsound_output_filter_enabled = 0;
+
 /* Apply the echo to a single accumulated voice-input sample, return
  * the echoed output to be mixed into the L/R outputs.  The ring stores
  * the HIGH 16 bits of the 32-bit feedback sum -- this is what bounds
@@ -134,6 +180,135 @@ static int16_t qsound_echo_apply(int32_t input)
 		qsound_echo_pos = 0;
 
 	return (int16_t)old_sample;
+}
+
+/* Design a 95-tap lowpass FIR using the windowed-sinc method with a
+ * Hamming window, normalised for unity DC gain.  The cutoff is set to
+ * ~8 kHz at the libretro sample rate, which rolls off the harsh upper
+ * band of the QSound output (the 8-bit ROM samples produce significant
+ * ultrasonic-band aliasing energy on hard transients that benefits from
+ * smoothing) without dulling the upper-midrange punch the music relies
+ * on.  Taps are scaled so their sum is 16384 (2^14); the FIR apply
+ * function below normalises the int32 accumulator by >>14, putting
+ * the filtered output back in the same magnitude range as the input. */
+static void qsound_design_fir(void)
+{
+	const double cutoff_hz   = 8000.0;
+	const double sample_rate = (double)Machine->sample_rate;
+	const double fc          = cutoff_hz / sample_rate; /* normalised, 0..0.5 */
+	const int    M           = QSOUND_FIR_TAPS - 1;
+	double       taps_f[QSOUND_FIR_TAPS];
+	double       sum         = 0.0;
+	int          n;
+
+	for (n = 0; n < QSOUND_FIR_TAPS; n++)
+	{
+		double x   = (double)n - 0.5 * (double)M;
+		double sinc;
+		double win;
+
+		if (x == 0.0)
+			sinc = 2.0 * fc;
+		else
+			sinc = sin(2.0 * M_PI * fc * x) / (M_PI * x);
+		/* Hamming window */
+		win = 0.54 - 0.46 * cos(2.0 * M_PI * (double)n / (double)M);
+		taps_f[n] = sinc * win;
+		sum += taps_f[n];
+	}
+	/* Normalise so the taps sum to 16384 (the FIR apply below does
+	 * >>14 to compensate, giving unity DC gain). */
+	for (n = 0; n < QSOUND_FIR_TAPS; n++)
+		qsound_fir_taps[n] = (int16_t)(taps_f[n] / sum * 16384.0);
+}
+
+/* Convolve the input with the static tap set, walking the delay line
+ * backward from the most recently written sample.  Input is the
+ * post-echo voice mix sample for one output channel; output is the
+ * filtered value in the same magnitude range (unity DC gain).
+ * Saturated int16 storage in the delay line keeps the accumulator
+ * bounded under input overload. */
+static int32_t qsound_fir_apply(struct qsound_fir_state *s, int32_t input)
+{
+	int32_t acc = 0;
+	int     pos;
+	int     i;
+
+	/* Saturate input to int16 on the way into the delay line so
+	 * loud transients don't wrap-truncate; the FIR's int32
+	 * accumulator stays bounded ~1.5G even at int16 peak input
+	 * times int16 peak taps summed over 95. */
+	if (input > 32767)       input = 32767;
+	else if (input < -32768) input = -32768;
+
+	/* Fast path: once the input has been zero long enough for the
+	 * full tap-count to have rolled through the delay line, every
+	 * tap is being multiplied by zero and the convolution result
+	 * is provably zero.  Skip the 95-iter loop entirely in that
+	 * case -- the delay-line slot still has to advance to keep the
+	 * ring position consistent, but the multiply-accumulate is
+	 * avoided.  This is the common case during attract-mode silence
+	 * and quiet stretches between sound effects; without this, the
+	 * FIR pays full cost (95 mul-adds per sample per channel) even
+	 * when the input is dead silent. */
+	if (input == 0 && s->silent_run >= QSOUND_FIR_TAPS)
+	{
+		s->delay_line[s->pos] = 0;
+		s->pos++;
+		if (s->pos >= QSOUND_FIR_TAPS) s->pos = 0;
+		return 0;
+	}
+	if (input == 0) s->silent_run++;
+	else            s->silent_run = 0;
+
+	s->delay_line[s->pos] = (int16_t)input;
+	pos = s->pos;
+	for (i = 0; i < QSOUND_FIR_TAPS; i++)
+	{
+		acc += (int32_t)s->delay_line[pos] * qsound_fir_taps[i];
+		if (pos == 0) pos = QSOUND_FIR_TAPS - 1;
+		else          pos--;
+	}
+
+	s->pos++;
+	if (s->pos >= QSOUND_FIR_TAPS) s->pos = 0;
+
+	/* Taps sum to 16384, so >>14 returns the FIR output to the
+	 * same magnitude range as the input. */
+	return acc >> 14;
+}
+
+/* Apply a fixed-offset delay: write the new input to the ring,
+ * return the value at the read position (which lags the write
+ * position by .delay samples).  Both positions advance in lockstep,
+ * so the lag is preserved across calls. */
+static int32_t qsound_delay_apply(struct qsound_delay_state *d, int32_t input)
+{
+	int32_t output;
+
+	/* Saturate to int16 for ring storage */
+	if (input > 32767)       input = 32767;
+	else if (input < -32768) input = -32768;
+	d->delay_line[d->write_pos] = (int16_t)input;
+	d->write_pos++;
+	if (d->write_pos >= QSOUND_DELAY_TAPS) d->write_pos = 0;
+
+	output = d->delay_line[d->read_pos];
+	d->read_pos++;
+	if (d->read_pos >= QSOUND_DELAY_TAPS) d->read_pos = 0;
+
+	return output;
+}
+
+/* Recompute the delay read position from the current write position
+ * and the desired lag.  Called after the host updates the delay
+ * value, or once at init. */
+static void qsound_delay_recompute(struct qsound_delay_state *d)
+{
+	int new_read = d->write_pos - d->delay;
+	while (new_read < 0) new_read += QSOUND_DELAY_TAPS;
+	while (new_read >= QSOUND_DELAY_TAPS) new_read -= QSOUND_DELAY_TAPS;
+	d->read_pos = new_read;
 }
 
 static void qsound_update( int num, int16_t **buffer, int length )
@@ -225,6 +400,18 @@ static void qsound_update( int num, int16_t **buffer, int length )
 			lacc += echo_out;
 			racc += echo_out;
 		}
+		/* Output-stage post-processing: FIR lowpass followed by the
+		 * channel-specific output delay line, gated on the user
+		 * option (default off).  When disabled the per-sample voice
+		 * mix flows straight through to pOutL/pOutR, matching the
+		 * pre-Tier-3 path. */
+		if (qsound_output_filter_enabled)
+		{
+			lacc = qsound_fir_apply(&qsound_fir[0], lacc);
+			racc = qsound_fir_apply(&qsound_fir[1], racc);
+			lacc = qsound_delay_apply(&qsound_delay_out[0], lacc);
+			racc = qsound_delay_apply(&qsound_delay_out[1], racc);
+		}
 		pOutL[j] = lacc;
 		pOutR[j] = racc;
 	}
@@ -255,6 +442,23 @@ int qsound_sh_start(const struct MachineSound *msound)
 	qsound_echo_length    = 6;
 	qsound_echo_feedback  = 0;
 	qsound_echo_last      = 0;
+
+	/* Initialize the output-stage FIR + delay state.  The FIR taps
+	 * are designed once here (windowed-sinc lowpass); both channels
+	 * use the same coefficient set since the filter is symmetric.
+	 * The delay-line offsets default to the algorithm's mode-1
+	 * constants (46 for L, 48 for R out of the 51-tap ring). */
+	qsound_design_fir();
+	memset(&qsound_fir[0], 0, sizeof(qsound_fir[0]));
+	memset(&qsound_fir[1], 0, sizeof(qsound_fir[1]));
+	qsound_fir[0].silent_run = QSOUND_FIR_TAPS;
+	qsound_fir[1].silent_run = QSOUND_FIR_TAPS;
+	memset(&qsound_delay_out[0], 0, sizeof(qsound_delay_out[0]));
+	memset(&qsound_delay_out[1], 0, sizeof(qsound_delay_out[1]));
+	qsound_delay_out[0].delay = 46;
+	qsound_delay_out[1].delay = 48;
+	qsound_delay_recompute(&qsound_delay_out[0]);
+	qsound_delay_recompute(&qsound_delay_out[1]);
 
 	qsound_frq_ratio = ((float)intf->clock / (float)QSOUND_CLOCKDIV) /
 						(float) Machine->sample_rate;
