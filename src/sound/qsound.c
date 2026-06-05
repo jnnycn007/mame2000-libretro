@@ -19,7 +19,7 @@
   5	 end
   6	 master channel volume
   7	 not used
-  8	 Balance (left=0x0110  centre=0x0120 right=0x0130)
+  8	 Balance (right=0x0110  centre=0x0120 left=0x0130)
   9	 unknown (most fixed samples use 0 for this register)
 
   Many thanks to CAB (the author of Amuse), without whom this probably would
