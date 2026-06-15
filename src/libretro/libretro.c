@@ -264,6 +264,46 @@ static void retro_set_audio_buff_status_cb(void)
    update_audio_latency = true;
 }
 
+/* Older libretro.h revisions predate this environment call.  Define it
+ * defensively; on frontends that do not implement it the callback simply
+ * returns false and we fall back to a sensible default. */
+#ifndef RETRO_ENVIRONMENT_GET_TARGET_SAMPLE_RATE
+#define RETRO_ENVIRONMENT_GET_TARGET_SAMPLE_RATE (81 | 0x10000)
+#endif
+
+/* Snap an arbitrary rate to the nearest entry on the standard ladder. */
+static int snap_to_standard_rate(int rate)
+{
+   static const int ladder[] = { 8000, 11025, 22050, 32000, 44100, 48000, 96000 };
+   int    best      = ladder[0];
+   int    best_dist = (rate > ladder[0]) ? (rate - ladder[0]) : (ladder[0] - rate);
+   unsigned i;
+
+   for (i = 1; i < sizeof(ladder) / sizeof(ladder[0]); i++)
+   {
+      int dist = (rate > ladder[i]) ? (rate - ladder[i]) : (ladder[i] - rate);
+      if (dist < best_dist)
+      {
+         best_dist = dist;
+         best      = ladder[i];
+      }
+   }
+   return best;
+}
+
+/* Resolve the "auto"/"manual" option to a concrete rate.  Query the
+ * frontend's target rate and round it to the nearest standard rate; if
+ * the frontend does not report one, fall back to 48000. */
+static int resolve_auto_sample_rate(void)
+{
+   unsigned target = 0;
+
+   if (environ_cb(RETRO_ENVIRONMENT_GET_TARGET_SAMPLE_RATE, &target) && target != 0)
+      return snap_to_standard_rate((int)target);
+
+   return 48000;
+}
+
 static void update_variables(bool first_run)
 {
     struct retro_variable var;
@@ -331,7 +371,19 @@ static void update_variables(bool first_run)
     sample_rate = 22050;
 
     if (environ_cb(RETRO_ENVIRONMENT_GET_VARIABLE, &var) && var.value)
-       sample_rate = strtol(var.value, NULL, 10);
+    {
+       /* "auto" and "manual" resolve to a concrete rate at read time.
+        * MAME 0.78 has no per-machine native output rate (every sound
+        * chip renders at Machine->sample_rate), so both currently ask
+        * the frontend for its target rate and snap it to the nearest
+        * value on the standard ladder, falling back to 48000.  A true
+        * "manual" native rate (derived from per-chip clocks) is a
+        * future change. */
+       if (!strcmp(var.value, "auto") || !strcmp(var.value, "manual"))
+          sample_rate = resolve_auto_sample_rate();
+       else
+          sample_rate = strtol(var.value, NULL, 10);
+    }
 
     var.value = NULL;
     var.key = "mame2000-stereo";

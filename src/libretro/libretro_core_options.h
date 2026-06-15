@@ -153,19 +153,27 @@ static struct retro_core_option_v2_definition option_defs_us[] = {
    },
    {
       "mame2000-sample_rate",
-      "Audio Rate (Restart)",
+      "Sample rate hint (Restart)",
       NULL,
       "Output audio sample rate, in Hz.  22050 is the legacy MAME "
       "0.78 default; higher rates increase audio fidelity at the "
-      "cost of additional CPU.  Changing this value requires a "
-      "core restart.",
+      "cost of additional CPU.  \"Auto\" asks the frontend for its "
+      "target rate and rounds to the nearest standard rate, falling "
+      "back to 48000 if the frontend does not report one.  \"Manual\" "
+      "currently behaves like \"Auto\".  Changing this value requires "
+      "a core restart.",
       NULL,
       NULL,
       {
-         { "22050", NULL },
-         { "11025", NULL },
-         { "32000", NULL },
-         { "44100", NULL },
+         { "auto",   "Auto" },
+         { "manual", "Manual" },
+         { "8000",   NULL },
+         { "11025",  NULL },
+         { "22050",  NULL },
+         { "32000",  NULL },
+         { "44100",  NULL },
+         { "48000",  NULL },
+         { "96000",  NULL },
          { NULL, NULL },
       },
       "22050"
